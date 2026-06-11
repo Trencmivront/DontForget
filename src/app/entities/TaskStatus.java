@@ -1,9 +1,3 @@
 package app.entities;
 
-import lombok.Data;
-
-@Data
-public class TaskStatus {
-	private Integer status_id;
-	private String status_name;
-}
+public record TaskStatus(Integer status_id, String status_name) {}

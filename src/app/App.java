@@ -11,11 +11,9 @@ import java.util.logging.Logger;
 import app.excp.GlobalExceptionHandler;
 import app.excp.DatabaseInitializationException;
 import app.gui.Main;
-import lombok.AllArgsConstructor;
 
 import javax.swing.*;
 
-@AllArgsConstructor
 public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
     
@@ -38,9 +36,11 @@ public class App {
 
 		        // Initialize database tables using crTables.sql
 		        Path crTablesPath = Path.of("src/app/db/tables/crTables.sql");
+//		        Path testRecords = Path.of("src/app/db/tables/crTables.sql");
 		        if (Files.exists(crTablesPath)) {
 
 		        	stmt.execute("RUNSCRIPT FROM 'src/app/db/tables/crTables.sql'");
+//		        	stmt.execute("RUNSCRIPT FROM 'src/app/db/tables/testRecords.sql'");
 		        	logger.info("Database tables initialized successfully using crTables.sql.");
 		        	
 		        } else {

@@ -1,9 +1,3 @@
 package app.entities;
 
-import lombok.Data;
-
-@Data
-public class TaskTag {
-	private Integer task_id;
-	private Integer tag_id;
-}
+public record TaskTag(Integer task_id, Integer tag_id) {}

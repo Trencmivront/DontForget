@@ -1,11 +1,3 @@
 package app.entities;
 
-import lombok.Data;
-
-@Data
-public class IconColor {
-	private Integer icon_color_id;
-	private Integer red;
-	private Integer green;
-	private Integer blue;
-}
+public record IconColor(Integer icon_color_id, Integer red, Integer green, Integer blue) {}
