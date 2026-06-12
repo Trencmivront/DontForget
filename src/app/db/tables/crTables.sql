@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS TASK_STATUS (
 CREATE TABLE IF NOT EXISTS PROJECTS (
     project_id INT AUTO_INCREMENT PRIMARY KEY,
     project_title VARCHAR(255) NOT NULL UNIQUE,
+    description VARCHAR(1000),
     list_order INT,
     icon_color_id INT NOT NULL,
     FOREIGN KEY (icon_color_id) REFERENCES ICON_COLOR(icon_color_id)

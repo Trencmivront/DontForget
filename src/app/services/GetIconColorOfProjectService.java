@@ -1,0 +1,46 @@
+package app.services;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Logger;
+
+import app.entities.IconColor;
+import app.excp.CouldNotFetchIconColorDataException;
+
+public class GetIconColorOfProjectService {
+	
+	private static final Logger logger = Logger.getLogger(GetIconColorOfProjectService.class.getName());
+	
+	public static IconColor execute(Connection conn, Integer id) {
+		
+		logger.info("The class " + logger.getName() + " is executed.");
+		
+		try {
+			
+			String sql = "SELECT * FROM ICON_COLOR ic JOIN PROJECTS p "
+					+ "ON p.icon_color_id = ic.icon_color_id WHERE p.project_id = (?)";
+			
+			PreparedStatement stm = conn.prepareStatement(sql); 
+			
+			stm.setInt(1, id);
+			ResultSet rs =  stm.executeQuery();
+			
+			if(rs.next()) {
+				return new IconColor(rs.getInt("icon_color_id"),
+						rs.getInt("red"),
+						rs.getInt("green"),
+						rs.getInt("blue"));
+			}
+			
+			return null;
+		}catch (SQLException s) {
+			CouldNotFetchIconColorDataException e = new CouldNotFetchIconColorDataException();
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+
+}

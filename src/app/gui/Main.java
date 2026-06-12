@@ -1,24 +1,36 @@
 package app.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.w3c.dom.css.CSSPrimitiveValue;
+import org.w3c.dom.css.RGBColor;
+
 import app.entities.Project;
+import app.services.GetIconColorOfProjectService;
 import app.services.GetProjectsService;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
+import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.List;
 import javax.swing.ScrollPaneConstants;
@@ -83,6 +95,7 @@ public class Main extends JFrame {
 		JButton newProjectButton = new JButton("+");
 		newProjectButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		newProjectField.add(newProjectButton);
+		addCreateProjectEventListener(newProjectButton);
 		
 		JScrollPane projectsContainer = new JScrollPane();
 		leftBottomContainer.add(projectsContainer, BorderLayout.CENTER);
@@ -127,7 +140,13 @@ public class Main extends JFrame {
 	}
 	
 	private void listProjects(JScrollPane container) {
-		List<Project> projects = GetProjectsService.execute(conn);
+		List<Project> projects;
+		try {
+			projects = GetProjectsService.execute(conn);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
+		}
+		
 		int size = projects.size();
 		
 		if(size <= 0) {
@@ -153,6 +172,9 @@ public class Main extends JFrame {
 			
 			ckSet.add(ck);
 			ckSet.add(label);
+			
+			GetIconColorOfProjectService.execute(conn, p.project_id());
+			
 			ckContainer.add(ckSet);
 		}
 		// we put it in a viewport
@@ -166,6 +188,15 @@ public class Main extends JFrame {
 	
 	private void addProjectEventListener() {
 		
+	}
+	
+	private void addCreateProjectEventListener(JButton button) {
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new CreateProjectWindow();
+			}
+		});
 	}
 
 }
