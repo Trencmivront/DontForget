@@ -2,16 +2,15 @@ package app.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dialog;
+
 import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import org.w3c.dom.css.CSSPrimitiveValue;
-import org.w3c.dom.css.RGBColor;
-
+import app.cmp.CustomIcon;
+import app.entities.IconColor;
 import app.entities.Project;
 import app.services.GetIconColorOfProjectService;
 import app.services.GetProjectsService;
@@ -19,8 +18,9 @@ import app.services.GetProjectsService;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
-import javax.swing.AbstractAction;
+
 import javax.swing.BoxLayout;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -29,8 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.util.List;
 import javax.swing.ScrollPaneConstants;
@@ -41,6 +41,7 @@ public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField searchTextField;
+	private JScrollPane projectsContainer;
 	
 	/**
 	 * Create the frame.
@@ -97,7 +98,7 @@ public class Main extends JFrame {
 		newProjectField.add(newProjectButton);
 		addCreateProjectEventListener(newProjectButton);
 		
-		JScrollPane projectsContainer = new JScrollPane();
+		projectsContainer = new JScrollPane();
 		leftBottomContainer.add(projectsContainer, BorderLayout.CENTER);
 		listProjects(projectsContainer);
 		
@@ -140,11 +141,13 @@ public class Main extends JFrame {
 	}
 	
 	private void listProjects(JScrollPane container) {
-		List<Project> projects;
+		List<Project> projects = null;
+		container.removeAll();
 		try {
 			projects = GetProjectsService.execute(conn);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
+			return;
 		}
 		
 		int size = projects.size();
@@ -170,11 +173,15 @@ public class Main extends JFrame {
 			ckSet.setLayout(new BoxLayout(ckSet, BoxLayout.X_AXIS));
 			ckSet.setAlignmentX(LEFT_ALIGNMENT);
 			
+			IconColor ic = GetIconColorOfProjectService.execute(conn, p.project_id());
+			if(ic != null) {
+				Color color = new Color(ic.red(), ic.green(), ic.blue());
+				label.setIcon(new CustomIcon(color, 12, 12));
+			}
+			
 			ckSet.add(ck);
 			ckSet.add(label);
-			
-			GetIconColorOfProjectService.execute(conn, p.project_id());
-			
+							
 			ckContainer.add(ckSet);
 		}
 		// we put it in a viewport
@@ -186,16 +193,17 @@ public class Main extends JFrame {
 		container.setViewport(viewport);
 	}
 	
-	private void addProjectEventListener() {
-		
-	}
-	
 	private void addCreateProjectEventListener(JButton button) {
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new CreateProjectWindow();
-			}
+		button.addActionListener(_ -> {
+			CreateProjectWindow createProjectWindow = new CreateProjectWindow(conn);
+			createProjectWindow.addWindowListener(new WindowAdapter() {
+				
+				@Override
+				public void windowClosed(WindowEvent e) {
+					listProjects(projectsContainer);
+				}
+				
+			});
 		});
 	}
 

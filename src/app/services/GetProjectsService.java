@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import app.entities.Project;
-import app.excp.CouldNotFetchProjectDataException;
 
 public class GetProjectsService {
+	
+	private GetProjectsService() {}
 	
 	private static final Logger logger = Logger.getLogger(GetProjectsService.class.getName());
 
@@ -18,7 +19,7 @@ public class GetProjectsService {
 		logger.info("Class " + logger.getName() + " is executed.");
 		try(Statement stm = conn.createStatement()) {
 			
-			String sql = "SELECT * FROM PROJECTS";
+			String sql = "SELECT * FROM PROJECT ORDER BY list_order";
 			
 			List<Project> projects = new ArrayList<Project>();
 			
@@ -36,7 +37,8 @@ public class GetProjectsService {
 			return projects;
 			
 		}catch (Exception e) {
-			throw new CouldNotFetchProjectDataException();
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

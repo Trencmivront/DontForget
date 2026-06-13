@@ -6,27 +6,30 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
-import app.entities.Project;
-import app.excp.ProjectCreationException;
+import app.dco.ProjectDCO;
 
 public class CreateProjectService {
 	
 	private static final Logger logger = Logger.getLogger(CreateProjectService.class.getName());
 
-	public static boolean execute(Connection conn, Project p){
+	public static boolean execute(Connection conn, ProjectDCO p){
 		logger.info("Class " + logger.getName() + " is executed.");
 		
-		String createSql = "INSERT INTO PROJECTS (project_title, description, list_order, icon_color_id)"
+		String createSql = "INSERT INTO PROJECT (project_title, description, list_order, icon_color_id)"
 				+ " VALUES (?, ?, ?, ?)";
 		
-		String listOrderSql = "SELECT MAX(list_order) FROM PROJECTS";
+		String listOrderSql = "SELECT MAX(list_order) as list_order FROM PROJECT";
 		
 		try(PreparedStatement pstm = conn.prepareStatement(createSql);
 				Statement stm = conn.createStatement()) {
 			
 			stm.execute(listOrderSql);
 			
-			int listOrder = stm.getResultSet().getInt("list_order");
+			ResultSet rs = stm.getResultSet();
+			int listOrder = 0;
+			if(rs.next()) {
+				listOrder = rs.getInt("list_order");
+			}
 			// increase list order for this project to append it at last
 			listOrder++;
 			
@@ -35,10 +38,13 @@ public class CreateProjectService {
 			pstm.setInt(3, listOrder);
 			pstm.setInt(4, p.icon_color_id());
 			
-			return pstm.execute();
-			
+			//if the result is empty
+			return !pstm.execute();
+				
 		}catch (Exception e) {
-			throw new ProjectCreationException();
+			logger.warning(e.getClass().getName() + " thrown." );
+			e.printStackTrace();
+			return false;
 		}
 	}
 

@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
-import app.excp.DatabaseInitializationException;
 import app.gui.Main;
 
 import javax.swing.*;
@@ -44,9 +43,8 @@ public class App {
 		        new Main(connection);
 		        
 		    }catch (SQLException s) {
-		    	DatabaseInitializationException e = new DatabaseInitializationException();
-				JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
-				e.printStackTrace();
+		    	s.printStackTrace();
+				JOptionPane.showMessageDialog(new JDialog(), "Error while initializing database.");
 			}
 		    catch (Exception e){
 				JOptionPane.showMessageDialog(new JDialog(), e.getMessage());

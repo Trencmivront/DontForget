@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import app.entities.IconColor;
-import app.excp.CouldNotFetchIconColorDataException;
 
 public class GetIconColorOfProjectService {
 	
@@ -19,7 +18,7 @@ public class GetIconColorOfProjectService {
 		
 		try {
 			
-			String sql = "SELECT * FROM ICON_COLOR ic JOIN PROJECTS p "
+			String sql = "SELECT * FROM ICON_COLOR ic JOIN PROJECT p "
 					+ "ON p.icon_color_id = ic.icon_color_id WHERE p.project_id = (?)";
 			
 			PreparedStatement stm = conn.prepareStatement(sql); 
@@ -36,8 +35,7 @@ public class GetIconColorOfProjectService {
 			
 			return null;
 		}catch (SQLException s) {
-			CouldNotFetchIconColorDataException e = new CouldNotFetchIconColorDataException();
-			e.printStackTrace();
+			s.printStackTrace();
 			return null;
 		}
 		
