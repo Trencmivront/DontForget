@@ -1,7 +1,6 @@
 package app.entities;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 public record Task(
 	Integer task_id,
@@ -9,10 +8,10 @@ public record Task(
 	String description,
 	Integer status_id,
 	Integer priority,
-	LocalDate due_date,
+	Date due_date,
 	Integer list_order,
 	Integer project_id,
-	LocalDateTime created_at,
-	LocalDateTime updated_at,
-	LocalDateTime completed_at
+	Date created_at,
+	Date updated_at,
+	Date completed_at
 ) {}

@@ -16,7 +16,7 @@ public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
     
     public static void main(String[] args) {
-    	        
+    	System.setProperty("sun.java2d.uiScale", "2.0");
         SwingUtilities.invokeLater(() -> {
 			
 			try {

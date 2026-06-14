@@ -10,6 +10,8 @@ import java.util.List;
 import app.entities.IconColor;
 
 public class GetIconColorsService {
+ private GetIconColorsService() {}
+
 	
 	public static List<IconColor> execute(Connection conn){
 		
