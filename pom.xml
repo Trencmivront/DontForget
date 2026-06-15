@@ -18,6 +18,20 @@
   
   <dependencies>
   
+  <!-- Source: https://mvnrepository.com/artifact/com.github.lgooddatepicker/LGoodDatePicker -->
+<dependency>
+    <groupId>com.github.lgooddatepicker</groupId>
+    <artifactId>LGoodDatePicker</artifactId>
+    <version>11.2.1</version>
+    <scope>compile</scope>
+</dependency>
+  
+  <dependency>
+    <groupId>com.formdev</groupId>
+    <artifactId>flatlaf</artifactId>
+    <version>3.7</version>
+</dependency>
+  
   <dependency>
     <groupId>org.springframework</groupId>
     <artifactId>spring-context</artifactId>

@@ -2,38 +2,7 @@ package app.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListDataListener;
-
-import app.cmp.CustomIcon;
-import app.entities.IconColor;
-import app.entities.Project;
-import app.entities.Task;
-import app.enums.LightColors;
-import app.services.GetIconColorOfProjectService;
-import app.services.GetProjectsService;
-import app.services.GetTasksOfProjectService;
-
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -41,31 +10,51 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.logging.Logger;
 
-import javax.swing.ScrollPaneConstants;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.border.EmptyBorder;
+
+import app.App;
+import app.cmp.CustomIcon;
+import app.entities.IconColor;
+import app.entities.Project;
+import app.enums.LightColors;
+import app.services.GetIconColorOfProjectService;
+import app.services.GetProjectsService;
 
 public class Main extends JFrame {
+	private static JFrame mainFrame;
 	
 	private static Connection conn;
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField searchTextField;
 	private JScrollPane projectsContainer;
-	private JPanel headerPanel;
-	private JScrollPane infoScrollPane;
-	private ButtonGroup tasksButtonGroup = new ButtonGroup();
-	
+	private JPanel showInfoPanel;
+	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	/**
 	 * Create the frame.
 	 */
-	public Main(Connection conn) {
+	public Main() {
+		logger.info("Drawing Main window.");
 		setFont(new Font("Times New Roman", Font.PLAIN, 20));
-		
-		Main.conn = conn;
+		mainFrame = Main.this;
+		Main.conn = App.connection;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 750, 500);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -82,6 +71,13 @@ public class Main extends JFrame {
 		leftContainer.add(leftTopContainer, BorderLayout.NORTH);
 		leftTopContainer.setLayout(new GridLayout(0, 2, 0, 0));
 		
+		JLabel placeholderLabel = new JLabel("");
+		leftTopContainer.add(placeholderLabel);
+		
+		JButton hideLeftPanelButton = new JButton("hide");
+		hideLeftPanelButton.setFont(new Font("Dialog", Font.BOLD, 20));
+		leftTopContainer.add(hideLeftPanelButton);
+		
 		searchTextField = new JTextField();
 		searchTextField.setFont(new Font("Dialog", Font.PLAIN, 20));
 		leftTopContainer.add(searchTextField);
@@ -90,10 +86,6 @@ public class Main extends JFrame {
 		JButton searchButton = new JButton("Search");
 		searchButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		leftTopContainer.add(searchButton);
-		
-		JButton hideLeftPanelButton = new JButton("hide");
-		hideLeftPanelButton.setFont(new Font("Dialog", Font.BOLD, 20));
-		leftTopContainer.add(hideLeftPanelButton);
 		
 		JPanel leftBottomContainer = new JPanel();
 		leftContainer.add(leftBottomContainer, BorderLayout.CENTER);
@@ -130,6 +122,7 @@ public class Main extends JFrame {
 		JButton inboxButton = new JButton("inbox");
 		inboxButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(inboxButton);
+		addInboxButtonEventListener(inboxButton);
 		
 		JButton todayButton = new JButton("today");
 		todayButton.setFont(new Font("Dialog", Font.BOLD, 20));
@@ -139,22 +132,13 @@ public class Main extends JFrame {
 		remindersButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(remindersButton);
 		
-		JPanel showInfoPanel = new JPanel();
+		showInfoPanel = new JPanel();
 		rightContainer.add(showInfoPanel, BorderLayout.CENTER);
 		showInfoPanel.setLayout(new BorderLayout(0, 0));
 		
-		headerPanel = new JPanel();
-		headerPanel.setLayout(new BorderLayout());
-		showInfoPanel.add(headerPanel, BorderLayout.NORTH);
-
-		infoScrollPane = new JScrollPane();
-		infoScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		showInfoPanel.add(infoScrollPane);
-		
-		JPanel taskActionsPanel = new JPanel();
-		showInfoPanel.add(taskActionsPanel, BorderLayout.SOUTH);
-
+		refreshWindow();
 		setVisible(true);
+		logger.info("Main window is ready.");
 	}
 	
 	private void listProjects(JScrollPane container) {
@@ -188,6 +172,7 @@ public class Main extends JFrame {
 			JPanel ckSet = new JPanel();
 
 			ckSet.putClientProperty("project_title", p.project_title());
+			ckSet.putClientProperty("description", p.description());
 			ckSet.putClientProperty("project_id", projectId);
 			ckSet.putClientProperty("list_order", p.list_order());
 			ckSet.putClientProperty("icon_color_id", p.icon_color_id());
@@ -218,7 +203,7 @@ public class Main extends JFrame {
 	
 	private void addCreateProjectEventListener(JButton button) {
 		button.addActionListener(_ -> {
-			CreateProjectWindow createProjectWindow = new CreateProjectWindow(Main.this ,conn);
+			CreateProjectWindow createProjectWindow = new CreateProjectWindow(Main.this);
 			createProjectWindow.addWindowListener(new WindowAdapter() {
 				
 				@Override
@@ -230,80 +215,31 @@ public class Main extends JFrame {
 		});
 	}
 	
+	private void addInboxButtonEventListener(JButton button) {
+		button.addActionListener(_ ->{
+			showInfoPanel.removeAll();
+			showInfoPanel.add(new InboxPanel());
+			refreshWindow();
+		});
+	}
+	
 	private void addProjectEventListener(JPanel panel) {
 		
 		if(panel != null) {
 			panel.addMouseListener(new MouseAdapter() {
-				
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					panel.setBackground(LightColors.PRIMARY_HOVER.getColor());
-					displayProjectInfo(panel);
+					showInfoPanel.removeAll();
+					showInfoPanel.add(new ProjectInfoPanel(panel));
+					refreshWindow();
 				}
 			});
 		}
-		
 	}
 	
-	private void displayProjectInfo(JPanel component) {
-		
-		String title = (String)component.getClientProperty("project_title");
-		int id = (int)component.getClientProperty("project_id");
-		String description = (String)component.getClientProperty("description");
-		
-		headerPanel.removeAll();
-		headerPanel.add(new JLabel(title), BorderLayout.NORTH);
-		headerPanel.add(new JLabel(description), BorderLayout.CENTER);
-		headerPanel.revalidate();
-		headerPanel.repaint();
-		
-		List<Task> tasks = GetTasksOfProjectService.execute(id, conn);
-		ListIterator<Task> i = tasks.listIterator();
-				
-		JPanel info = new JPanel();
-		info.setLayout(new BorderLayout());
-		
-		JPanel tasksContainer = new JPanel();
-		tasksContainer.setLayout(new BorderLayout());
-		info.add(tasksContainer, BorderLayout.NORTH);
-		
-		
-		while(i.hasNext()) {
-			tasksContainer.add(createTaskContainer(i.next()));
-		}
-				
-		infoScrollPane.setViewportView(tasksContainer);
-		infoScrollPane.revalidate();
-		infoScrollPane.repaint();
-		
+	private void refreshWindow() {
+		mainFrame.revalidate();
+		mainFrame.repaint();
 	}
-	
-	private JPanel createTaskContainer(Task task){
-		
-		JPanel taskPanel = new JPanel();
-		taskPanel.setLayout(new BorderLayout());
-		JLabel title = new JLabel(task.task_title());
-		
-		title.putClientProperty("task_id", task.task_id());
-		title.putClientProperty("description", task.description());
-		title.putClientProperty("status_id", task.status_id());
-		title.putClientProperty("priority", task.priority());
-		title.putClientProperty("due_date", task.due_date());
-		title.putClientProperty("list_order", task.list_order());
-		title.putClientProperty("project_id", task.project_id());
-		title.putClientProperty("created_at", task.created_at());
-		title.putClientProperty("updated_at", task.updated_at());
-		title.putClientProperty("completed_at", task.completed_at());
-		
-		JCheckBox chk = new JCheckBox();
-		
-		taskPanel.add(chk,BorderLayout.EAST);
-		taskPanel.add(title, BorderLayout.WEST);
-		
-		tasksButtonGroup.add(chk);
-		taskPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-				
-		return taskPanel;
-	}
-
 }

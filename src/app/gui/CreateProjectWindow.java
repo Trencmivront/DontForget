@@ -10,11 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
 
+import app.App;
 import app.dco.ProjectDCO;
 import app.entities.IconColor;
 import app.services.CreateProjectService;
 import app.services.GetIconColorsService;
-import app.enums.LightColors;
 
 import java.awt.Color;
 
@@ -28,10 +28,12 @@ import java.awt.Font;
 import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JTextArea;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
 
@@ -43,15 +45,17 @@ public class CreateProjectWindow extends JDialog {
 	private JTextArea descriptionTextArea;
 	private ButtonGroup bg;
 	private static Connection conn;
+	private static final Logger logger = Logger.getLogger(CreateProjectWindow.class.getName());
 
 	/**
 	 * Create the dialog.
 	 */
-	public CreateProjectWindow(JFrame source , Connection conn) {
-		CreateProjectWindow.conn = conn;
-				
-		setBounds(100, 100, 450, 300);
-//		Locate the dialog at the center of JFrame
+	public CreateProjectWindow(JFrame source) {
+		logger.info("Drawing the window.");
+		CreateProjectWindow.conn = App.connection;
+		Dimension sourceSize = source.getSize();
+//		Make the size of this window to be half of size of main window
+		setSize(new Dimension((int)(sourceSize.getWidth() / 2), (int)(sourceSize.getHeight() / 2)));
 		setLocationRelativeTo(source);
 		setResizable(false);
 //		Can't interact with JFrame until JDialog is closed
@@ -59,44 +63,37 @@ public class CreateProjectWindow extends JDialog {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 //		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPanel.setBackground(LightColors.BACKGROUND.getColor());
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 
 		JPanel titlePanel = new JPanel();
-		titlePanel.setBackground(LightColors.BACKGROUND.getColor());
 		contentPanel.add(titlePanel, BorderLayout.NORTH);
 		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
 
 		JLabel projectTitleLabel = new JLabel("Title");
 		projectTitleLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-		projectTitleLabel.setForeground(LightColors.TEXT_MAIN.getColor());
 		titlePanel.add(projectTitleLabel);
 
 		projectTitleTextField = new JTextField();
 		projectTitleTextField.setToolTipText("Project Title");
 		projectTitleTextField.setFont(new Font("Dialog", Font.PLAIN, 20));
-		projectTitleTextField.setForeground(LightColors.TEXT_MAIN.getColor());
 		projectTitleTextField.setBackground(Color.WHITE);
 		titlePanel.add(projectTitleTextField);
 		projectTitleTextField.setColumns(10);
 
 		JPanel descriptionPanel = new JPanel();
-		descriptionPanel.setBackground(LightColors.BACKGROUND.getColor());
 		contentPanel.add(descriptionPanel, BorderLayout.CENTER);
 		descriptionPanel.setLayout(new BoxLayout(descriptionPanel, BoxLayout.X_AXIS));
 
 		JLabel descriptionLabel = new JLabel("Description");
 		descriptionLabel.setFont(new Font("Dialog", Font.BOLD, 20));
 		descriptionLabel.setAlignmentY(Component.TOP_ALIGNMENT);
-		descriptionLabel.setForeground(LightColors.TEXT_MAIN.getColor());
 		descriptionPanel.add(descriptionLabel);
 		
 		descriptionTextArea = new JTextArea();
 		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setFont(new Font("Dialog", Font.PLAIN, 20));
 		descriptionTextArea.setColumns(15);
-		descriptionTextArea.setForeground(LightColors.TEXT_MAIN.getColor());
 		descriptionTextArea.setBackground(Color.WHITE);
 
 		JScrollPane scrollPane = new JScrollPane(descriptionTextArea);
@@ -104,57 +101,53 @@ public class CreateProjectWindow extends JDialog {
 		scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
 		scrollPane.setBorder(new EmptyBorder(20, 10, 20, 10));
 		scrollPane.getViewport().setBackground(Color.WHITE);
-		
 		descriptionPanel.add(scrollPane);
 
 
-		JPanel colorPanel = new JPanel();
-		colorPanel.setBackground(LightColors.BACKGROUND.getColor());
+		JPanel colorPanel = new JPanel();		
 		contentPanel.add(colorPanel, BorderLayout.SOUTH);
 		colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.X_AXIS));
 		
 		JLabel colorLabel = new JLabel("Color: ");
 		colorLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-		colorLabel.setForeground(LightColors.TEXT_MAIN.getColor());
 		colorPanel.add(colorLabel);
 		
 		JPanel colorRadioPanel = new JPanel();
-		colorRadioPanel.setBackground(LightColors.BACKGROUND.getColor());
 		colorPanel.add(colorRadioPanel);
 
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		buttonPane.setBackground(LightColors.BACKGROUND.getColor());
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
-		cancelButton.setBackground(LightColors.BUTTON_HOVER.getColor());
-		cancelButton.setForeground(LightColors.TEXT_MAIN.getColor());
 		buttonPane.add(cancelButton);
 
 		JButton createButton = new JButton("CREATE");
-		createButton.setBackground(LightColors.PRIMARY.getColor());
-		createButton.setForeground(LightColors.BACKGROUND.getColor());
 		createButton.setActionCommand("CREATE");
 		buttonPane.add(createButton);
 		getRootPane().setDefaultButton(createButton);
-		
-		setVisible(true);
-		
+				
 		listColors(colorRadioPanel);
 		addCreateButtonActionListener(createButton);
 		addCancelButtonActionListener(cancelButton);
-			
+		
+		revalidate();
+		repaint();
+		setVisible(true);
+
+		logger.info("Window is ready.");
 	}
 	
 	private void addCancelButtonActionListener(JButton button) {
+		logger.info("Running function.");
 		button.addActionListener(_ -> {
 			dispose();
 		});
 	}
 	
 	private void addCreateButtonActionListener(JButton button) {
+		logger.info("Running function.");
 		button.addActionListener(_ -> {
 			String title = projectTitleTextField.getText();
 			String description = descriptionTextArea.getText(); // Description can be null
@@ -181,7 +174,8 @@ public class CreateProjectWindow extends JDialog {
 	}
 	
 	private void listColors(Container container) {
-		
+		logger.info("Running function.");
+
 		List<IconColor> ic = GetIconColorsService.execute(conn);
 		// initialize the ButtonGroup here
 		bg = new ButtonGroup();
@@ -202,6 +196,8 @@ public class CreateProjectWindow extends JDialog {
 	
 	// a function for getting selected radio button from a button group
 	private JRadioButton getSelectedRadioButton(ButtonGroup group) {
+		logger.info("Running function.");
+
 	    // Get all buttons added to the group
 	    Enumeration<AbstractButton> buttons = group.getElements();
 	    

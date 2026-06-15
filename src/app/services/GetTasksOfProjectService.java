@@ -17,7 +17,7 @@ public class GetTasksOfProjectService {
 	private static final Logger logger = Logger.getLogger(GetTasksOfProjectService.class.getName());
 	
 	public static List<Task> execute(int id, Connection conn){
-		logger.info("");
+		logger.info("Service executed.");
 		
 		String sql = "SELECT * FROM TASK WHERE project_id = ?";
 		
@@ -28,6 +28,10 @@ public class GetTasksOfProjectService {
 			
 			List<Task> tasks = new ArrayList<Task>();
 			
+			if(!rs.first()) {
+				return null;
+			}
+			
 			while(rs.next()) {
 				tasks.add(new Task(
 						rs.getInt("task_id"),
@@ -35,12 +39,12 @@ public class GetTasksOfProjectService {
 						rs.getString("description"),
 						rs.getInt("status_id"),
 						rs.getInt("priority"),
-						rs.getDate("due_date"),
+						rs.getTimestamp("due_date"),
 						rs.getInt("list_order"),
 						rs.getInt("project_id"),
-						rs.getDate("created_at"),
-						rs.getDate("updated_at"),
-						rs.getDate("completed_at")));
+						rs.getTimestamp("created_at"),
+						rs.getTimestamp("updated_at"),
+						rs.getTimestamp("completed_at")));
 			}
 			
 			return tasks;

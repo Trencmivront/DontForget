@@ -1,6 +1,6 @@
 package app.entities;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public record Task(
 	Integer task_id,
@@ -8,10 +8,10 @@ public record Task(
 	String description,
 	Integer status_id,
 	Integer priority,
-	Date due_date,
+	Timestamp due_date,
 	Integer list_order,
 	Integer project_id,
-	Date created_at,
-	Date updated_at,
-	Date completed_at
+	Timestamp created_at,
+	Timestamp updated_at,
+	Timestamp completed_at
 ) {}

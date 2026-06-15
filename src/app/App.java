@@ -12,20 +12,26 @@ import app.gui.Main;
 
 import javax.swing.*;
 
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+
 public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
+	public static Connection connection; 
     
     public static void main(String[] args) {
     	System.setProperty("sun.java2d.uiScale", "2.0");
+    	System.setProperty("awt.useSystemAAFontSettings", "on");
+    	System.setProperty("swing.aatext", "true");
+
         SwingUtilities.invokeLater(() -> {
 			
 			try {
 				// Initializing the connection and statement
-				Connection connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
+				connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
 				Statement stmt = connection.createStatement();
 
 		        // Initialize the look and feel
-		        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		        UIManager.setLookAndFeel(new FlatMacDarkLaf());
 
 		        logger.info("Starting DontForget application...");
 
@@ -40,7 +46,7 @@ public class App {
 		        } else {
 		            logger.severe("crTables.sql file not found at " + crTablesPath.toAbsolutePath());
 		        }
-		        new Main(connection);
+		        new Main();
 		        
 		    }catch (SQLException s) {
 		    	s.printStackTrace();
