@@ -1,5 +1,5 @@
 package app.entities;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
-public record Reminder(Integer task_id, LocalDateTime remind_at, String cstm_message) {}
+public record Reminder(Long task_id, Timestamp remind_at, String cstm_message) {}

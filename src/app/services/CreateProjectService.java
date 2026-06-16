@@ -1,18 +1,18 @@
 package app.services;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
+import app.App;
 import app.dco.ProjectDCO;
 
 public class CreateProjectService {
 	
 	private static final Logger logger = Logger.getLogger(CreateProjectService.class.getName());
 
-	public static boolean execute(Connection conn, ProjectDCO p){
+	public static boolean execute(ProjectDCO p){
 		logger.info("Class " + logger.getName() + " is executed.");
 		
 		String createSql = "INSERT INTO PROJECT (project_title, description, list_order, icon_color_id)"
@@ -20,8 +20,8 @@ public class CreateProjectService {
 		
 		String listOrderSql = "SELECT MAX(list_order) as list_order FROM PROJECT";
 		
-		try(PreparedStatement pstm = conn.prepareStatement(createSql);
-				Statement stm = conn.createStatement()) {
+		try(PreparedStatement pstm = App.connection.prepareStatement(createSql);
+				Statement stm = App.connection.createStatement()) {
 			
 			stm.execute(listOrderSql);
 			

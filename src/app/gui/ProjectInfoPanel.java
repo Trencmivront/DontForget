@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Connection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Logger;
@@ -16,20 +15,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import app.App;
 import app.entities.Task;
 import app.services.GetTasksOfProjectService;
 
 public class ProjectInfoPanel extends JPanel{
 	
 	private static final long serialVersionUID = 1L;
-	private static Connection conn;
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	
 	public ProjectInfoPanel(JPanel panel) {
 		JPanel projectPanel = panel;
-		ProjectInfoPanel.conn = App.connection;
 				
 		String title = (String)projectPanel.getClientProperty("project_title");
 		int id = (int)projectPanel.getClientProperty("project_id");
@@ -48,7 +44,7 @@ public class ProjectInfoPanel extends JPanel{
 		headerPanel.repaint();
 		headerPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 100));
 		
-		List<Task> tasks = GetTasksOfProjectService.execute(id, conn);
+		List<Task> tasks = GetTasksOfProjectService.execute(id);
 		if(tasks == null) {
 			logger.info("No task found for project.");
 			return;

@@ -1,41 +1,35 @@
 package app.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.border.EmptyBorder;
-
-import app.App;
-import app.dco.ProjectDCO;
-import app.entities.IconColor;
-import app.services.CreateProjectService;
-import app.services.GetIconColorsService;
-
 import java.awt.Color;
-
-import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
-import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.JTextArea;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-
+import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+
+import app.dco.ProjectDCO;
+import app.entities.IconColor;
+import app.services.CreateProjectService;
+import app.services.GetIconColorsService;
 
 public class CreateProjectWindow extends JDialog {
 
@@ -44,7 +38,6 @@ public class CreateProjectWindow extends JDialog {
 	private JTextField projectTitleTextField;
 	private JTextArea descriptionTextArea;
 	private ButtonGroup bg;
-	private static Connection conn;
 	private static final Logger logger = Logger.getLogger(CreateProjectWindow.class.getName());
 
 	/**
@@ -52,7 +45,6 @@ public class CreateProjectWindow extends JDialog {
 	 */
 	public CreateProjectWindow(JFrame source) {
 		logger.info("Drawing the window.");
-		CreateProjectWindow.conn = App.connection;
 		Dimension sourceSize = source.getSize();
 //		Make the size of this window to be half of size of main window
 		setSize(new Dimension((int)(sourceSize.getWidth() / 2), (int)(sourceSize.getHeight() / 2)));
@@ -163,7 +155,7 @@ public class CreateProjectWindow extends JDialog {
 				iconColorId = (int) selectedRadioButton.getClientProperty("icon_color_id");
 			}
 			
-			if(CreateProjectService.execute(conn, new ProjectDCO(title, description, iconColorId))) {
+			if(CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
 				JOptionPane.showMessageDialog(new JDialog(), "Project Created Succesfully");
 				dispose();
 			}
@@ -176,7 +168,7 @@ public class CreateProjectWindow extends JDialog {
 	private void listColors(Container container) {
 		logger.info("Running function.");
 
-		List<IconColor> ic = GetIconColorsService.execute(conn);
+		List<IconColor> ic = GetIconColorsService.execute();
 		// initialize the ButtonGroup here
 		bg = new ButtonGroup();
 		

@@ -1,12 +1,12 @@
 package app.services;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import app.App;
 import app.entities.Project;
 
 public class GetProjectsService {
@@ -15,9 +15,9 @@ public class GetProjectsService {
 	
 	private static final Logger logger = Logger.getLogger(GetProjectsService.class.getName());
 
-	public static List<Project> execute(Connection conn){
+	public static List<Project> execute(){
 		logger.info("Class " + logger.getName() + " is executed.");
-		try(Statement stm = conn.createStatement()) {
+		try(Statement stm = App.connection.createStatement()) {
 			
 			String sql = "SELECT * FROM PROJECT ORDER BY list_order";
 			

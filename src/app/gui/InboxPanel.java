@@ -1,27 +1,22 @@
 package app.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.sql.Connection;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
+import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
-import com.formdev.flatlaf.icons.FlatInternalFrameCloseIcon;
+import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import app.App;
 import app.entities.Inbox;
 import app.services.DeleteMessageByIdService;
 import app.services.GetInboxService;
@@ -30,77 +25,110 @@ public class InboxPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(InboxPanel.class.getName());
-	private final Connection conn;
-	private JPanel listContainer;
 
 	public InboxPanel() {
 		logger.info("Initializing InboxPanel.");
-		this.conn = App.connection;
 		
-		setLayout(new GridLayout(0, 1));
+		setLayout(new BorderLayout());
 
-		// List Container
-		listContainer = new JPanel();
-		listContainer.setLayout(new BoxLayout(listContainer, BoxLayout.Y_AXIS));
 		List<Inbox> inboxItems = null;
-		if (conn != null) {
-			inboxItems = GetInboxService.execute(conn);
-		}
+
+		inboxItems = GetInboxService.execute();
 
 		if (inboxItems == null || inboxItems.isEmpty()) {
-			JPanel emptyPanel = new JPanel(new BorderLayout());
-			emptyPanel.setBorder(new EmptyBorder(60, 20, 60, 20));
-
-			JLabel emptyLabel = new JLabel("Your inbox is empty.", SwingConstants.CENTER);
-			emptyLabel.setFont(new Font("Dialog", Font.ITALIC, 16));
-			emptyPanel.add(emptyLabel);
-
-			listContainer.add(emptyPanel);
+			add(new EmptyPanel("Your inbox is empty."), BorderLayout.CENTER);
 		} else {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DefaultTableModel model = new DefaultTableModel(new Object[] { "Message", "Date", "Action" }, 0) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return column == 2;
+				}
+				
+				@Override
+				public Class<?> getColumnClass(int columnIndex) {
+					return String.class;
+				}
+			};
+
 			for (Inbox item : inboxItems) {
-				JPanel itemPanel = new JPanel();
-				itemPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-				itemPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
-
-				// Message label
-				JLabel messageLabel = new JLabel("<html><body style='width: 150px;'>" + item.message() + "</body></html>");
-				itemPanel.add(messageLabel);
-
-				// Timestamp label
-				String dateStr = item.created_at() != null ? item.created_at().format(formatter) : "";
-				JLabel dateLabel = new JLabel(dateStr);
-				dateLabel.setHorizontalAlignment(SwingConstants.LEFT);
-				itemPanel.add(dateLabel);
-				
-				JButton deleteMessageButton = new JButton(new FlatInternalFrameCloseIcon());
-				deleteMessageButton.setHorizontalAlignment(SwingConstants.RIGHT);
-				deleteMessageButton.setMaximumSize(new Dimension(15, 15));
-				itemPanel.add(deleteMessageButton);
-				deleteMessageButton.putClientProperty("inbox_id", item.inbox_id());
-				addDeleteButtonActionListener(deleteMessageButton, itemPanel);
-				
-				listContainer.add(itemPanel);
+				model.addRow(new Object[] { item.message(), item.created_at().toString(), "" });
 			}
-		}
 
-		JScrollPane scrollPane = new JScrollPane(listContainer);
-		scrollPane.setBorder(null);
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		add(scrollPane);
+			JTable table = new JTable(model);
+			table.setRowHeight(35);
+			table.setFillsViewportHeight(true);
+
+			// Adjust column widths
+			table.getColumnModel().getColumn(0).setPreferredWidth(400);
+			table.getColumnModel().getColumn(1).setPreferredWidth(160);
+			table.getColumnModel().getColumn(2).setPreferredWidth(100);
+
+			// Set cell renderer and editor for action column
+			table.getColumnModel().getColumn(2).setCellRenderer(new ActionCellRenderer());
+			table.getColumnModel().getColumn(2).setCellEditor(new ActionCellEditor(table, model, inboxItems));
+
+			JScrollPane scrollPane = new JScrollPane(table);
+			add(scrollPane, BorderLayout.CENTER);
+		}
 
 		logger.info("InboxPanel drawn.");
 	}
-	
-	private void addDeleteButtonActionListener(JButton button, JPanel container) {
-		button.addActionListener(_->{
-			int id = (int)button.getClientProperty("inbox_id");
-			DeleteMessageByIdService.execute(conn, id);
-			container.removeAll();
-			container.setVisible(false);
-			listContainer.revalidate();
-			listContainer.repaint();
-		});
+
+	private static class ActionPanel extends JPanel {
+		private static final long serialVersionUID = 1L;
+		private final JButton deleteButton = new JButton("Delete");
+
+		public ActionPanel() {
+			setLayout(new WrapLayout(FlowLayout.CENTER, 5, 0));
+			add(deleteButton);
+		}
 	}
-	
+
+	private static class ActionCellRenderer implements TableCellRenderer {
+		private final ActionPanel panel = new ActionPanel();
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
+			if (isSelected) {
+				panel.setBackground(table.getSelectionBackground());
+			} else {
+				panel.setBackground(table.getBackground());
+			}
+			return panel;
+		}
+	}
+
+	private static class ActionCellEditor extends AbstractCellEditor implements TableCellEditor {
+		private static final long serialVersionUID = 1L;
+		private final ActionPanel panel = new ActionPanel();
+
+		public ActionCellEditor(JTable table, DefaultTableModel model, List<Inbox> inboxItems) {
+			panel.deleteButton.addActionListener(_ -> {
+				int row = table.getEditingRow();
+				fireEditingStopped();
+				if (row != -1) {
+					int modelRow = table.convertRowIndexToModel(row);
+					Inbox item = inboxItems.get(modelRow);
+					DeleteMessageByIdService.execute(item.inbox_id().intValue());
+					model.removeRow(modelRow);
+					inboxItems.remove(modelRow);
+				}
+			});
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value,
+				boolean isSelected, int row, int column) {
+			panel.setBackground(table.getSelectionBackground());
+			return panel;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			return "";
+		}
+	}
 }

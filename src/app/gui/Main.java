@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.sql.Connection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,7 +25,6 @@ import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.border.EmptyBorder;
 
-import app.App;
 import app.cmp.CustomIcon;
 import app.entities.IconColor;
 import app.entities.Project;
@@ -37,12 +35,12 @@ import app.services.GetProjectsService;
 public class Main extends JFrame {
 	private static JFrame mainFrame;
 	
-	private static Connection conn;
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField searchTextField;
 	private JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
+	private JPanel prevProjectPanel;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	/**
 	 * Create the frame.
@@ -51,7 +49,6 @@ public class Main extends JFrame {
 		logger.info("Drawing Main window.");
 		setFont(new Font("Times New Roman", Font.PLAIN, 20));
 		mainFrame = Main.this;
-		Main.conn = App.connection;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 750, 500);
@@ -131,12 +128,19 @@ public class Main extends JFrame {
 		JButton remindersButton = new JButton("reminders");
 		remindersButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(remindersButton);
+		addReminderActionListener(remindersButton);
 		
 		showInfoPanel = new JPanel();
 		rightContainer.add(showInfoPanel, BorderLayout.CENTER);
 		showInfoPanel.setLayout(new BorderLayout(0, 0));
 		
 		refreshWindow();
+		
+		addWindowListener(new WindowAdapter() {
+			
+			
+		});
+		
 		setVisible(true);
 		logger.info("Main window is ready.");
 	}
@@ -145,7 +149,7 @@ public class Main extends JFrame {
 		List<Project> projects = null;
 		container.removeAll();
 		try {
-			projects = GetProjectsService.execute(conn);
+			projects = GetProjectsService.execute();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
 			return;
@@ -179,7 +183,7 @@ public class Main extends JFrame {
 			ckSet.setLayout(new BoxLayout(ckSet, BoxLayout.X_AXIS));
 			ckSet.setAlignmentX(LEFT_ALIGNMENT);
 			
-			IconColor ic = GetIconColorOfProjectService.execute(conn, projectId);
+			IconColor ic = GetIconColorOfProjectService.execute(projectId);
 			if(ic != null) {
 				Color color = new Color(ic.red(), ic.green(), ic.blue());
 				label.setIcon(new CustomIcon(color, 12, 12));
@@ -205,7 +209,6 @@ public class Main extends JFrame {
 		button.addActionListener(_ -> {
 			CreateProjectWindow createProjectWindow = new CreateProjectWindow(Main.this);
 			createProjectWindow.addWindowListener(new WindowAdapter() {
-				
 				@Override
 				public void windowClosed(WindowEvent e) {
 					listProjects(projectsContainer);
@@ -229,13 +232,23 @@ public class Main extends JFrame {
 			panel.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
+					if(prevProjectPanel != null) prevProjectPanel.setBackground(null);
 					panel.setBackground(LightColors.PRIMARY_HOVER.getColor());
 					showInfoPanel.removeAll();
 					showInfoPanel.add(new ProjectInfoPanel(panel));
+					prevProjectPanel = panel;
 					refreshWindow();
 				}
 			});
 		}
+	}
+	
+	private void addReminderActionListener(JButton button) {
+		button.addActionListener(_->{
+			showInfoPanel.removeAll();
+			showInfoPanel.add(new ReminderPanel());
+			refreshWindow();
+		});
 	}
 	
 	private void refreshWindow() {

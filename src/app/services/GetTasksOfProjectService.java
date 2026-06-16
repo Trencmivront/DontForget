@@ -1,6 +1,5 @@
 package app.services;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -10,18 +9,19 @@ import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import app.App;
 import app.entities.Task;
 
 public class GetTasksOfProjectService {
  private GetTasksOfProjectService() {}
 	private static final Logger logger = Logger.getLogger(GetTasksOfProjectService.class.getName());
 	
-	public static List<Task> execute(int id, Connection conn){
+	public static List<Task> execute(int id){
 		logger.info("Service executed.");
 		
 		String sql = "SELECT * FROM TASK WHERE project_id = ?";
 		
-		try (PreparedStatement pstm = conn.prepareStatement(sql)){
+		try (PreparedStatement pstm = App.connection.prepareStatement(sql)){
 			
 			pstm.setInt(1, id);
 			ResultSet rs = pstm.executeQuery();
@@ -52,9 +52,7 @@ public class GetTasksOfProjectService {
 		}catch (Exception e) {
 			JOptionPane.showMessageDialog(new JDialog(), "Error while getting tasks for project id="+id);
 			e.printStackTrace();
-			return null;
 		}
-		
+		return null;	
 	}
-
 }

@@ -1,5 +1,5 @@
 package app.entities;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
-public record Inbox(Integer inbox_id, String message, LocalDateTime created_at) {}
+public record Inbox(Long inbox_id, String message, Timestamp created_at) {}

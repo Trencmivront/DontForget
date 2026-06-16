@@ -1,5 +1,7 @@
 package app;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -23,8 +25,8 @@ public class App {
     	System.setProperty("awt.useSystemAAFontSettings", "on");
     	System.setProperty("swing.aatext", "true");
 
-        SwingUtilities.invokeLater(() -> {
-			
+        SwingUtilities.invokeLater(() ->{
+        	
 			try {
 				// Initializing the connection and statement
 				connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
@@ -46,7 +48,27 @@ public class App {
 		        } else {
 		            logger.severe("crTables.sql file not found at " + crTablesPath.toAbsolutePath());
 		        }
-		        new Main();
+		        Main main = new Main();
+		        
+		        // to open and close connection when needed
+		        main.addWindowListener(new WindowAdapter() {
+		        	@Override
+					public void windowClosing(WindowEvent e) {
+						try {		
+							App.connection.close();
+						}catch (SQLException s) {
+							s.printStackTrace();
+						}
+					}
+					@Override
+					public void windowOpened(WindowEvent e) {
+						try {
+							App.connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
+						}catch (SQLException s) {
+							s.printStackTrace();
+						}
+					}
+				});
 		        
 		    }catch (SQLException s) {
 		    	s.printStackTrace();
@@ -55,6 +77,12 @@ public class App {
 		    catch (Exception e){
 				JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
 		        e.printStackTrace();
+		    }finally {
+		    	try {
+					App.connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		    }
 			
 		});

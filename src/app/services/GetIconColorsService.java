@@ -1,21 +1,21 @@
 package app.services;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.App;
 import app.entities.IconColor;
 
 public class GetIconColorsService {
  private GetIconColorsService() {}
 
 	
-	public static List<IconColor> execute(Connection conn){
+	public static List<IconColor> execute(){
 		
-		try (Statement stm = conn.createStatement()){
+		try (Statement stm = App.connection.createStatement()){
 			
 			String sql = "SELECT * FROM ICON_COLOR";
 			
