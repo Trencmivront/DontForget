@@ -14,10 +14,8 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -29,6 +27,12 @@ import app.cmp.CustomIcon;
 import app.entities.IconColor;
 import app.entities.Project;
 import app.enums.LightColors;
+import app.gui.panels.InboxPanel;
+import app.gui.panels.ProjectInfoPanel;
+import app.gui.panels.ReminderPanel;
+import app.gui.panels.TagPanel;
+import app.gui.panels.TodayPanel;
+import app.gui.windows.CreateProjectWindow;
 import app.services.GetIconColorOfProjectService;
 import app.services.GetProjectsService;
 
@@ -102,7 +106,6 @@ public class Main extends JFrame {
 		
 		projectsContainer = new JScrollPane();
 		leftBottomContainer.add(projectsContainer, BorderLayout.CENTER);
-		listProjects(projectsContainer);
 		
 		JPanel rightContainer = new JPanel();
 		mainContainer.setRightComponent(rightContainer);
@@ -119,7 +122,6 @@ public class Main extends JFrame {
 		JButton inboxButton = new JButton("inbox");
 		inboxButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(inboxButton);
-		addInboxButtonEventListener(inboxButton);
 		
 		JButton todayButton = new JButton("today");
 		todayButton.setFont(new Font("Dialog", Font.BOLD, 20));
@@ -128,18 +130,20 @@ public class Main extends JFrame {
 		JButton remindersButton = new JButton("reminders");
 		remindersButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(remindersButton);
-		addReminderActionListener(remindersButton);
 		
 		showInfoPanel = new JPanel();
 		rightContainer.add(showInfoPanel, BorderLayout.CENTER);
 		showInfoPanel.setLayout(new BorderLayout(0, 0));
 		
-		refreshWindow();
+//		add action listeners for buttons
+		addNavigationButtonActionListener(remindersButton, ReminderPanel.class.getName());
+		addNavigationButtonActionListener(inboxButton, InboxPanel.class.getName());
+		addNavigationButtonActionListener(tagsButton, TagPanel.class.getName());
+		addNavigationButtonActionListener(todayButton, TodayPanel.class.getName());
 		
-		addWindowListener(new WindowAdapter() {
-			
-			
-		});
+		listProjects(projectsContainer);
+
+		refreshWindow();
 		
 		setVisible(true);
 		logger.info("Main window is ready.");
@@ -148,12 +152,8 @@ public class Main extends JFrame {
 	private void listProjects(JScrollPane container) {
 		List<Project> projects = null;
 		container.removeAll();
-		try {
-			projects = GetProjectsService.execute();
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
-			return;
-		}
+
+		projects = GetProjectsService.execute();
 		
 		int size = projects.size();
 		
@@ -180,6 +180,7 @@ public class Main extends JFrame {
 			ckSet.putClientProperty("project_id", projectId);
 			ckSet.putClientProperty("list_order", p.list_order());
 			ckSet.putClientProperty("icon_color_id", p.icon_color_id());
+			
 			ckSet.setLayout(new BoxLayout(ckSet, BoxLayout.X_AXIS));
 			ckSet.setAlignmentX(LEFT_ALIGNMENT);
 			
@@ -218,35 +219,28 @@ public class Main extends JFrame {
 		});
 	}
 	
-	private void addInboxButtonEventListener(JButton button) {
-		button.addActionListener(_ ->{
-			showInfoPanel.removeAll();
-			showInfoPanel.add(new InboxPanel());
-			refreshWindow();
+	private void addProjectEventListener(JPanel panel) {
+		panel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// removing background color from previous project button
+				setProjectBackgroundColor(panel);
+				showInfoPanel.removeAll();
+				showInfoPanel.add(new ProjectInfoPanel(panel));
+				refreshWindow();
+			}
 		});
 	}
 	
-	private void addProjectEventListener(JPanel panel) {
-		
-		if(panel != null) {
-			panel.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					if(prevProjectPanel != null) prevProjectPanel.setBackground(null);
-					panel.setBackground(LightColors.PRIMARY_HOVER.getColor());
-					showInfoPanel.removeAll();
-					showInfoPanel.add(new ProjectInfoPanel(panel));
-					prevProjectPanel = panel;
-					refreshWindow();
-				}
-			});
-		}
-	}
-	
-	private void addReminderActionListener(JButton button) {
-		button.addActionListener(_->{
+	private void addNavigationButtonActionListener(JButton button, String className) {
+		button.addActionListener(_ ->{
+			setProjectBackgroundColor(null);
 			showInfoPanel.removeAll();
-			showInfoPanel.add(new ReminderPanel());
+			try {
+				showInfoPanel.add((JPanel)Class.forName(className).getDeclaredConstructor().newInstance());
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
 			refreshWindow();
 		});
 	}
@@ -254,5 +248,11 @@ public class Main extends JFrame {
 	private void refreshWindow() {
 		mainFrame.revalidate();
 		mainFrame.repaint();
+	}
+	
+	private void setProjectBackgroundColor(JPanel project) {
+		if(prevProjectPanel != null) prevProjectPanel.setBackground(null);
+		if(project != null) project.setBackground(LightColors.PRIMARY_HOVER.getColor());
+		prevProjectPanel = project;
 	}
 }

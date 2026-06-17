@@ -1,4 +1,4 @@
-package app.gui;
+package app.gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -16,36 +16,38 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import app.entities.Task;
+import app.gui.windows.TaskWindow;
 import app.services.GetTasksOfProjectService;
 
 public class ProjectInfoPanel extends JPanel{
 	
 	private static final long serialVersionUID = 1L;
+	private JScrollPane infoScrollPane;
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	
 	public ProjectInfoPanel(JPanel panel) {
-		JPanel projectPanel = panel;
 				
-		String title = (String)projectPanel.getClientProperty("project_title");
-		int id = (int)projectPanel.getClientProperty("project_id");
-		String description = (String)projectPanel.getClientProperty("description");
-		
 		setLayout(new BorderLayout());
 		
-		JPanel headerPanel = new JPanel();
-		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-		add(headerPanel, BorderLayout.NORTH);
+		add(createHeaderPanel(panel), BorderLayout.NORTH);
 		
-		headerPanel.removeAll();
-		headerPanel.add(new JLabel(title));
-		headerPanel.add(new JLabel(description));
-		headerPanel.revalidate();
-		headerPanel.repaint();
-		headerPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 100));
+		infoScrollPane = new JScrollPane();
+		infoScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		add(infoScrollPane);
 		
+		JPanel taskActionsPanel = new JPanel();
+		add(taskActionsPanel, BorderLayout.SOUTH);
+		
+		listTasks(panel);
+		
+	}
+	
+	private void listTasks(JPanel projectPanel) {
+		int id = (int)projectPanel.getClientProperty("project_id");
 		List<Task> tasks = GetTasksOfProjectService.execute(id);
-		if(tasks == null) {
+		if(tasks.isEmpty()) {
+			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
 			logger.info("No task found for project.");
 			return;
 		}
@@ -55,30 +57,27 @@ public class ProjectInfoPanel extends JPanel{
 		info.setLayout(new BorderLayout());
 		
 		JPanel tasksContainer = new JPanel();
-		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));
-		info.add(tasksContainer, BorderLayout.NORTH);
-		
+		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
 			tasksContainer.add(createTaskContainer(i.next()));
 		}
 		
-		JScrollPane infoScrollPane = new JScrollPane();
-		infoScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		add(infoScrollPane);
-		
-		JPanel taskActionsPanel = new JPanel();
-		add(taskActionsPanel, BorderLayout.SOUTH);
-				
 		infoScrollPane.setViewportView(tasksContainer);
 		infoScrollPane.revalidate();
 		infoScrollPane.repaint();
 	}
 	
+	private JPanel createHeaderPanel(JPanel projectPanel) {
+		String title = (String)projectPanel.getClientProperty("project_title");
+		String description = (String)projectPanel.getClientProperty("description");				
+		return new HeaderPanel(title, description);
+	}
+	
 	private JPanel createTaskContainer(Task task){
 		
 		JPanel taskPanel = new JPanel();
-		taskPanel.setLayout(new BorderLayout());
+		taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.X_AXIS));
 		JLabel title = new JLabel(task.task_title());
 		
 		taskPanel.putClientProperty("task_id", task.task_id());
@@ -94,8 +93,8 @@ public class ProjectInfoPanel extends JPanel{
 		
 		JCheckBox chk = new JCheckBox();
 		
-		taskPanel.add(chk,BorderLayout.WEST);
-		taskPanel.add(title, BorderLayout.CENTER);
+		taskPanel.add(chk);
+		taskPanel.add(title);
 		
 		taskPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 		

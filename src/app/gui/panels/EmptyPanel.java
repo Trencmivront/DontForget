@@ -1,4 +1,4 @@
-package app.gui;
+package app.gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Font;

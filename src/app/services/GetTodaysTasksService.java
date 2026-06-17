@@ -1,32 +1,31 @@
 package app.services;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-
 import app.App;
 import app.entities.Task;
 
-public class GetTasksOfProjectService {
- private GetTasksOfProjectService() {}
-	private static final Logger logger = Logger.getLogger(GetTasksOfProjectService.class.getName());
+public class GetTodaysTasksService {
+ private GetTodaysTasksService() {}
+	private static final Logger logger = Logger.getLogger(GetTodaysTasksService.class.getName());
 	
-	public static List<Task> execute(int id){
+	public static List<Task> execute(){
 		logger.info("Service executed.");
-		
-		String sql = "SELECT * FROM TASK WHERE project_id = ?";
-		List<Task> tasks = new ArrayList<Task>();
-		
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)){
+				
+		try {
+			Statement pstm = App.connection.createStatement();
 			
-			pstm.setInt(1, id);
-			ResultSet rs = pstm.executeQuery();
-						
+			String sql = "SELECT * FROM TASK WHERE "
+					+ "FORMATDATETIME(due_date, '%Y-%m-%d') = FORMATDATETIME(NOW(), 'dd-MM-yyyy')";
+			
+			ResultSet rs = pstm.executeQuery(sql);
+			
+			List<Task> tasks = new ArrayList<Task>();
+			
 			while(rs.next()) {
 				tasks.add(new Task(
 						rs.getInt("task_id"),
@@ -45,7 +44,6 @@ public class GetTasksOfProjectService {
 			return tasks;
 			
 		}catch (Exception e) {
-			JOptionPane.showMessageDialog(new JDialog(), "Error while getting tasks for project id="+id);
 			e.printStackTrace();
 		}
 		return null;	

@@ -1,4 +1,4 @@
-package app.gui;
+package app.gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -27,6 +27,7 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import app.entities.Reminder;
 import app.entities.Task;
+import app.gui.windows.TaskWindow;
 import app.services.GetRemindersService;
 import app.services.GetTaskByIdService;
 
@@ -66,7 +67,7 @@ public class ReminderPanel extends JPanel{
 	private HashMap<String, List<Reminder>> getMonthlyReminders() {
 		List<Reminder> reminders = GetRemindersService.execute();
 		
-		if(reminders.isEmpty()) {
+		if(reminders.isEmpty() || reminders == null) {
 			return null;
 		}
 		
@@ -131,7 +132,7 @@ public class ReminderPanel extends JPanel{
 			table.getColumnModel().getColumn(0).setPreferredWidth(60);
 			table.getColumnModel().getColumn(1).setPreferredWidth(400);
 			table.getColumnModel().getColumn(2).setPreferredWidth(180);
-			
+						
 			// Adjust row height when action column is too narrow to fit buttons in a single line
 			table.getColumnModel().addColumnModelListener(new javax.swing.event.TableColumnModelListener() {
 				private final int minSingleRowWidth = new ActionPanel().getPreferredSize().width;

@@ -1,4 +1,4 @@
-package app.gui;
+package app.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
