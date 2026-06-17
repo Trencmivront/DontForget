@@ -2,11 +2,12 @@ package app.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
@@ -21,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -61,11 +61,7 @@ public class CreateProjectWindow extends JDialog {
 		JPanel titlePanel = new JPanel();
 		contentPanel.add(titlePanel, BorderLayout.NORTH);
 		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
-
-		JLabel projectTitleLabel = new JLabel("Title");
-		projectTitleLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-		titlePanel.add(projectTitleLabel);
-
+		
 		projectTitleTextField = new JTextField();
 		projectTitleTextField.setToolTipText("Project Title");
 		projectTitleTextField.setFont(new Font("Dialog", Font.PLAIN, 20));
@@ -76,25 +72,24 @@ public class CreateProjectWindow extends JDialog {
 		JPanel descriptionPanel = new JPanel();
 		contentPanel.add(descriptionPanel, BorderLayout.CENTER);
 		descriptionPanel.setLayout(new BoxLayout(descriptionPanel, BoxLayout.X_AXIS));
-
-		JLabel descriptionLabel = new JLabel("Description");
-		descriptionLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-		descriptionLabel.setAlignmentY(Component.TOP_ALIGNMENT);
-		descriptionPanel.add(descriptionLabel);
 		
 		descriptionTextArea = new JTextArea();
 		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setFont(new Font("Dialog", Font.PLAIN, 20));
-		descriptionTextArea.setColumns(15);
-		descriptionTextArea.setBackground(Color.WHITE);
-
-		JScrollPane scrollPane = new JScrollPane(descriptionTextArea);
-		scrollPane.setAlignmentY(Component.TOP_ALIGNMENT);
-		scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-		scrollPane.setBorder(new EmptyBorder(20, 10, 20, 10));
-		scrollPane.getViewport().setBackground(Color.WHITE);
-		descriptionPanel.add(scrollPane);
-
+		descriptionTextArea.setColumns(40);
+		descriptionTextArea.setRows(25);
+		descriptionTextArea.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				String text = descriptionTextArea.getText();
+				if(text.length() >= 1000) {
+					descriptionTextArea.setText(text.substring(0, 1000));
+				}
+			}
+		});
+		descriptionTextArea.setBackground(Color.GRAY);
+		
+		descriptionPanel.add(descriptionTextArea);
 
 		JPanel colorPanel = new JPanel();		
 		contentPanel.add(colorPanel, BorderLayout.SOUTH);

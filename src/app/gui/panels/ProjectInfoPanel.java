@@ -2,6 +2,7 @@ package app.gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -9,13 +10,17 @@ import java.util.ListIterator;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import app.entities.Task;
+import app.gui.windows.CreateTaskWindow;
 import app.gui.windows.TaskWindow;
 import app.services.GetTasksOfProjectService;
 
@@ -37,7 +42,9 @@ public class ProjectInfoPanel extends JPanel{
 		add(infoScrollPane);
 		
 		JPanel taskActionsPanel = new JPanel();
+		taskActionsPanel.setLayout(new BorderLayout());
 		add(taskActionsPanel, BorderLayout.SOUTH);
+		createTaskActionButton(taskActionsPanel);
 		
 		listTasks(panel);
 		
@@ -74,6 +81,21 @@ public class ProjectInfoPanel extends JPanel{
 		return new HeaderPanel(title, description);
 	}
 	
+	private void createTaskActionButton(JPanel panel) {
+		JButton button = new JButton("+");
+		
+		button.setHorizontalAlignment(SwingConstants.CENTER);
+		button.setFont(new Font("Ariel", 1, 20));
+		
+		button.addActionListener(_->{
+			new CreateTaskWindow();
+		});
+		button.setBorder(new EmptyBorder(5, 0, 5, 0));
+		button.setMaximumSize(new Dimension(40, 40));
+		
+		panel.add(button, BorderLayout.CENTER);
+	}
+	
 	private JPanel createTaskContainer(Task task){
 		
 		JPanel taskPanel = new JPanel();
@@ -106,5 +128,9 @@ public class ProjectInfoPanel extends JPanel{
 		});
 				
 		return taskPanel;
+	}
+	
+	private void addCheckBoxActionListener() {
+		
 	}
 }
