@@ -231,7 +231,7 @@ public class Main extends JFrame {
 		});
 	}
 	
-	private void refreshWindow() {
+	public static void refreshWindow() {
 		mainFrame.revalidate();
 		mainFrame.repaint();
 	}

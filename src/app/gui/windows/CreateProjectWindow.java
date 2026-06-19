@@ -134,8 +134,8 @@ public class CreateProjectWindow extends JDialog {
 	}
 	
 	private void addCreateButtonActionListener(JButton button) {
-		logger.info("Running function.");
 		button.addActionListener(_ -> {
+			logger.info("Running function.");
 			String title = projectTitleTextField.getText();
 			String description = descriptionTextArea.getText(); // Description can be null
 			// we don't want the title to be empty
@@ -150,13 +150,11 @@ public class CreateProjectWindow extends JDialog {
 				iconColorId = (int) selectedRadioButton.getClientProperty("icon_color_id");
 			}
 			
-			if(CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
-				JOptionPane.showMessageDialog(new JDialog(), "Project Created Succesfully");
+			if(!CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
+				JOptionPane.showMessageDialog(new JDialog(), "Error while creating project", "Database Error", JOptionPane.ERROR_MESSAGE);
 				dispose();
 			}
-			else {
-				JOptionPane.showMessageDialog(new JDialog(), "Error while creating project");
-			}
+
 		});
 	}
 	

@@ -2,10 +2,7 @@ package app.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
@@ -33,6 +30,9 @@ import javax.swing.border.EmptyBorder;
 import com.github.lgooddatepicker.components.DateTimePicker;
 
 import app.dco.TaskDCO;
+import app.entities.Reminder;
+import app.gui.Main;
+import app.services.reminder.CreateReminderService;
 import app.services.task.CreateTaskService;
 
 public class CreateTaskWindow extends JDialog {
@@ -44,9 +44,14 @@ public class CreateTaskWindow extends JDialog {
 	private Integer selectedPriority = null;
 	private Timestamp selectedReminderTime = null;
 	private String selectedReminderMsg = null;
+	private JPanel projectPanel;
+	private JTextField titleField;
+	private JTextArea descArea;
 
-	public CreateTaskWindow() {
+	public CreateTaskWindow(JPanel panel) {
 		logger.info("Initializing CreateTaskWindow.");
+		
+		projectPanel = panel;
 		
 		// Find active Main window to anchor to
 		Window activeWindow = FocusManager.getCurrentManager().getActiveWindow();
@@ -81,7 +86,7 @@ public class CreateTaskWindow extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 
 		// 1. Task Title (Header Panel)
-		JTextField titleField = new JTextField();
+		titleField = new JTextField();
 		titleField.setFont(new Font("Dialog", Font.BOLD, 15));
 		titleField.putClientProperty("JTextField.placeholderText", "Title of the task");
 		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
@@ -90,7 +95,7 @@ public class CreateTaskWindow extends JDialog {
 		// 2. Center Panel (Description + Options)
 		JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
 
-		JTextArea descArea = new JTextArea();
+		descArea = new JTextArea();
 		descArea.setFont(new Font("Dialog", Font.PLAIN, 14));
 		descArea.setLineWrap(true);
 		descArea.setWrapStyleWord(true);
@@ -141,14 +146,22 @@ public class CreateTaskWindow extends JDialog {
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
 
 		getRootPane().setDefaultButton(createButton);
+		
+		addCreateButtonActionListener(createButton);
 
 		// Set up dropdown popups for the option buttons
 		setupDueDateMenu(dueDateBtn);
 		setupPriorityMenu(priorityBtn);
 		setupReminderMenu(reminderBtn);
 
-		// Save handler
-		createButton.addActionListener(_ -> {
+		revalidate();
+		repaint();
+		setVisible(true);
+		logger.info("CreateTaskWindow display complete.");
+	}
+	
+	private void addCreateButtonActionListener(JButton button) {
+		button.addActionListener(_->{
 			String title = titleField.getText().trim();
 			String description = descArea.getText().trim();
 
@@ -158,27 +171,25 @@ public class CreateTaskWindow extends JDialog {
 				return;
 			}
 
-			Integer projectId = getProjectId();
-			if (projectId == null) {
-				JOptionPane.showMessageDialog(CreateTaskWindow.this, "No active project selected to add this task to.",
-						"Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+			Integer projectId = (int)projectPanel.getClientProperty("project_id");
 
-			boolean success = CreateTaskService.execute(new TaskDCO(title, description, 1, selectedPriority, selectedDueDate, projectId), selectedReminderTime, selectedReminderMsg);
-			if (success) {
-				refreshParentUI();
-				dispose();
-			} else {
+			Long taskId = CreateTaskService.execute(new TaskDCO(title, description, 1, selectedPriority, selectedDueDate, projectId));
+			
+			if(taskId == 0) {
 				JOptionPane.showMessageDialog(CreateTaskWindow.this, "Failed to create task. Make sure the title is unique.",
 						"Error", JOptionPane.ERROR_MESSAGE);
 			}
+			
+			if (selectedReminderTime != null && taskId != null) {
+				Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
+				CreateReminderService.execute(reminder);
+			}
+//				Refresh main ui
+				projectPanel.dispatchEvent(new MouseEvent(projectPanel, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, projectPanel.getWidth()/2, projectPanel.getHeight()/2, 1, false));
+				Main.refreshWindow();
+//				Close this ui
+				dispose();
 		});
-
-		revalidate();
-		repaint();
-		setVisible(true);
-		logger.info("CreateTaskWindow display complete.");
 	}
 
 	private void setupDueDateMenu(JButton button) {
@@ -200,41 +211,24 @@ public class CreateTaskWindow extends JDialog {
 
 		todayItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now();
-			button.setText("📅 Due: Today (" + selectedDueDate + ")");
+			button.setText("📅 " + selectedDueDate);
 			button.setForeground(new Color(42, 157, 143));
 		});
 
 		tomorrowItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusDays(1);
-			button.setText("📅 Due: Tomorrow (" + selectedDueDate + ")");
+			button.setText("📅 " + selectedDueDate);
 			button.setForeground(new Color(42, 157, 143));
 		});
 
 		nextWeekItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusWeeks(1);
-			button.setText("📅 Due: " + selectedDueDate);
+			button.setText("📅 " + selectedDueDate);
 			button.setForeground(new Color(42, 157, 143));
 		});
 
 		customItem.addActionListener(_ -> {
-			String input = JOptionPane.showInputDialog(CreateTaskWindow.this, "Enter due date (YYYY-MM-DD):",
-					"Custom Due Date", JOptionPane.PLAIN_MESSAGE);
-			if (input != null && !input.trim().isEmpty()) {
-				try {
-					LocalDate date = LocalDate.parse(input.trim());
-					if (date.isBefore(LocalDate.now())) {
-						JOptionPane.showMessageDialog(CreateTaskWindow.this, "Due date cannot be in the past.",
-								"Invalid Date", JOptionPane.ERROR_MESSAGE);
-					} else {
-						selectedDueDate = date;
-						button.setText("📅 Due: " + selectedDueDate);
-						button.setForeground(new Color(42, 157, 143));
-					}
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(CreateTaskWindow.this, "Invalid date format. Use YYYY-MM-DD.",
-							"Invalid Format", JOptionPane.ERROR_MESSAGE);
-				}
-			}
+			
 		});
 
 		clearDateItem.addActionListener(_ -> {
@@ -246,9 +240,9 @@ public class CreateTaskWindow extends JDialog {
 
 	private void setupPriorityMenu(JButton button) {
 		JPopupMenu priorityMenu = new JPopupMenu();
-		JMenuItem highItem = new JMenuItem("🔴 High (1)");
-		JMenuItem mediumItem = new JMenuItem("🟠 Medium (2)");
-		JMenuItem lowItem = new JMenuItem("🟢 Low (3)");
+		JMenuItem highItem = new JMenuItem("🔴 High");
+		JMenuItem mediumItem = new JMenuItem("🟠 Medium");
+		JMenuItem lowItem = new JMenuItem("🟢 Low");
 		JMenuItem clearPriorityItem = new JMenuItem("⚪ Clear Priority");
 
 		priorityMenu.add(highItem);
@@ -299,8 +293,10 @@ public class CreateTaskWindow extends JDialog {
 			picker.setDateTimePermissive(LocalDateTime.now().plusHours(2));
 			
 			JDialog inputDialog = new JDialog(CreateTaskWindow.this);
+
 			inputDialog.setTitle("Set Reminder");
 			inputDialog.setModal(true);
+			inputDialog.setAlwaysOnTop(true);
 			inputDialog.setResizable(false);
 			
 			inputDialog.setLayout(new BorderLayout(10, 10));
@@ -378,71 +374,4 @@ public class CreateTaskWindow extends JDialog {
 		});
 	}
 
-	private Integer getProjectId() {
-		for (Frame frame : Frame.getFrames()) {
-			if (frame.isVisible() && frame.getClass().getName().endsWith("Main")) {
-				Integer id = findActiveProject(frame);
-				if (id != null)
-					return id;
-			}
-		}
-		for (Frame frame : Frame.getFrames()) {
-			Integer id = findActiveProject(frame);
-			if (id != null)
-				return id;
-		}
-		return null;
-	}
-
-	private Integer findActiveProject(Container container) {
-		for (Component comp : container.getComponents()) {
-			if (comp instanceof JPanel) {
-				JPanel panel = (JPanel) comp;
-				Object projIdObj = panel.getClientProperty("project_id");
-				if (projIdObj instanceof Integer) {
-					Color primaryHover = new Color(79, 70, 229);
-					if (primaryHover.equals(panel.getBackground())) {
-						return (Integer) projIdObj;
-					}
-				}
-			}
-			if (comp instanceof Container) {
-				Integer id = findActiveProject((Container) comp);
-				if (id != null)
-					return id;
-			}
-		}
-		return null;
-	}
-
-	private void refreshParentUI() {
-		for (Frame frame : Frame.getFrames()) {
-			if (frame.isVisible() && frame.getClass().getName().endsWith("Main")) {
-				triggerSelectedPanelClick(frame);
-			}
-		}
-	}
-
-	private void triggerSelectedPanelClick(Container container) {
-		for (Component comp : container.getComponents()) {
-			if (comp instanceof JPanel) {
-				JPanel panel = (JPanel) comp;
-				Object projIdObj = panel.getClientProperty("project_id");
-				if (projIdObj instanceof Integer) {
-					Color primaryHover = new Color(79, 70, 229);
-					if (primaryHover.equals(panel.getBackground())) {
-						EventQueue.invokeLater(() -> {
-							panel.dispatchEvent(new MouseEvent(panel,
-									MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1,
-									false));
-						});
-						return;
-					}
-				}
-			}
-			if (comp instanceof Container) {
-				triggerSelectedPanelClick((Container) comp);
-			}
-		}
-	}
 }

@@ -30,12 +30,14 @@ public class ProjectInfoPanel extends JPanel{
 	private JScrollPane infoScrollPane;
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
+	private JPanel projectPanel;
 	
 	public ProjectInfoPanel(JPanel panel) {
+		projectPanel = panel;
 				
 		setLayout(new BorderLayout());
 		
-		add(createHeaderPanel(panel), BorderLayout.NORTH);
+		add(createHeaderPanel(), BorderLayout.NORTH);
 		
 		infoScrollPane = new JScrollPane();
 		infoScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -46,11 +48,11 @@ public class ProjectInfoPanel extends JPanel{
 		add(taskActionsPanel, BorderLayout.SOUTH);
 		createTaskActionButton(taskActionsPanel);
 		
-		listTasks(panel);
+		listTasks();
 		
 	}
 	
-	private void listTasks(JPanel projectPanel) {
+	private void listTasks() {
 		int id = (int)projectPanel.getClientProperty("project_id");
 		List<Task> tasks = GetTasksOfProjectService.execute(id);
 		if(tasks.isEmpty()) {
@@ -75,7 +77,7 @@ public class ProjectInfoPanel extends JPanel{
 		infoScrollPane.repaint();
 	}
 	
-	private JPanel createHeaderPanel(JPanel projectPanel) {
+	private JPanel createHeaderPanel() {
 		String title = (String)projectPanel.getClientProperty("project_title");
 		String description = (String)projectPanel.getClientProperty("description");				
 		return new HeaderPanel(title, description);
@@ -87,9 +89,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_->{
-			new CreateTaskWindow();
-		});
+		button.addActionListener(_-> new CreateTaskWindow(projectPanel));
 		button.setBorder(new EmptyBorder(5, 0, 5, 0));
 		button.setMaximumSize(new Dimension(40, 40));
 		

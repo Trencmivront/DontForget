@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.logging.Logger;
 
@@ -18,7 +17,7 @@ public class CreateTaskService {
 
 	private CreateTaskService() {}
 
-	public static boolean execute(TaskDCO task, Timestamp remindAt, String reminderMsg) {
+	public static Long execute(TaskDCO task) {
 		logger.info("Executing CreateTaskService.");
 
 		int projectId = task.project_id();
@@ -33,16 +32,14 @@ public class CreateTaskService {
 			}
 		} catch (Exception e) {
 			logger.warning("Error getting max list_order: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		String insertTaskSql = "INSERT INTO TASK (task_title, description, status_id, priority, due_date, list_order, project_id, created_at, updated_at) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
-		try {
-			App.connection.setAutoCommit(false);
+		try (PreparedStatement pstm = App.connection.prepareStatement(insertTaskSql, Statement.RETURN_GENERATED_KEYS)){
 
-			try (PreparedStatement pstm = App.connection.prepareStatement(insertTaskSql,
-					Statement.RETURN_GENERATED_KEYS)) {
 				pstm.setString(1, task.task_title());
 				pstm.setString(2, task.description() == null || task.description().isEmpty() ? null : task.description());
 				pstm.setInt(3, task.status_id() != null ? task.status_id() : 1); // 1 = ACTIVE
@@ -62,45 +59,15 @@ public class CreateTaskService {
 				pstm.setInt(6, listOrder);
 				pstm.setInt(7, projectId);
 
-				pstm.executeUpdate();
+				pstm.execute();
 
-				int taskId = -1;
-				try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-					if (generatedKeys.next()) {
-						taskId = generatedKeys.getInt(1);
-					}
-				}
+				logger.info("Task saved successfully.");
+				return pstm.getGeneratedKeys().getLong(1);
 
-				if (taskId == -1) {
-					throw new SQLException("Failed to retrieve generated task_id.");
-				}
-
-				if (remindAt != null) {
-					String insertReminderSql = "INSERT INTO REMINDER (task_id, remind_at, cstm_message) VALUES (?, ?, ?)";
-					try (PreparedStatement rpstm = App.connection.prepareStatement(insertReminderSql)) {
-						rpstm.setInt(1, taskId);
-						rpstm.setTimestamp(2, remindAt);
-						rpstm.setString(3, reminderMsg);
-						rpstm.executeUpdate();
-					}
-				}
-
-				App.connection.commit();
-				logger.info("Task and reminders saved successfully.");
-				return true;
-
-			} catch (Exception ex) {
-				App.connection.rollback();
-				logger.severe("Transaction rolled back due to error: " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			} finally {
-				App.connection.setAutoCommit(true);
-			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			logger.severe("Database connection error: " + e.getMessage());
 			e.printStackTrace();
-			return false;
+			return 0l;
 		}
 	}
 }
