@@ -8,7 +8,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import app.entities.Task;
-import app.services.GetTodaysTasksService;
+import app.services.task.GetTodaysTasksService;
 
 public class TodayPanel extends JPanel{
 	

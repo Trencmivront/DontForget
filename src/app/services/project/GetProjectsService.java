@@ -1,4 +1,4 @@
-package app.services;
+package app.services.project;
 
 import java.sql.ResultSet;
 import java.sql.Statement;

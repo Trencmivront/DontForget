@@ -1,4 +1,4 @@
-package app.services;
+package app.services.tag;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

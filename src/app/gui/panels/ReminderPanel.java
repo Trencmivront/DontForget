@@ -28,8 +28,8 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 import app.entities.Reminder;
 import app.entities.Task;
 import app.gui.windows.TaskWindow;
-import app.services.GetRemindersService;
-import app.services.GetTaskByIdService;
+import app.services.reminder.GetRemindersService;
+import app.services.task.GetTaskByIdService;
 
 public class ReminderPanel extends JPanel{
 	

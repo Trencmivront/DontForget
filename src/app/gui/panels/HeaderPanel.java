@@ -14,9 +14,10 @@ public class HeaderPanel extends JPanel{
 	
 	public HeaderPanel(String title, String description) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		JLabel titleLabel = new JLabel(title);
-		JLabel descpLabel = new JLabel(description);
-		
+//		to make the long text wrap
+		JLabel titleLabel = new JLabel("<html>" + title + "</html>");
+		JLabel descpLabel = new JLabel("<html>" + description + "</html>");
+				
 		titleLabel.setFont(new Font("Roboto",1, 30));
 		descpLabel.setFont(new Font("Roboto", 0, 15));
 		

@@ -1,4 +1,4 @@
-package app.services;
+package app.services.inbox;
 
 import java.sql.ResultSet;
 import java.sql.Statement;

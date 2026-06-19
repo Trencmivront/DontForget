@@ -3,7 +3,6 @@ package app.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -19,9 +18,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.border.EmptyBorder;
+
+import com.formdev.flatlaf.icons.FlatSearchIcon;
 
 import app.cmp.CustomIcon;
 import app.entities.IconColor;
@@ -33,15 +33,14 @@ import app.gui.panels.ReminderPanel;
 import app.gui.panels.TagPanel;
 import app.gui.panels.TodayPanel;
 import app.gui.windows.CreateProjectWindow;
-import app.services.GetIconColorOfProjectService;
-import app.services.GetProjectsService;
+import app.services.icon.GetIconColorOfProjectService;
+import app.services.project.GetProjectsService;
 
 public class Main extends JFrame {
 	private static JFrame mainFrame;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField searchTextField;
 	private JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
@@ -70,23 +69,18 @@ public class Main extends JFrame {
 		
 		JPanel leftTopContainer = new JPanel();
 		leftContainer.add(leftTopContainer, BorderLayout.NORTH);
-		leftTopContainer.setLayout(new GridLayout(0, 2, 0, 0));
+		leftTopContainer.setLayout(new BorderLayout(0, 0));
+		leftTopContainer.setBorder(new EmptyBorder(5, 1, 30, 1));
 		
-		JLabel placeholderLabel = new JLabel("");
-		leftTopContainer.add(placeholderLabel);
+		JButton searchButton = new JButton(new FlatSearchIcon());
+		leftTopContainer.add(searchButton, BorderLayout.WEST);
 		
-		JButton hideLeftPanelButton = new JButton("hide");
-		hideLeftPanelButton.setFont(new Font("Dialog", Font.BOLD, 20));
-		leftTopContainer.add(hideLeftPanelButton);
+		JLabel appNameLabel = new JLabel("DontForget");
+		appNameLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
+		leftTopContainer.add(appNameLabel, BorderLayout.CENTER);
 		
-		searchTextField = new JTextField();
-		searchTextField.setFont(new Font("Dialog", Font.PLAIN, 20));
-		leftTopContainer.add(searchTextField);
-		searchTextField.setColumns(10);
-		
-		JButton searchButton = new JButton("Search");
-		searchButton.setFont(new Font("Dialog", Font.BOLD, 20));
-		leftTopContainer.add(searchButton);
+		JButton hideLeftPanelButton = new JButton("-");
+		leftTopContainer.add(hideLeftPanelButton, BorderLayout.EAST);
 		
 		JPanel leftBottomContainer = new JPanel();
 		leftContainer.add(leftBottomContainer, BorderLayout.CENTER);
@@ -94,14 +88,10 @@ public class Main extends JFrame {
 		
 		JPanel newProjectField = new JPanel();
 		leftBottomContainer.add(newProjectField, BorderLayout.NORTH);
-		
-		JLabel newProjectLabel = new JLabel("new project");
-		newProjectLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-		newProjectField.add(newProjectLabel);
+		newProjectField.setLayout(new BorderLayout(0, 0));
 		
 		JButton newProjectButton = new JButton("+");
-		newProjectButton.setFont(new Font("Dialog", Font.BOLD, 20));
-		newProjectField.add(newProjectButton);
+		newProjectField.add(newProjectButton, BorderLayout.EAST);
 		addCreateProjectEventListener(newProjectButton);
 		
 		projectsContainer = new JScrollPane();
@@ -116,19 +106,15 @@ public class Main extends JFrame {
 		buttonMenuPanel.setLayout(new BoxLayout(buttonMenuPanel, BoxLayout.X_AXIS));
 		
 		JButton tagsButton = new JButton("tags");
-		tagsButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(tagsButton);
 		
 		JButton inboxButton = new JButton("inbox");
-		inboxButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(inboxButton);
 		
 		JButton todayButton = new JButton("today");
-		todayButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(todayButton);
 		
 		JButton remindersButton = new JButton("reminders");
-		remindersButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		buttonMenuPanel.add(remindersButton);
 		
 		showInfoPanel = new JPanel();

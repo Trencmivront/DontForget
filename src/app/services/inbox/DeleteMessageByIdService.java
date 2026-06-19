@@ -1,4 +1,4 @@
-package app.services;
+package app.services.inbox;
 
 import java.sql.PreparedStatement;
 import java.util.logging.Logger;

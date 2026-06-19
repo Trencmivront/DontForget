@@ -22,7 +22,7 @@ import javax.swing.border.EmptyBorder;
 import app.entities.Task;
 import app.gui.windows.CreateTaskWindow;
 import app.gui.windows.TaskWindow;
-import app.services.GetTasksOfProjectService;
+import app.services.task.GetTasksOfProjectService;
 
 public class ProjectInfoPanel extends JPanel{
 	
@@ -93,7 +93,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setBorder(new EmptyBorder(5, 0, 5, 0));
 		button.setMaximumSize(new Dimension(40, 40));
 		
-		panel.add(button, BorderLayout.CENTER);
+		panel.add(button, BorderLayout.EAST);
 	}
 	
 	private JPanel createTaskContainer(Task task){
@@ -128,9 +128,5 @@ public class ProjectInfoPanel extends JPanel{
 		});
 				
 		return taskPanel;
-	}
-	
-	private void addCheckBoxActionListener() {
-		
 	}
 }

@@ -1,4 +1,4 @@
-package app.services;
+package app.services.task;
 
 public class DeleteTaskByIdService {
 

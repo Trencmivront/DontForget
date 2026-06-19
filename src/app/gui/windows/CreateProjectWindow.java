@@ -28,8 +28,8 @@ import javax.swing.border.EmptyBorder;
 
 import app.dco.ProjectDCO;
 import app.entities.IconColor;
-import app.services.CreateProjectService;
-import app.services.GetIconColorsService;
+import app.services.icon.GetIconColorsService;
+import app.services.project.CreateProjectService;
 
 public class CreateProjectWindow extends JDialog {
 

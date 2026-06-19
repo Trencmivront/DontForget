@@ -16,8 +16,8 @@ import javax.swing.JViewport;
 import app.cmp.CustomIcon;
 import app.entities.IconColor;
 import app.entities.Tag;
-import app.services.GetIconColorOfTagService;
-import app.services.GetTagsService;
+import app.services.icon.GetIconColorOfTagService;
+import app.services.tag.GetTagsService;
 
 public class TagPanel extends JPanel {
 	private static final long serialVersionUID = 1L;

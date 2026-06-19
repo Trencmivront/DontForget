@@ -18,8 +18,8 @@ import javax.swing.table.TableCellRenderer;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import app.entities.Inbox;
-import app.services.DeleteMessageByIdService;
-import app.services.GetInboxService;
+import app.services.inbox.DeleteMessageByIdService;
+import app.services.inbox.GetInboxService;
 
 public class InboxPanel extends JPanel {
 
