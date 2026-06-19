@@ -52,6 +52,14 @@
     <version>11.2.1</version>
     <scope>compile</scope>
 </dependency>
+
+<!-- Source: https://mvnrepository.com/artifact/com.formdev/flatlaf-extras -->
+<dependency>
+    <groupId>com.formdev</groupId>
+    <artifactId>flatlaf-extras</artifactId>
+    <version>3.7.1</version>
+    <scope>compile</scope>
+</dependency>
   
   <dependency>
     <groupId>com.formdev</groupId>

@@ -1,0 +1,186 @@
+package main.gui.windows;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Window;
+import java.sql.Timestamp;
+import java.util.logging.Logger;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+
+import main.gui.Main;
+
+public class TaskWindow extends JDialog {
+	
+	private static final long serialVersionUID = 1L;
+ 	private JPanel contentPanel;
+	private static final Logger logger = Logger.getLogger(TaskWindow.class.getName());
+
+	public TaskWindow(JPanel source, JPanel taskPanel) {
+		logger.info("Drawing the window.");
+	
+		setTitle("Task Details");
+		setModal(true);
+		setResizable(false);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		
+		Window activeWindow = Main.main;
+
+		if (activeWindow != null) {
+			Dimension size = activeWindow.getSize();
+			int w = Math.min(480, (int) (size.getWidth() * 0.75));
+			int h = Math.min(400, (int) (size.getHeight() * 0.75));
+			setSize(new Dimension(w, h));
+			setLocationRelativeTo(activeWindow);
+		} else {
+			setSize(new Dimension(480, 400));
+			setLocation(200, 200);
+		}
+
+		// Content Panel with standard margin (15, 15) and border 20 like CreateTaskWindow
+		contentPanel = new JPanel(new BorderLayout(15, 15));
+		contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+
+		// Extract properties
+		Integer statusId = (Integer) taskPanel.getClientProperty("status_id");
+		Integer priority = (Integer) taskPanel.getClientProperty("priority");
+		Timestamp dueDate = (Timestamp) taskPanel.getClientProperty("due_date");
+		Timestamp completedAt = (Timestamp) taskPanel.getClientProperty("completed_at");
+		String taskTitle = (String)taskPanel.getClientProperty("task_title");
+		
+		// 1. Task Title (Header Panel) - Styled like titleField in CreateTaskWindow
+		JTextField titleField = new JTextField(taskTitle);
+		titleField.setEditable(false);
+		titleField.setFont(new Font("Dialog", Font.BOLD, 15));
+		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
+		contentPanel.add(titleField, BorderLayout.NORTH);
+
+		// 2. Center Panel (Description + Options) - Styled like centerPanel in CreateTaskWindow
+		JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
+
+		String description = (String) taskPanel.getClientProperty("description");
+		JTextArea descTextArea = new JTextArea();
+		descTextArea.setFont(new Font("Dialog", Font.PLAIN, 14));
+		descTextArea.setLineWrap(true);
+		descTextArea.setWrapStyleWord(true);
+		descTextArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
+		descTextArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
+		descTextArea.setText(description != null ? description : "");
+		descTextArea.setEditable(true);
+
+		JScrollPane descScrollPane = new JScrollPane(descTextArea);
+		centerPanel.add(descScrollPane, BorderLayout.CENTER);
+
+		// Format Detail values as clean string status/priority labels
+		String statusStr = "Unknown";
+		Color statusColor = Color.BLACK;
+		if (statusId != null) {
+			if (statusId == 1) {
+				statusStr = "🟢 ACTIVE";
+				statusColor = new Color(40, 167, 69);
+			} else if (statusId == 2) {
+				statusStr = "🔵 COMPLETED";
+				statusColor = new Color(0, 123, 255);
+			} else if (statusId == 3) {
+				statusStr = "⚪ PAST";
+				statusColor = new Color(108, 117, 125);
+			} else {
+				statusStr = "Status " + statusId;
+			}
+		}
+
+		String priorityStr = "🏳️ None";
+		Color priorityColor = Color.BLACK;
+		if (priority != null) {
+			if (priority == 1) {
+				priorityStr = "🔴 High";
+				priorityColor = new Color(220, 53, 69);
+			} else if (priority == 2) {
+				priorityStr = "🟠 Medium";
+				priorityColor = new Color(255, 140, 0);
+			} else if (priority == 3) {
+				priorityStr = "🟢 Low";
+				priorityColor = new Color(40, 167, 69);
+			} else {
+				priorityStr = priority.toString();
+			}
+		}
+
+		String dueDateStr = "📅 " + (dueDate != null ? dueDate.toString() : "No due date");
+		Color dueDateColor = dueDate != null ? new Color(42, 157, 143) : null;
+
+		// Options Panel under description (for Status, Priority, Due Date badges)
+		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
+
+		JButton statusBtn = new JButton(statusStr);
+		statusBtn.setFocusable(false);
+		statusBtn.putClientProperty("JButton.buttonType", "roundRect");
+		if (statusColor != null) {
+			statusBtn.setForeground(statusColor);
+		}
+
+		JButton priorityBtn = new JButton(priorityStr);
+		priorityBtn.setFocusable(false);
+		priorityBtn.putClientProperty("JButton.buttonType", "roundRect");
+		if (priorityColor != null) {
+			priorityBtn.setForeground(priorityColor);
+		}
+
+		JButton dueDateBtn = new JButton(dueDateStr);
+		dueDateBtn.setFocusable(false);
+		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
+		if (dueDateColor != null) {
+			dueDateBtn.setForeground(dueDateColor);
+		}
+
+		optionsPanel.add(statusBtn);
+		optionsPanel.add(priorityBtn);
+		optionsPanel.add(dueDateBtn);
+
+		if (completedAt != null) {
+			JButton completedBtn = new JButton("✅ " + completedAt.toString());
+			completedBtn.setFocusable(false);
+			completedBtn.putClientProperty("JButton.buttonType", "roundRect");
+			completedBtn.setForeground(new Color(59, 130, 246));
+			optionsPanel.add(completedBtn);
+		}
+
+		centerPanel.add(optionsPanel, BorderLayout.SOUTH);
+		contentPanel.add(centerPanel, BorderLayout.CENTER);
+
+		// 3. Footer Panel (Close button)
+		JPanel footerPanel = new JPanel(new BorderLayout());
+		footerPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+
+		JButton closeButton = new JButton("Close");
+		closeButton.setFont(new Font("Dialog", Font.BOLD, 14));
+		closeButton.putClientProperty("JButton.buttonType", "roundRect");
+		closeButton.addActionListener(_ -> dispose());
+
+		buttonPane.add(closeButton);
+		footerPanel.add(buttonPane, BorderLayout.EAST);
+		contentPanel.add(footerPanel, BorderLayout.SOUTH);
+
+		getRootPane().setDefaultButton(closeButton);
+
+		revalidate();
+		repaint();
+		setVisible(true);
+
+		logger.info("Window is ready.");
+	}
+}
