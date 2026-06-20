@@ -8,17 +8,26 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import com.github.lgooddatepicker.zinternaltools.WrapLayout;
+
+import main.entities.IconColor;
+import main.entities.Tag;
 import main.gui.Main;
+import main.services.icon.GetIconColorOfTagService;
+import main.services.tag.GetTagsOfTaskService;
 
 public class TaskWindow extends JDialog {
 	
@@ -62,6 +71,8 @@ public class TaskWindow extends JDialog {
 		// 1. Task Title (Header Panel) - Styled like titleField in CreateTaskWindow
 		JTextField titleField = new JTextField(taskTitle);
 		titleField.setEditable(false);
+//		set caret invisible
+		titleField.setCaretColor(new Color(0, 0,0,0));
 		titleField.setFont(new Font("Dialog", Font.BOLD, 15));
 		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		contentPanel.add(titleField, BorderLayout.NORTH);
@@ -77,8 +88,9 @@ public class TaskWindow extends JDialog {
 		descTextArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
 		descTextArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		descTextArea.setText(description != null ? description : "");
-		descTextArea.setEditable(true);
-
+		descTextArea.setEditable(false);
+		descTextArea.setCaretColor(new Color(0, 0,0,0));
+		
 		JScrollPane descScrollPane = new JScrollPane(descTextArea);
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
 
@@ -87,41 +99,41 @@ public class TaskWindow extends JDialog {
 		Color statusColor = Color.BLACK;
 		if (statusId != null) {
 			if (statusId == 1) {
-				statusStr = "🟢 ACTIVE";
+				statusStr = "ACTIVE";
 				statusColor = new Color(40, 167, 69);
 			} else if (statusId == 2) {
-				statusStr = "🔵 COMPLETED";
+				statusStr = "COMPLETED";
 				statusColor = new Color(0, 123, 255);
 			} else if (statusId == 3) {
-				statusStr = "⚪ PAST";
+				statusStr = "PAST";
 				statusColor = new Color(108, 117, 125);
 			} else {
 				statusStr = "Status " + statusId;
 			}
 		}
 
-		String priorityStr = "🏳️ None";
+		String priorityStr = "None";
 		Color priorityColor = Color.BLACK;
 		if (priority != null) {
 			if (priority == 1) {
-				priorityStr = "🔴 High";
+				priorityStr = "High";
 				priorityColor = new Color(220, 53, 69);
 			} else if (priority == 2) {
-				priorityStr = "🟠 Medium";
+				priorityStr = "Medium";
 				priorityColor = new Color(255, 140, 0);
 			} else if (priority == 3) {
-				priorityStr = "🟢 Low";
+				priorityStr = "Low";
 				priorityColor = new Color(40, 167, 69);
 			} else {
 				priorityStr = priority.toString();
 			}
 		}
 
-		String dueDateStr = "📅 " + (dueDate != null ? dueDate.toString() : "No due date");
+		String dueDateStr = (dueDate != null ? dueDate.toString() : "No due date");
 		Color dueDateColor = dueDate != null ? new Color(42, 157, 143) : null;
 
 		// Options Panel under description (for Status, Priority, Due Date badges)
-		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+		JPanel optionsPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
 		JButton statusBtn = new JButton(statusStr);
@@ -150,11 +162,34 @@ public class TaskWindow extends JDialog {
 		optionsPanel.add(dueDateBtn);
 
 		if (completedAt != null) {
-			JButton completedBtn = new JButton("✅ " + completedAt.toString());
+			JButton completedBtn = new JButton(completedAt.toString());
 			completedBtn.setFocusable(false);
 			completedBtn.putClientProperty("JButton.buttonType", "roundRect");
 			completedBtn.setForeground(new Color(59, 130, 246));
 			optionsPanel.add(completedBtn);
+		}
+
+		// Fetch and display tags in a JMenu
+		Integer taskId = (Integer) taskPanel.getClientProperty("task_id");
+		if (taskId != null) {
+			List<Tag> tags = GetTagsOfTaskService.execute(taskId);
+			if (tags != null && !tags.isEmpty()) {
+				JButton tagsMenuButton = new JButton("Tags");
+				JPopupMenu tagsMenu = new JPopupMenu();
+				
+				for (Tag tag : tags) {
+					JMenuItem tagItem = new JMenuItem(tag.tag_name());
+					
+					IconColor ic = GetIconColorOfTagService.execute(tag.tag_id());
+					Color tagColor = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
+					tagItem.setForeground(tagColor);
+					
+					tagsMenu.add(tagItem);
+				}
+				
+				tagsMenuButton.addActionListener(_->tagsMenu.show(tagsMenuButton, 0, -tagsMenuButton.getHeight()));
+				optionsPanel.add(tagsMenuButton);
+			}
 		}
 
 		centerPanel.add(optionsPanel, BorderLayout.SOUTH);

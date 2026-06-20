@@ -26,12 +26,19 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import com.github.lgooddatepicker.components.DateTimePicker;
+import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
+import java.util.ArrayList;
+import java.util.List;
 import main.dco.TaskDCO;
 import main.entities.Reminder;
+import main.entities.Tag;
+import main.entities.TaskTag;
 import main.gui.Main;
 import main.services.reminder.CreateReminderService;
+import main.services.tag.GetTagsService;
 import main.services.task.CreateTaskService;
+import main.services.tasktag.CreateTaskTagService;
 
 public class CreateTaskWindow extends JDialog {
 
@@ -45,6 +52,7 @@ public class CreateTaskWindow extends JDialog {
 	private JPanel projectPanel;
 	private JTextField titleField;
 	private JTextArea descArea;
+	private List<Tag> selectedTags = new ArrayList<>();
 
 	public CreateTaskWindow(JPanel panel) {
 		logger.info("Initializing CreateTaskWindow.");
@@ -95,21 +103,25 @@ public class CreateTaskWindow extends JDialog {
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
 
 		// Options bar under description
-		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+		JPanel optionsPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-		JButton dueDateBtn = new JButton("📅 Set Due Date");
+		JButton dueDateBtn = new JButton("Set Due Date");
 		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton priorityBtn = new JButton("🏳️ Set Priority");
+		JButton priorityBtn = new JButton("Set Priority");
 		priorityBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton reminderBtn = new JButton("⏰ Set Reminder");
+		JButton reminderBtn = new JButton("Set Reminder");
 		reminderBtn.putClientProperty("JButton.buttonType", "roundRect");
+
+		JButton tagsBtn = new JButton("Set Tags");
+		tagsBtn.putClientProperty("JButton.buttonType", "roundRect");
 
 		optionsPanel.add(dueDateBtn);
 		optionsPanel.add(priorityBtn);
 		optionsPanel.add(reminderBtn);
+		optionsPanel.add(tagsBtn);
 		centerPanel.add(optionsPanel, BorderLayout.SOUTH);
 
 		contentPanel.add(centerPanel, BorderLayout.CENTER);
@@ -142,6 +154,7 @@ public class CreateTaskWindow extends JDialog {
 		setupDueDateMenu(dueDateBtn);
 		setupPriorityMenu(priorityBtn);
 		setupReminderMenu(reminderBtn);
+		setupTagsDialog(tagsBtn);
 
 		revalidate();
 		repaint();
@@ -173,6 +186,12 @@ public class CreateTaskWindow extends JDialog {
 				Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
 				CreateReminderService.execute(reminder);
 			}
+
+			if (taskId != 0 && selectedTags != null) {
+				for (Tag tag : selectedTags) {
+					CreateTaskTagService.execute(new TaskTag(taskId.intValue(), tag.tag_id()));
+				}
+			}
 //				Refresh main ui
 				projectPanel.dispatchEvent(new MouseEvent(projectPanel, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, projectPanel.getWidth()/2, projectPanel.getHeight()/2, 1, false));
 				Main.refreshWindow();
@@ -200,19 +219,19 @@ public class CreateTaskWindow extends JDialog {
 
 		todayItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now();
-			button.setText("📅 " + selectedDueDate);
+			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
 		});
 
 		tomorrowItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusDays(1);
-			button.setText("📅 " + selectedDueDate);
+			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
 		});
 
 		nextWeekItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusWeeks(1);
-			button.setText("📅 " + selectedDueDate);
+			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
 		});
 
@@ -222,17 +241,17 @@ public class CreateTaskWindow extends JDialog {
 
 		clearDateItem.addActionListener(_ -> {
 			selectedDueDate = null;
-			button.setText("📅 Set Due Date");
+			button.setText("Set Due Date");
 			button.setForeground(null);
 		});
 	}
 
 	private void setupPriorityMenu(JButton button) {
 		JPopupMenu priorityMenu = new JPopupMenu();
-		JMenuItem highItem = new JMenuItem("🔴 High");
-		JMenuItem mediumItem = new JMenuItem("🟠 Medium");
-		JMenuItem lowItem = new JMenuItem("🟢 Low");
-		JMenuItem clearPriorityItem = new JMenuItem("⚪ Clear Priority");
+		JMenuItem highItem = new JMenuItem("High");
+		JMenuItem mediumItem = new JMenuItem("Medium");
+		JMenuItem lowItem = new JMenuItem("Low");
+		JMenuItem clearPriorityItem = new JMenuItem("Clear Priority");
 
 		priorityMenu.add(highItem);
 		priorityMenu.add(mediumItem);
@@ -244,33 +263,33 @@ public class CreateTaskWindow extends JDialog {
 
 		highItem.addActionListener(_ -> {
 			selectedPriority = 1;
-			button.setText("🔴 High");
+			button.setText("High");
 			button.setForeground(new Color(239, 68, 68));
 		});
 
 		mediumItem.addActionListener(_ -> {
 			selectedPriority = 2;
-			button.setText("🟠 Medium");
+			button.setText("Medium");
 			button.setForeground(new Color(245, 158, 11));
 		});
 
 		lowItem.addActionListener(_ -> {
 			selectedPriority = 3;
-			button.setText("🟢 Low");
+			button.setText("Low");
 			button.setForeground(new Color(16, 185, 129));
 		});
 
 		clearPriorityItem.addActionListener(_ -> {
 			selectedPriority = null;
-			button.setText("🏳️ Set Priority");
+			button.setText("Set Priority");
 			button.setForeground(null);
 		});
 	}
 
 	private void setupReminderMenu(JButton button) {
 		JPopupMenu reminderMenu = new JPopupMenu();
-		JMenuItem addReminderItem = new JMenuItem("⏰ Add/Edit Reminder...");
-		JMenuItem clearReminderItem = new JMenuItem("❌ Clear Reminder");
+		JMenuItem addReminderItem = new JMenuItem("Add/Edit Reminder...");
+		JMenuItem clearReminderItem = new JMenuItem("Clear Reminder");
 
 		reminderMenu.add(addReminderItem);
 		reminderMenu.add(clearReminderItem);
@@ -341,7 +360,7 @@ public class CreateTaskWindow extends JDialog {
 				String msgText = msgField.getText().trim();
 				selectedReminderMsg = msgText.isEmpty() ? null : msgText;
 				
-				button.setText("⏰ Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				button.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 				button.setForeground(new Color(59, 130, 246));
 				inputDialog.dispose();
 			});
@@ -358,9 +377,97 @@ public class CreateTaskWindow extends JDialog {
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;
 			selectedReminderMsg = null;
-			button.setText("⏰ Set Reminder");
+			button.setText("Set Reminder");
 			button.setForeground(null);
 		});
+	}
+
+	private void setupTagsDialog(JButton button) {
+		button.addActionListener(_ -> {
+			JDialog tagsDialog = new JDialog(CreateTaskWindow.this);
+			tagsDialog.setTitle("Select Tags");
+			tagsDialog.setModal(true);
+			tagsDialog.setResizable(false);
+			tagsDialog.setLayout(new BorderLayout(10, 10));
+
+			JPanel mainPanel = new JPanel();
+			mainPanel.setLayout(new javax.swing.BoxLayout(mainPanel, javax.swing.BoxLayout.Y_AXIS));
+			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+
+			List<Tag> allTags = GetTagsService.execute();
+			List<javax.swing.JCheckBox> checkBoxes = new ArrayList<>();
+			List<Tag> tagsList = new ArrayList<>();
+
+			if (allTags == null || allTags.isEmpty()) {
+				mainPanel.add(new javax.swing.JLabel("No tags found."));
+			} else {
+				for (Tag tag : allTags) {
+					JPanel tagRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+					javax.swing.JCheckBox cb = new javax.swing.JCheckBox();
+					if (selectedTags.contains(tag)) {
+						cb.setSelected(true);
+					}
+					javax.swing.JLabel label = new javax.swing.JLabel(tag.tag_name());
+					label.setFont(new Font("Dialog", Font.PLAIN, 14));
+
+					main.entities.IconColor ic = main.services.icon.GetIconColorOfTagService.execute(tag.tag_id());
+					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
+					label.setIcon(new main.cmp.CustomIcon(color, 12, 12));
+
+					tagRow.add(cb);
+					tagRow.add(label);
+					mainPanel.add(tagRow);
+
+					checkBoxes.add(cb);
+					tagsList.add(tag);
+				}
+			}
+
+			JScrollPane scrollPane = new JScrollPane(mainPanel);
+			scrollPane.setPreferredSize(new Dimension(250, 200));
+			tagsDialog.add(scrollPane, BorderLayout.CENTER);
+
+			JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+			buttonPane.setBorder(new EmptyBorder(0, 15, 15, 15));
+
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.putClientProperty("JButton.buttonType", "roundRect");
+			cancelButton.addActionListener(_ -> tagsDialog.dispose());
+
+			JButton okButton = new JButton("OK");
+			okButton.putClientProperty("JButton.buttonType", "roundRect");
+			okButton.addActionListener(_ -> {
+				selectedTags.clear();
+				for (int i = 0; i < checkBoxes.size(); i++) {
+					if (checkBoxes.get(i).isSelected()) {
+						selectedTags.add(tagsList.get(i));
+					}
+				}
+				updateTagsButton(button);
+				tagsDialog.dispose();
+			});
+
+			buttonPane.add(cancelButton);
+			buttonPane.add(okButton);
+			tagsDialog.add(buttonPane, BorderLayout.SOUTH);
+
+			tagsDialog.pack();
+			tagsDialog.setLocationRelativeTo(CreateTaskWindow.this);
+			tagsDialog.setVisible(true);
+		});
+	}
+
+	private void updateTagsButton(JButton button) {
+		if (selectedTags.isEmpty()) {
+			button.setText("Set Tags");
+			button.setForeground(null);
+		} else if (selectedTags.size() == 1) {
+			button.setText(selectedTags.get(0).tag_name());
+			button.setForeground(new Color(59, 130, 246));
+		} else {
+			button.setText(selectedTags.size() + " Tags Selected");
+			button.setForeground(new Color(59, 130, 246));
+		}
 	}
 
 }

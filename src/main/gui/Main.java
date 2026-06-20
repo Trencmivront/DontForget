@@ -20,10 +20,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
+import javax.swing.WindowConstants;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
-import com.formdev.flatlaf.icons.FlatClearIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 
 import main.cmp.CustomIcon;
@@ -40,8 +40,11 @@ import main.services.icon.GetIconColorOfProjectService;
 import main.services.project.DeleteProjectService;
 import main.services.project.GetProjectsService;
 
-public class Main extends JFrame {
-	private static JFrame mainFrame;
+public class Main extends JFrame {	
+	private static final int WINDOW_HEIGHT= 500;
+	private static final int WINDOW_WIDTH = 750;
+	private static final int WINDOW_X = 100;
+	private static final int WINDOW_Y = 100;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -51,7 +54,7 @@ public class Main extends JFrame {
 	private JButton deleteProjectsButton;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	public static Main main;
-	private List<JPanel> selectedProjects = new ArrayList<JPanel>();
+	private List<JPanel> selectedProjects = new ArrayList<>();
 	/**
 	 * Create the frame.
 	 */
@@ -60,10 +63,8 @@ public class Main extends JFrame {
 //		setting the global toucher for main, freaky
 		main =  Main.this;
 		
-		mainFrame = Main.this;
-		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 750, 500);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setBounds(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -306,8 +307,8 @@ public class Main extends JFrame {
 	}
 	
 	public static void refreshWindow() {
-		mainFrame.revalidate();
-		mainFrame.repaint();
+		main.revalidate();
+		main.repaint();
 	}
 	
 	private void setProjectBackgroundColor(JPanel project) {

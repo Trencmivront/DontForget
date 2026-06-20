@@ -184,6 +184,7 @@ public class ReminderPanel extends JPanel{
 							JPanel taskPanel = new JPanel();
 							taskPanel.setLayout(new BorderLayout());
 							JLabel title = new JLabel(task.task_title());
+							taskPanel.putClientProperty("task_title", task.task_title());
 							taskPanel.putClientProperty("task_id", task.task_id());
 							taskPanel.putClientProperty("description", task.description());
 							taskPanel.putClientProperty("status_id", task.status_id());

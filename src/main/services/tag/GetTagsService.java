@@ -19,10 +19,6 @@ public class GetTagsService {
 			
 			ResultSet rs = stm.executeQuery(sql);
 			
-			if(!rs.first()) {
-				return null;
-			}
-			
 			List<Tag> tags = new ArrayList<Tag>();
 			
 			while(rs.next()) {
@@ -31,7 +27,7 @@ public class GetTagsService {
 						rs.getInt("icon_color_id")));
 			}
 			
-			return tags;
+			return tags.isEmpty() ? null : tags;
 			
 		}catch(SQLException e){
 			e.printStackTrace();

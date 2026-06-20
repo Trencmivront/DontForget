@@ -1,4 +1,4 @@
-package main;
+package main.notify;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
