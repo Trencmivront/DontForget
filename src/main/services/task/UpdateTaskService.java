@@ -2,6 +2,7 @@ package main.services.task;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.logging.Logger;
 
@@ -29,7 +30,7 @@ public class UpdateTaskService {
 			pstm.setString(2, task.description() == null || task.description().isEmpty() ? null : task.description());
 			pstm.setInt(3, task.status_id() != null ? task.status_id() : 1);
 
-			if (task.priority() != null) {
+			if (task.priority() != 0) {
 				pstm.setInt(4, task.priority());
 			} else {
 				pstm.setNull(4, Types.INTEGER);
@@ -41,13 +42,13 @@ public class UpdateTaskService {
 				pstm.setNull(5, Types.TIMESTAMP);
 			}
 
-			if (task.list_order() != null) {
+			if (task.list_order() != 0) {
 				pstm.setInt(6, task.list_order());
 			} else {
 				pstm.setNull(6, Types.INTEGER);
 			}
 
-			if (task.project_id() != null) {
+			if (task.project_id() != 0) {
 				pstm.setInt(7, task.project_id());
 			} else {
 				pstm.setNull(7, Types.INTEGER);
@@ -56,11 +57,11 @@ public class UpdateTaskService {
 			// Handle completed_at timestamp:
 			// If status is COMPLETED (2), set completed_at (either provided or current time).
 			// Otherwise (ACTIVE or other), reset completed_at to null.
-			if (task.status_id() != null && task.status_id() == 2) {
+			if (task.status_id() != 0 && task.status_id() == 2) {
 				if (task.completed_at() != null) {
 					pstm.setTimestamp(8, task.completed_at());
 				} else {
-					pstm.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+					pstm.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
 				}
 			} else {
 				pstm.setNull(8, Types.TIMESTAMP);

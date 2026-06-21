@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS TASK (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     task_title VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(1000),
-    status_id INT NOT NULL,
+    status_id INT,
     priority INT CHECK (priority IN (1, 2, 3)),
     due_date DATE CHECK (due_date >= CURRENT_DATE),
     list_order INT,

@@ -16,6 +16,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -24,8 +25,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import main.entities.Task;
+import main.gui.Main;
 import main.gui.windows.CreateTaskWindow;
 import main.gui.windows.TaskWindow;
+import main.services.task.DeleteCompletedTasksService;
 import main.services.task.GetTasksOfProjectService;
 import main.services.task.UpdateTaskService;
 
@@ -39,19 +42,19 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public ProjectInfoPanel(JPanel panel) {
 		projectPanel = panel;
-				
 		setLayout(new BorderLayout());
 		
 		add(createHeaderPanel(), BorderLayout.NORTH);
 		
 		infoScrollPane = new JScrollPane();
 		infoScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		add(infoScrollPane);
+		add(infoScrollPane, BorderLayout.CENTER);
 		
 		JPanel taskActionsPanel = new JPanel();
 		taskActionsPanel.setLayout(new BorderLayout());
 		add(taskActionsPanel, BorderLayout.SOUTH);
 		createTaskActionButton(taskActionsPanel);
+		createDeleteCompletedTasksButton(taskActionsPanel);
 		
 		listTasks();
 		
@@ -60,8 +63,13 @@ public class ProjectInfoPanel extends JPanel{
 	private void listTasks() {
 		int id = (int)projectPanel.getClientProperty("project_id");
 		List<Task> tasks = GetTasksOfProjectService.execute(id);
+		
 		if(tasks.isEmpty()) {
+			infoScrollPane.removeAll();
 			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
+			revalidate();
+			repaint();
+			Main.refreshWindow();
 			logger.info("No task found for project.");
 			return;
 		}
@@ -99,6 +107,36 @@ public class ProjectInfoPanel extends JPanel{
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);
+	}
+	
+	private void createDeleteCompletedTasksButton(JPanel panel) {
+		JButton button = new JButton("DC");
+		
+		button.setHorizontalAlignment(SwingConstants.CENTER);
+		button.setFont(new Font("Ariel", 1, 14));
+		
+		addDeleteCompletedTasksActionListener(button);
+		button.setBorder(new EmptyBorder(5, 0, 5, 0));
+		button.setMaximumSize(new Dimension(40, 40));
+		
+		panel.add(button, BorderLayout.WEST);
+	}
+	
+	private void addDeleteCompletedTasksActionListener(JButton button) {
+		button.addActionListener(_ -> {
+			int confirm = JOptionPane.showConfirmDialog(
+					ProjectInfoPanel.this,
+					"Are you sure you want to delete completed tasks?",
+					"Delete Completed Tasks",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.WARNING_MESSAGE
+				);
+			if(confirm == JOptionPane.YES_OPTION) {
+				int id = (int) projectPanel.getClientProperty("project_id");
+				DeleteCompletedTasksService.execute(id);
+				listTasks();
+			}
+		});
 	}
 	
 	private JPanel createTaskContainer(Task task){
@@ -206,10 +244,11 @@ public class ProjectInfoPanel extends JPanel{
 				new Timestamp(System.currentTimeMillis()),
 				completedAt
 			);
-
+			
 			if (UpdateTaskService.execute(updatedTask)) {
 				listTasks();
 			}
 		});
 	}
+
 }

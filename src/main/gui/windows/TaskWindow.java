@@ -27,17 +27,20 @@ import main.entities.IconColor;
 import main.entities.Tag;
 import main.gui.Main;
 import main.services.icon.GetIconColorOfTagService;
+import javax.swing.JOptionPane;
 import main.services.tag.GetTagsOfTaskService;
+import main.services.task.DeleteTaskService;
 
 public class TaskWindow extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
  	private JPanel contentPanel;
+ 	private JPanel source;
 	private static final Logger logger = Logger.getLogger(TaskWindow.class.getName());
 
 	public TaskWindow(JPanel source, JPanel taskPanel) {
 		logger.info("Drawing the window.");
-	
+		this.source = source;
 		setTitle("Task Details");
 		setModal(true);
 		setResizable(false);
@@ -201,11 +204,18 @@ public class TaskWindow extends JDialog {
 
 		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
+		JButton deleteButton = new JButton("Delete");
+		deleteButton.setFont(new Font("Dialog", Font.BOLD, 14));
+		deleteButton.putClientProperty("JButton.buttonType", "roundRect");
+		deleteButton.setForeground(new Color(220, 53, 69));
+		addDeleteButtonActionListener(deleteButton, taskId);
+
 		JButton closeButton = new JButton("Close");
 		closeButton.setFont(new Font("Dialog", Font.BOLD, 14));
 		closeButton.putClientProperty("JButton.buttonType", "roundRect");
 		closeButton.addActionListener(_ -> dispose());
 
+		buttonPane.add(deleteButton);
 		buttonPane.add(closeButton);
 		footerPanel.add(buttonPane, BorderLayout.EAST);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
@@ -217,5 +227,27 @@ public class TaskWindow extends JDialog {
 		setVisible(true);
 
 		logger.info("Window is ready.");
+	}
+	
+	private void addDeleteButtonActionListener(JButton button, int taskId) {
+		button.addActionListener(_->{
+			int confirm = JOptionPane.showConfirmDialog(
+					TaskWindow.this,
+					"Are you sure you want to delete this task?",
+					"Delete Task",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.WARNING_MESSAGE
+				);
+				if (confirm == JOptionPane.YES_OPTION) {
+					if (DeleteTaskService.execute(taskId)) {
+//						refreshing both gui
+						source.revalidate();
+						Main.refreshWindow();
+						dispose();
+					} else {
+						JOptionPane.showMessageDialog(TaskWindow.this, "Failed to delete the task.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
 	}
 }
