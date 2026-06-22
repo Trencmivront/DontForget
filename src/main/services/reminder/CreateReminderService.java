@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import main.App;
 import main.entities.Reminder;
+import main.notify.NotificationManager;
 
 public class CreateReminderService {
 
@@ -27,6 +28,10 @@ public class CreateReminderService {
 			pstm.executeUpdate();
 
 			logger.info("Reminder saved successfully.");
+//			Start the reminder once it is saved
+			NotificationManager nm = new NotificationManager();
+			nm.scheduleReminder(reminder);
+			
 			return true;
 
 		} catch (SQLException e) {

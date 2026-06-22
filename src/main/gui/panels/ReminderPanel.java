@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,14 +40,15 @@ public class ReminderPanel extends JPanel{
 	
 	public ReminderPanel() {
 		logger.info("Drawing the Reminder panel.");
-		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		setLayout(new BorderLayout());
 		
 		monthTabbedPane = new JTabbedPane(JTabbedPane.LEFT);
 		monthTabbedPane.setSelectedIndex(-1);
 		
 		addTabs();
 		
-		add(monthTabbedPane);
+		add(new HeaderPanel("Reminders"), BorderLayout.NORTH);
+		add(monthTabbedPane, BorderLayout.CENTER);
 		logger.info("Window is ready.");
 	}
 		

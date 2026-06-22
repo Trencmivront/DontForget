@@ -1,7 +1,11 @@
 package main;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -15,15 +19,33 @@ import javax.swing.*;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import main.gui.Main;
+import main.notify.NotificationManager;
 
 public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
 	public static Connection connection; 
     
     public static void main(String[] args) {
+    	
+    	// Try connecting to the running instance
+        try (Socket socket = new Socket("localhost", 12345);
+        		OutputStream out = socket.getOutputStream();) {
+                out.write("SHOW".getBytes());
+                out.flush();
+            logger.info("Showing the app.");
+            return; 
+        } catch (IOException _) {
+            logger.info("Starting app.");
+        }
+    	
     	System.setProperty("sun.java2d.uiScale", "2.0");
     	System.setProperty("awt.useSystemAAFontSettings", "on");
     	System.setProperty("swing.aatext", "true");
+    	
+    	if(Main.main != null) {
+    		Main.main.setVisible(true);
+    		return;
+    	}
 
         SwingUtilities.invokeLater(() ->{
         	
@@ -48,43 +70,61 @@ public class App {
 		        } else {
 		            logger.severe("crTables.sql file not found at " + crTablesPath.toAbsolutePath());
 		        }
-		        Main main = new Main();
-		        
-		        // to open and close connection when needed
-		        main.addWindowListener(new WindowAdapter() {
-		        	@Override
-					public void windowClosing(WindowEvent e) {
-						try {		
-							App.connection.close();
-						}catch (SQLException s) {
-							s.printStackTrace();
-						}
-					}
-					@Override
-					public void windowOpened(WindowEvent e) {
-						try {
-							App.connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
-						}catch (SQLException s) {
-							s.printStackTrace();
-						}
-					}
-				});
+//		        initialize the notification manager
+		        NotificationManager nm = new NotificationManager();
+		        nm.initialize();
 		        
 		    }catch (SQLException s) {
 		    	s.printStackTrace();
-				JOptionPane.showMessageDialog(new JDialog(), "Error while initializing database.");
+				JOptionPane.showMessageDialog(new JDialog(), "ERROR: App is running.", "ok", JOptionPane.WARNING_MESSAGE);
 			}
 		    catch (Exception e){
 				JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
 		        e.printStackTrace();
-		    }finally {
-		    	try {
-					App.connection.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 		    }
 			
+//	        show window
+	        new Main();
+			startSingleInstanceListener();
 		});
+        
+//        Close the connection when app is terminated
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                if (App.connection != null && !App.connection.isClosed()) {
+                    App.connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }));
+    }
+    
+    private static void startSingleInstanceListener() {
+        new Thread(() -> {
+            try (ServerSocket serverSocket = new ServerSocket(12345)) {
+                while (true) {
+                    try (Socket clientSocket = serverSocket.accept();
+                    		BufferedReader bf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
+                    	String message = bf.readLine();
+//                    	If SHOW, then show?
+                    	if("SHOW".equals(message)) {
+                        SwingUtilities.invokeLater(() -> {
+                            if (Main.main != null) {
+                                Main.main.setVisible(true);
+                                Main.main.toFront();
+                                Main.main.requestFocus();
+                            }
+                        });
+                    	}
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                logger.severe("Could not start single instance listener: " + e.getMessage());
+            }
+        }).start();
+    
     }
 }

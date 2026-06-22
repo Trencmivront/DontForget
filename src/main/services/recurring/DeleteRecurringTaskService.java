@@ -12,14 +12,22 @@ public class DeleteRecurringTaskService {
 	private static final Logger logger = Logger.getLogger(DeleteRecurringTaskService.class.getName());
 
 	public static boolean execute(int id) {
-		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
-
+		logger.info(String.format("Class %s is executed with input id: %d", logger.getName(), id));
+//		We need to delete relationships first
+		String relationSql = "DELETE FROM RECURRING_TASK_WEEK_DAYS WHERE task_id = ?";
 		String sql = "DELETE FROM RECURRING_TASK WHERE task_id = ?";
-
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		
+		try (PreparedStatement pstm = App.connection.prepareStatement(sql);
+				PreparedStatement pstm2 = App.connection.prepareStatement(relationSql)) {
+			pstm2.setInt(1, id);
+			if(pstm2.executeUpdate() != 0) {
+				
+			}
+			
 			pstm.setInt(1, id);
-			pstm.executeUpdate();
-			logger.info("Recurring task deleted.");
+			if(pstm.executeUpdate() != 0) {
+				logger.info("Recurring task deleted.");
+			}
 			return true;
 		} catch (Exception e) {
 			logger.warning("Error deleting recurring task for ID " + id + ": " + e.getMessage());

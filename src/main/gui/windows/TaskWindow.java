@@ -8,12 +8,15 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -24,10 +27,11 @@ import javax.swing.border.EmptyBorder;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.entities.IconColor;
+import main.entities.Reminder;
 import main.entities.Tag;
 import main.gui.Main;
 import main.services.icon.GetIconColorOfTagService;
-import javax.swing.JOptionPane;
+import main.services.reminder.GetReminderByIdService;
 import main.services.tag.GetTagsOfTaskService;
 import main.services.task.DeleteTaskService;
 
@@ -36,6 +40,8 @@ public class TaskWindow extends JDialog {
 	private static final long serialVersionUID = 1L;
  	private JPanel contentPanel;
  	private JPanel source;
+	private Timestamp selectedReminderTime = null;
+	private String selectedReminderMsg = null;
 	private static final Logger logger = Logger.getLogger(TaskWindow.class.getName());
 
 	public TaskWindow(JPanel source, JPanel taskPanel) {
@@ -70,6 +76,10 @@ public class TaskWindow extends JDialog {
 		Timestamp dueDate = (Timestamp) taskPanel.getClientProperty("due_date");
 		Timestamp completedAt = (Timestamp) taskPanel.getClientProperty("completed_at");
 		String taskTitle = (String)taskPanel.getClientProperty("task_title");
+		Integer taskId = (Integer) taskPanel.getClientProperty("task_id");
+		if (taskId != null) {
+			getReminders(taskId);
+		}
 		
 		// 1. Task Title (Header Panel) - Styled like titleField in CreateTaskWindow
 		JTextField titleField = new JTextField(taskTitle);
@@ -172,8 +182,21 @@ public class TaskWindow extends JDialog {
 			optionsPanel.add(completedBtn);
 		}
 
+		// Reminder display
+		if (selectedReminderTime != null) {
+			JButton reminderBtn = new JButton();
+			reminderBtn.setFocusable(false);
+			reminderBtn.putClientProperty("JButton.buttonType", "roundRect");
+			LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
+			reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+			reminderBtn.setForeground(new Color(59, 130, 246));
+			if (selectedReminderMsg != null && !selectedReminderMsg.isEmpty()) {
+				reminderBtn.setToolTipText(selectedReminderMsg);
+			}
+			optionsPanel.add(reminderBtn);
+		}
+
 		// Fetch and display tags in a JMenu
-		Integer taskId = (Integer) taskPanel.getClientProperty("task_id");
 		if (taskId != null) {
 			List<Tag> tags = GetTagsOfTaskService.execute(taskId);
 			if (tags != null && !tags.isEmpty()) {
@@ -249,5 +272,16 @@ public class TaskWindow extends JDialog {
 					}
 				}
 			});
+	}
+	
+	private void getReminders(int taskId) {
+		// Fetch existing reminder if any
+		if (taskId != 0) {
+			Reminder reminders = GetReminderByIdService.execute(taskId);
+			if (reminders != null) {
+				selectedReminderTime = reminders.remind_at();
+				selectedReminderMsg = reminders.cstm_message();
+			}
+		}
 	}
 }

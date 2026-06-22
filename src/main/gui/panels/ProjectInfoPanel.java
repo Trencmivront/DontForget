@@ -161,6 +161,8 @@ public class ProjectInfoPanel extends JPanel{
 //		means that task is completed
 		
 		switch (task.status_id()) {
+		case 1, 0:
+		break;
 		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.task_title() + "</i></s></html>");
 		chk.setSelected(true);}
 			break;

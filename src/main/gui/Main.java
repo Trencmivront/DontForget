@@ -63,7 +63,8 @@ public class Main extends JFrame {
 //		setting the global toucher for main, freaky
 		main =  Main.this;
 		
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setTitle("DontForget");
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

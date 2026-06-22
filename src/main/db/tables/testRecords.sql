@@ -35,8 +35,20 @@ VALUES ('Run 5 Kilometers', 'Daily morning cardio workout.', 2, 3, CURRENT_DATE,
 INSERT INTO TASK (task_title, description, status_id, priority, due_date, list_order, project_id, created_at, updated_at, completed_at) 
 VALUES ('Fix Bug in Login API', 'Resolve session timeout issue reported in Jira.', 1, 1, DATEADD('DAY', 5, CURRENT_DATE), 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
+-- Insert WEEK_DAYS records
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (1, 'MONDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (2, 'TUESDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (3, 'WEDNESDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (4, 'THURSDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (5, 'FRIDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (6, 'SATURDAY');
+INSERT INTO WEEK_DAYS (week_day_id, day_name) VALUES (7, 'SUNDAY');
+
 -- Insert RECURRING_TASKS records (1:1 relation with TASKS)
 INSERT INTO RECURRING_TASK (task_id, day_of_week, max_occourrences) VALUES (3, 'MONDAY', 12);
+
+-- Insert RECURRING_TASK_WEEK_DAYS records
+INSERT INTO RECURRING_TASK_WEEK_DAYS (task_id, week_day_id) VALUES (3, 1);
 
 -- Insert REMINDERS records (1:1 relation with TASKS)
 INSERT INTO REMINDER (task_id, remind_at, cstm_message) VALUES (1, DATEADD('HOUR', 4, CURRENT_TIMESTAMP), 'Please review the design document with the tech lead.');

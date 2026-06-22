@@ -28,6 +28,8 @@ public class TagPanel extends JPanel {
 		logger.info("Drawing TagPanel.");
 		setLayout(new BorderLayout());
 		
+		add(new HeaderPanel("Tags"), BorderLayout.NORTH);
+		
 		scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
 		
