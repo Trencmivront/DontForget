@@ -31,6 +31,8 @@ public class InboxPanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 
+		add(new HeaderPanel("Messages"), BorderLayout.NORTH);
+		
 		List<Inbox> inboxItems = null;
 
 		inboxItems = GetInboxService.execute();

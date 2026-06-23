@@ -16,13 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
 import javax.swing.WindowConstants;
-import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 
@@ -48,6 +50,7 @@ public class Main extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private JSplitPane mainContainer;
 	private JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
@@ -71,7 +74,7 @@ public class Main extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
-		JSplitPane mainContainer = new JSplitPane();
+		mainContainer = new JSplitPane();
 		contentPane.add(mainContainer, BorderLayout.CENTER);
 		
 		JPanel leftContainer = new JPanel();
@@ -89,9 +92,6 @@ public class Main extends JFrame {
 		JLabel appNameLabel = new JLabel("DontForget");
 		appNameLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
 		leftTopContainer.add(appNameLabel, BorderLayout.CENTER);
-		
-		JButton hideLeftPanelButton = new JButton("");
-		leftTopContainer.add(hideLeftPanelButton, BorderLayout.EAST);
 		
 		JPanel leftBottomContainer = new JPanel();
 		leftContainer.add(leftBottomContainer, BorderLayout.CENTER);
@@ -144,6 +144,7 @@ public class Main extends JFrame {
 		addNavigationButtonActionListener(inboxButton, InboxPanel.class.getName());
 		addNavigationButtonActionListener(tagsButton, TagPanel.class.getName());
 		addNavigationButtonActionListener(todayButton, TodayPanel.class.getName());
+		setSplitDivider();
 		
 		listProjects(projectsContainer);
 
@@ -304,6 +305,22 @@ public class Main extends JFrame {
 				e.printStackTrace();
 			}
 			refreshWindow();
+		});
+	}
+	
+	private void setSplitDivider() {
+		BasicSplitPaneUI splitUi = (BasicSplitPaneUI)mainContainer.getUI();
+		BasicSplitPaneDivider divider = splitUi.getDivider();
+		divider.setBorder(null);
+		mainContainer.putClientProperty("FlatLaf.style", "background: #000000");
+		mainContainer.setDividerSize(14);
+		divider.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2) {
+					mainContainer.setDividerLocation(0);
+				}
+			}
 		});
 	}
 	

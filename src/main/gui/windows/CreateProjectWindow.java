@@ -24,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import main.gui.popup.ErrorDialog;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -186,7 +187,7 @@ public class CreateProjectWindow extends JDialog {
 			}
 			
 			if(!CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
-				JOptionPane.showMessageDialog(new JDialog(), "Error while creating project", "Database Error", JOptionPane.ERROR_MESSAGE);
+				new ErrorDialog("Database Error", "Error while creating project");
 			}
 			dispose();
 

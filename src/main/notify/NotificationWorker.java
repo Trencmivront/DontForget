@@ -1,5 +1,11 @@
 package main.notify;
 
+import java.io.File;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 public class NotificationWorker implements Runnable{
 //	id of the task to open
 	private int id;
@@ -23,6 +29,25 @@ public class NotificationWorker implements Runnable{
 
 	@Override
 	public void run() {
-		WaylandNotification.sendNotification(title, message);
+//		Playing notification sound
+		try{
+			File audioFile = new File("src/resources/sound/dry-pop-up.wav");
+			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFile);
+			
+			Clip clip = AudioSystem.getClip();
+			
+			clip.open(audioInputStream);
+			
+			clip.start();
+			WaylandNotification.sendNotification(title, message);
+			Thread.sleep(clip.getMicrosecondLength() / 1000);
+			
+			clip.close();
+			audioInputStream.close();
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

@@ -28,7 +28,7 @@ public class App {
     public static void main(String[] args) {
     	
     	// Try connecting to the running instance
-        try (Socket socket = new Socket("localhost", 12345);
+        try (Socket socket = new Socket("localhost", 19999);
         		OutputStream out = socket.getOutputStream();) {
                 out.write("SHOW".getBytes());
                 out.flush();
@@ -62,9 +62,9 @@ public class App {
 		        // Initialize database tables using crTables.sql
 		        Path crTablesPath = Path.of("src/main/db/tables/crTables.sql");
 		        if (Files.exists(crTablesPath)) {
-		        	stmt.execute("RUNSCRIPT FROM 'src/main/db/tables/delTables.sql'");
+//		        	stmt.execute("RUNSCRIPT FROM 'src/main/db/tables/delTables.sql'");
 		        	stmt.execute("RUNSCRIPT FROM 'src/main/db/tables/crTables.sql'");
-		        	stmt.execute("RUNSCRIPT FROM 'src/main/db/tables/testRecords.sql'");
+//		        	stmt.execute("RUNSCRIPT FROM 'src/main/db/tables/testRecords.sql'");
 		        	logger.info("Database tables initialized successfully using crTables.sql.");
 		        	
 		        } else {
@@ -102,7 +102,7 @@ public class App {
     
     private static void startSingleInstanceListener() {
         new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(12345)) {
+            try (ServerSocket serverSocket = new ServerSocket(19999)) {
                 while (true) {
                     try (Socket clientSocket = serverSocket.accept();
                     		BufferedReader bf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {

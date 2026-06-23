@@ -21,6 +21,10 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.ListSelectionEvent;
 
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
@@ -134,11 +138,11 @@ public class ReminderPanel extends JPanel{
 			table.getColumnModel().getColumn(2).setPreferredWidth(180);
 						
 			// Adjust row height when action column is too narrow to fit buttons in a single line
-			table.getColumnModel().addColumnModelListener(new javax.swing.event.TableColumnModelListener() {
+			table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 				private final int minSingleRowWidth = new ActionPanel().getPreferredSize().width;
 
 				@Override
-				public void columnMarginChanged(javax.swing.event.ChangeEvent e) {
+				public void columnMarginChanged(ChangeEvent e) {
 					int actionColWidth = table.getColumnModel().getColumn(2).getWidth();
 					int newRowHeight = (actionColWidth < minSingleRowWidth) ? 70 : 35;
 					if (table.getRowHeight() != newRowHeight) {
@@ -146,10 +150,10 @@ public class ReminderPanel extends JPanel{
 					}
 				}
 //				These are useless
-				@Override public void columnAdded(javax.swing.event.TableColumnModelEvent e) {}
-				@Override public void columnRemoved(javax.swing.event.TableColumnModelEvent e) {}
-				@Override public void columnMoved(javax.swing.event.TableColumnModelEvent e) {}
-				@Override public void columnSelectionChanged(javax.swing.event.ListSelectionEvent e) {}
+				@Override public void columnAdded(TableColumnModelEvent e) {}
+				@Override public void columnRemoved(TableColumnModelEvent e) {}
+				@Override public void columnMoved(TableColumnModelEvent e) {}
+				@Override public void columnSelectionChanged(ListSelectionEvent e) {}
 			});
 			
 			// Set cell renderer and editor for action column

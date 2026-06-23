@@ -14,8 +14,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -30,11 +33,15 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import main.cmp.CustomIcon;
 import main.dco.TaskDCO;
+import main.entities.IconColor;
 import main.entities.Reminder;
 import main.entities.Tag;
 import main.entities.TaskTag;
 import main.gui.Main;
+import main.gui.popup.ErrorDialog;
+import main.services.icon.GetIconColorOfTagService;
 import main.services.reminder.CreateReminderService;
 import main.services.tag.GetTagsService;
 import main.services.task.CreateTaskService;
@@ -178,8 +185,7 @@ public class CreateTaskWindow extends JDialog {
 			Long taskId = (long)CreateTaskService.execute(new TaskDCO(title, description, 1, selectedPriority, selectedDueDate, projectId));
 			
 			if(taskId == 0) {
-				JOptionPane.showMessageDialog(CreateTaskWindow.this, "Failed to create task. Make sure the title is unique.",
-						"Error", JOptionPane.ERROR_MESSAGE);
+				new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 			}
 			
 			if (selectedReminderTime != null && taskId != null) {
@@ -346,13 +352,11 @@ public class CreateTaskWindow extends JDialog {
 			okButton.addActionListener(_ -> {
 				LocalDateTime ldt = picker.getDateTimeStrict();
 				if (ldt == null) {
-					JOptionPane.showMessageDialog(inputDialog, "Please select a valid date and time.",
-							"Invalid Date/Time", JOptionPane.ERROR_MESSAGE);
+					new ErrorDialog("Invalid Date/Time", "Please select a valid date and time.");
 					return;
 				}
 				if (ldt.isBefore(LocalDateTime.now())) {
-					JOptionPane.showMessageDialog(inputDialog, "Reminder time cannot be in the past.",
-							"Invalid Date/Time", JOptionPane.ERROR_MESSAGE);
+					new ErrorDialog("Invalid Date/Time", "Reminder time cannot be in the past.");
 					return;
 				}
 				
@@ -391,28 +395,28 @@ public class CreateTaskWindow extends JDialog {
 			tagsDialog.setLayout(new BorderLayout(10, 10));
 
 			JPanel mainPanel = new JPanel();
-			mainPanel.setLayout(new javax.swing.BoxLayout(mainPanel, javax.swing.BoxLayout.Y_AXIS));
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
 			List<Tag> allTags = GetTagsService.execute();
-			List<javax.swing.JCheckBox> checkBoxes = new ArrayList<>();
+			List<JCheckBox> checkBoxes = new ArrayList<>();
 			List<Tag> tagsList = new ArrayList<>();
 
 			if (allTags == null || allTags.isEmpty()) {
-				mainPanel.add(new javax.swing.JLabel("No tags found."));
+				mainPanel.add(new JLabel("No tags found."));
 			} else {
 				for (Tag tag : allTags) {
 					JPanel tagRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-					javax.swing.JCheckBox cb = new javax.swing.JCheckBox();
+					JCheckBox cb = new JCheckBox();
 					if (selectedTags.contains(tag)) {
 						cb.setSelected(true);
 					}
-					javax.swing.JLabel label = new javax.swing.JLabel(tag.tag_name());
+					JLabel label = new JLabel(tag.tag_name());
 					label.setFont(new Font("Dialog", Font.PLAIN, 14));
 
-					main.entities.IconColor ic = main.services.icon.GetIconColorOfTagService.execute(tag.tag_id());
+					IconColor ic = GetIconColorOfTagService.execute(tag.tag_id());
 					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
-					label.setIcon(new main.cmp.CustomIcon(color, 12, 12));
+					label.setIcon(new CustomIcon(color, 12, 12));
 
 					tagRow.add(cb);
 					tagRow.add(label);

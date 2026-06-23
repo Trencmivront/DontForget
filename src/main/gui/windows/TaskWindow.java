@@ -30,6 +30,7 @@ import main.entities.IconColor;
 import main.entities.Reminder;
 import main.entities.Tag;
 import main.gui.Main;
+import main.gui.popup.ErrorDialog;
 import main.services.icon.GetIconColorOfTagService;
 import main.services.reminder.GetReminderByIdService;
 import main.services.tag.GetTagsOfTaskService;
@@ -268,7 +269,7 @@ public class TaskWindow extends JDialog {
 						Main.refreshWindow();
 						dispose();
 					} else {
-						JOptionPane.showMessageDialog(TaskWindow.this, "Failed to delete the task.", "Error", JOptionPane.ERROR_MESSAGE);
+						new ErrorDialog("Error", "Failed to delete the task.");
 					}
 				}
 			});
