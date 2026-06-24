@@ -13,17 +13,9 @@ public class DeleteRecurringTaskService {
 
 	public static boolean execute(int id) {
 		logger.info(String.format("Class %s is executed with input id: %d", logger.getName(), id));
-//		We need to delete relationships first
-		String relationSql = "DELETE FROM RECURRING_TASK_WEEK_DAYS WHERE task_id = ?";
 		String sql = "DELETE FROM RECURRING_TASK WHERE task_id = ?";
 		
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql);
-				PreparedStatement pstm2 = App.connection.prepareStatement(relationSql)) {
-			pstm2.setInt(1, id);
-			if(pstm2.executeUpdate() != 0) {
-				
-			}
-			
+		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
 			pstm.setInt(1, id);
 			if(pstm.executeUpdate() != 0) {
 				logger.info("Recurring task deleted.");

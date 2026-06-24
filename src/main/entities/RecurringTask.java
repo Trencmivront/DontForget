@@ -1,3 +1,3 @@
 package main.entities;
 
-public record RecurringTask(Integer task_id, String day_of_week, Integer max_occourrences) {}
+public record RecurringTask(Integer task_id, Integer week_day_id) {}

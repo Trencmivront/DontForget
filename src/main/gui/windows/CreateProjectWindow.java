@@ -6,9 +6,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;
@@ -17,14 +15,12 @@ import java.util.logging.Logger;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
-import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import main.gui.popup.ErrorDialog;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -33,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 
 import main.dco.ProjectDCO;
 import main.entities.IconColor;
+import main.gui.popup.ErrorDialog;
 import main.services.icon.GetIconColorsService;
 import main.services.project.CreateProjectService;
 
@@ -51,35 +48,16 @@ public class CreateProjectWindow extends JDialog {
 	public CreateProjectWindow(JFrame source) {
 		logger.info("Drawing the window.");
 		
-		// Find active Main window to anchor to
-		Window activeWindow = source;
-		if (activeWindow == null) {
-			activeWindow = FocusManager.getCurrentManager().getActiveWindow();
-		}
-		if (activeWindow == null) {
-			for (Frame f : Frame.getFrames()) {
-				if (f.isVisible()) {
-					activeWindow = f;
-					break;
-				}
-			}
-		}
+		super(source, "Create Project", true);
 
-		setTitle("Create Project");
-		setModal(true);
 		setResizable(false);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		if (activeWindow != null) {
-			Dimension size = activeWindow.getSize();
-			int w = Math.min(480, (int) (size.getWidth() * 0.75));
-			int h = Math.min(400, (int) (size.getHeight() * 0.75));
-			setSize(new Dimension(w, h));
-			setLocationRelativeTo(activeWindow);
-		} else {
-			setSize(new Dimension(480, 400));
-			setLocation(200, 200);
-		}
+		Dimension size = source.getSize();
+		int w = Math.min(480, (int) (size.getWidth() * 0.75));
+		int h = Math.min(400, (int) (size.getHeight() * 0.75));
+		setSize(new Dimension(w, h));
+		setLocationRelativeTo(source);
 
 		// Content Panel with standard margin
 		contentPanel.setLayout(new BorderLayout(15, 15));

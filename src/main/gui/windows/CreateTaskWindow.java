@@ -2,6 +2,7 @@ package main.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -9,9 +10,10 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
@@ -28,11 +30,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.github.lgooddatepicker.components.DateTimePicker;
+import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import java.util.ArrayList;
-import java.util.List;
 import main.cmp.CustomIcon;
 import main.dco.TaskDCO;
 import main.entities.IconColor;
@@ -41,7 +41,9 @@ import main.entities.Tag;
 import main.entities.TaskTag;
 import main.gui.Main;
 import main.gui.popup.ErrorDialog;
+import main.gui.popup.ReminderDialog;
 import main.services.icon.GetIconColorOfTagService;
+import main.services.recurring.CreateRecurringTaskService;
 import main.services.reminder.CreateReminderService;
 import main.services.tag.GetTagsService;
 import main.services.task.CreateTaskService;
@@ -52,14 +54,20 @@ public class CreateTaskWindow extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(CreateTaskWindow.class.getName());
 
-	private LocalDate selectedDueDate = null;
-	private Integer selectedPriority = null;
-	private Timestamp selectedReminderTime = null;
-	private String selectedReminderMsg = null;
-	private JPanel projectPanel;
-	private JTextField titleField;
-	private JTextArea descArea;
-	private List<Tag> selectedTags = new ArrayList<>();
+	public LocalDate selectedDueDate = null;
+	public Integer selectedPriority = null;
+
+	public JPanel projectPanel;
+	public JTextField titleField;
+	public JTextArea descArea;
+	public List<Tag> selectedTags = new ArrayList<>();
+
+	public Timestamp selectedReminderTime = null;
+	public String selectedReminderMsg = null;
+	public boolean isRecurring = false;
+	public List<DayOfWeek> selectedRecurringDays = new ArrayList<>();
+
+	public JButton dueDateBtn;
 
 	public CreateTaskWindow(JPanel panel) {
 		logger.info("Initializing CreateTaskWindow.");
@@ -113,7 +121,7 @@ public class CreateTaskWindow extends JDialog {
 		JPanel optionsPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-		JButton dueDateBtn = new JButton("Set Due Date");
+		dueDateBtn = new JButton("Set Due Date");
 		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
 
 		JButton priorityBtn = new JButton("Set Priority");
@@ -129,7 +137,12 @@ public class CreateTaskWindow extends JDialog {
 		optionsPanel.add(priorityBtn);
 		optionsPanel.add(reminderBtn);
 		optionsPanel.add(tagsBtn);
-		centerPanel.add(optionsPanel, BorderLayout.SOUTH);
+
+		JPanel southContainer = new JPanel();
+		southContainer.setLayout(new BoxLayout(southContainer, BoxLayout.Y_AXIS));
+		southContainer.add(optionsPanel);
+
+		centerPanel.add(southContainer, BorderLayout.SOUTH);
 
 		contentPanel.add(centerPanel, BorderLayout.CENTER);
 
@@ -198,6 +211,10 @@ public class CreateTaskWindow extends JDialog {
 					CreateTaskTagService.execute(new TaskTag(taskId.intValue(), tag.tag_id()));
 				}
 			}
+
+			if (taskId != 0 && isRecurring && selectedRecurringDays != null && !selectedRecurringDays.isEmpty()) {
+				CreateRecurringTaskService.execute(taskId.intValue(), selectedRecurringDays);
+			}
 //				Refresh main ui
 				projectPanel.dispatchEvent(new MouseEvent(projectPanel, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, projectPanel.getWidth()/2, projectPanel.getHeight()/2, 1, false));
 				Main.refreshWindow();
@@ -211,7 +228,7 @@ public class CreateTaskWindow extends JDialog {
 		JMenuItem todayItem = new JMenuItem("Today");
 		JMenuItem tomorrowItem = new JMenuItem("Tomorrow");
 		JMenuItem nextWeekItem = new JMenuItem("Next Week");
-		JMenuItem customItem = new JMenuItem("Custom Date (YYYY-MM-DD)...");
+		JMenuItem customItem = new JMenuItem("Custom Date");
 		JMenuItem clearDateItem = new JMenuItem("Clear Date");
 
 		dateMenu.add(todayItem);
@@ -242,7 +259,40 @@ public class CreateTaskWindow extends JDialog {
 		});
 
 		customItem.addActionListener(_ -> {
+			DatePicker picker = new DatePicker();
+			picker.setDateToToday();
 			
+			JDialog inputDialog = new JDialog(CreateTaskWindow.this, "Set Due-Date", true);
+			
+			Container contentPane = inputDialog.getContentPane();
+			
+			contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+			contentPane.add(picker);
+			
+			inputDialog.setAlwaysOnTop(true);
+			inputDialog.setResizable(false);
+			
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout(new WrapLayout(FlowLayout.RIGHT, 20, 5));
+			contentPane.add(buttonPanel);
+			
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.addActionListener(_->{
+				inputDialog.dispose();
+			});
+			buttonPanel.add(cancelButton);
+			
+			JButton addButton = new JButton("Add");
+			addButton.addActionListener(_->{
+				selectedDueDate = picker.getDate();
+				button.setText(selectedDueDate.toString());
+				button.setForeground(new Color(42, 157, 143));
+				inputDialog.dispose();
+			});
+			buttonPanel.add(addButton);
+			
+			inputDialog.setSize(getPreferredSize());
+			inputDialog.setVisible(true);	
 		});
 
 		clearDateItem.addActionListener(_ -> {
@@ -294,88 +344,18 @@ public class CreateTaskWindow extends JDialog {
 
 	private void setupReminderMenu(JButton button) {
 		JPopupMenu reminderMenu = new JPopupMenu();
-		JMenuItem addReminderItem = new JMenuItem("Add/Edit Reminder...");
+		JMenuItem addReminderItem = new JMenuItem("Add/Edit Reminder");
 		JMenuItem clearReminderItem = new JMenuItem("Clear Reminder");
 
 		reminderMenu.add(addReminderItem);
 		reminderMenu.add(clearReminderItem);
 
-		button.addActionListener(_ -> reminderMenu.show(button, 0, -button.getHeight()));
+		button.addActionListener(_ -> {
+			reminderMenu.show(button, 0, -button.getHeight());
+		});
 
 		addReminderItem.addActionListener(_ -> {
-			DateTimePicker picker = new DateTimePicker();
-			picker.setDateTimePermissive(LocalDateTime.now().plusHours(2));
-			
-			JDialog inputDialog = new JDialog(CreateTaskWindow.this);
-
-			inputDialog.setTitle("Set Reminder");
-			inputDialog.setModal(true);
-			inputDialog.setAlwaysOnTop(true);
-			inputDialog.setResizable(false);
-			
-			inputDialog.setLayout(new BorderLayout(10, 10));
-			
-			JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-			
-			// Date Time Picker
-			mainPanel.add(picker, BorderLayout.CENTER);
-			
-			// Custom reminder message input (optional)
-			JTextField msgField = new JTextField();
-			msgField.putClientProperty("JTextField.placeholderText", "Custom message (optional)");
-			msgField.putClientProperty("JTextField.margin", new Insets(4, 6, 4, 6));
-			if (selectedReminderMsg != null) {
-				msgField.setText(selectedReminderMsg);
-			}
-			mainPanel.add(msgField, BorderLayout.SOUTH);
-			
-			inputDialog.add(mainPanel, BorderLayout.CENTER);
-			
-			// Bottom Buttons (Cancel & OK)
-			JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-			buttonPane.setBorder(new EmptyBorder(0, 15, 15, 15));
-			
-			JButton cancelButton = new JButton("Cancel");
-			cancelButton.putClientProperty("JButton.buttonType", "roundRect");
-			cancelButton.addActionListener(_ -> inputDialog.dispose());
-			
-			JButton okButton = new JButton("OK");
-			okButton.putClientProperty("JButton.buttonType", "roundRect");
-			
-			buttonPane.add(cancelButton);
-			buttonPane.add(okButton);
-			inputDialog.add(buttonPane, BorderLayout.SOUTH);
-			
-			inputDialog.getRootPane().setDefaultButton(okButton);
-			
-			okButton.addActionListener(_ -> {
-				LocalDateTime ldt = picker.getDateTimeStrict();
-				if (ldt == null) {
-					new ErrorDialog("Invalid Date/Time", "Please select a valid date and time.");
-					return;
-				}
-				if (ldt.isBefore(LocalDateTime.now())) {
-					new ErrorDialog("Invalid Date/Time", "Reminder time cannot be in the past.");
-					return;
-				}
-				
-				selectedReminderTime = Timestamp.valueOf(ldt);
-				String msgText = msgField.getText().trim();
-				selectedReminderMsg = msgText.isEmpty() ? null : msgText;
-				
-				button.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-				button.setForeground(new Color(59, 130, 246));
-				inputDialog.dispose();
-			});
-			
-			if (selectedReminderTime != null) {
-				picker.setDateTimePermissive(selectedReminderTime.toLocalDateTime());
-			}
-			
-			inputDialog.pack();
-			inputDialog.setLocationRelativeTo(CreateTaskWindow.this);
-			inputDialog.setVisible(true);
+			new ReminderDialog(CreateTaskWindow.this, button);
 		});
 
 		clearReminderItem.addActionListener(_ -> {
@@ -383,6 +363,18 @@ public class CreateTaskWindow extends JDialog {
 			selectedReminderMsg = null;
 			button.setText("Set Reminder");
 			button.setForeground(null);
+
+			isRecurring = false;
+
+			selectedRecurringDays.clear();
+
+			selectedDueDate = null;
+			dueDateBtn.setText("Set Due Date");
+			dueDateBtn.setForeground(null);
+			dueDateBtn.setEnabled(true);
+
+			revalidate();
+			repaint();
 		});
 	}
 

@@ -48,7 +48,6 @@ public class App {
     	}
 
         SwingUtilities.invokeLater(() ->{
-        	
 			try {
 				// Initializing the connection and statement
 				connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");

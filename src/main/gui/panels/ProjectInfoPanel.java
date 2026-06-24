@@ -99,11 +99,11 @@ public class ProjectInfoPanel extends JPanel{
 	private void createTaskActionButton(JPanel panel) {
 		JButton button = new JButton("+");
 		
+		button.putClientProperty("JButton.buttonType", "roundRect");
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
 		button.addActionListener(_-> new CreateTaskWindow(projectPanel));
-		button.setBorder(new EmptyBorder(5, 0, 5, 0));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);

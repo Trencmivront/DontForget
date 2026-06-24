@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
 import javax.swing.WindowConstants;
@@ -27,6 +28,7 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import com.formdev.flatlaf.icons.FlatSearchIcon;
+import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.cmp.CustomIcon;
 import main.entities.IconColor;
@@ -109,6 +111,7 @@ public class Main extends JFrame {
 		addDeleteProjectActionListener(deleteProjectsButton);
 		
 		JButton newProjectButton = new JButton("+");
+		newProjectButton.putClientProperty("JButton.buttonType", "roundRect");
 		newProjectField.add(newProjectButton, BorderLayout.EAST);
 		addCreateProjectActionListener(newProjectButton);
 		
@@ -120,8 +123,7 @@ public class Main extends JFrame {
 		rightContainer.setLayout(new BorderLayout(0, 0));
 		
 		JPanel buttonMenuPanel = new JPanel();
-		rightContainer.add(buttonMenuPanel, BorderLayout.NORTH);
-		buttonMenuPanel.setLayout(new BoxLayout(buttonMenuPanel, BoxLayout.X_AXIS));
+		buttonMenuPanel.setLayout(new WrapLayout(WrapLayout.CENTER, 20, 5));
 		
 		JButton tagsButton = new JButton("tags");
 		buttonMenuPanel.add(tagsButton);
@@ -135,6 +137,13 @@ public class Main extends JFrame {
 		JButton remindersButton = new JButton("reminders");
 		buttonMenuPanel.add(remindersButton);
 		
+		JPanel navigationPanel = new JPanel();
+		navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
+		navigationPanel.add(new JSeparator());
+		navigationPanel.add(buttonMenuPanel);
+		navigationPanel.add(new JSeparator());
+		rightContainer.add(navigationPanel, BorderLayout.NORTH);
+
 		showInfoPanel = new JPanel();
 		rightContainer.add(showInfoPanel, BorderLayout.CENTER);
 		showInfoPanel.setLayout(new BorderLayout(0, 0));

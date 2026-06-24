@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.util.logging.Logger;
 
 import main.App;
-import main.services.recurring.DeleteRecurringTaskService;
 import main.services.reminder.DeleteReminderService;
 import main.services.tasktag.DeleteTaskTagService;
 
@@ -18,7 +17,6 @@ public class DeleteTaskService {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		// 1. Delete associated connections using the specialized service classes
-		DeleteRecurringTaskService.execute(id);
 		DeleteReminderService.execute(id);
 		DeleteTaskTagService.execute(id);
 

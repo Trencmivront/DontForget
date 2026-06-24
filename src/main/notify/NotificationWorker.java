@@ -29,7 +29,7 @@ public class NotificationWorker implements Runnable{
 
 	@Override
 	public void run() {
-//		Playing notification sound
+//		Playing notification sound and send notification
 		try{
 			File audioFile = new File("src/resources/sound/dry-pop-up.wav");
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFile);

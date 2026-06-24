@@ -47,25 +47,18 @@ CREATE TABLE IF NOT EXISTS TASK (
     FOREIGN KEY (project_id) REFERENCES PROJECT(project_id)
 );
 
--- Create RECURRING_TASKS table (1:1 relation with TASKS)
-CREATE TABLE IF NOT EXISTS RECURRING_TASK (
-    task_id INT PRIMARY KEY,
-    day_of_week VARCHAR(50),
-    max_occourrences INT NOT NULL,
-    FOREIGN KEY (task_id) REFERENCES TASK(task_id)
-);
-
 CREATE TABLE IF NOT EXISTS WEEK_DAYS(
 	week_day_id INT PRIMARY KEY,
 	day_name VARCHAR(20) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS RECURRING_TASK_WEEK_DAYS(
-	task_id INT NOT NULL,
-	week_day_id INT NOT NULL,
-	CONSTRAINT pk_rtwd PRIMARY KEY (task_id, week_day_id),
-	CONSTRAINT fk_rtwd_r_task FOREIGN KEY (task_id) REFERENCES RECURRING_TASK(task_id),
-	CONSTRAINT fk_rtwd_week_days FOREIGN KEY (week_day_id) REFERENCES WEEK_DAYS(week_day_id)
+-- Create RECURRING_TASKS table (allowing multiple weekdays per task ID via composite PK)
+CREATE TABLE IF NOT EXISTS RECURRING_TASK (
+    task_id INT NOT NULL,
+    week_day_id INT NOT NULL,
+    PRIMARY KEY (task_id, week_day_id),
+    FOREIGN KEY (task_id) REFERENCES TASK(task_id),
+    CONSTRAINT fk_recurring_task_week_days FOREIGN KEY (week_day_id) REFERENCES WEEK_DAYS(week_day_id)
 );
 
 -- Create REMINDERS table (1:1 relation with TASKS)
