@@ -26,3 +26,5 @@ replay_pid*
 # database file
 *.db
 
+# deb package settings
+deb/

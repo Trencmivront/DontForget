@@ -16,11 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
@@ -156,6 +160,20 @@ public class Main extends JFrame {
 		setSplitDivider();
 		
 		listProjects(projectsContainer);
+		
+		JToolBar toolBar = new JToolBar();
+		contentPane.add(toolBar, BorderLayout.NORTH);
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenu optionsMenu = new JMenu("Options");
+		
+		JMenuItem exitItem = new JMenuItem("Exit");
+		exitItem.addActionListener(_->System.exit(0));
+		
+		optionsMenu.add(exitItem);
+		menuBar.add(optionsMenu);
+		
+		toolBar.add(menuBar);
 
 		refreshWindow();
 		

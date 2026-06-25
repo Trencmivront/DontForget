@@ -31,7 +31,7 @@ public class NotificationWorker implements Runnable{
 	public void run() {
 //		Playing notification sound and send notification
 		try{
-			File audioFile = new File("src/resources/sound/dry-pop-up.wav");
+			File audioFile = new File("src/main/resources/sounds/dry-pop-up.wav");
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFile);
 			
 			Clip clip = AudioSystem.getClip();
