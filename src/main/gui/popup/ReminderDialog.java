@@ -254,7 +254,7 @@ public class ReminderDialog extends JDialog {
 				source.dueDateBtn.setForeground(null);
 				source.dueDateBtn.setEnabled(false);
 			} else {
-				source.dueDateBtn.setText(source.selectedDueDate.toString());
+				source.dueDateBtn.setText(source.selectedDueDate != null ? source.selectedDueDate.toString():null);
 				source.dueDateBtn.setForeground(new Color(42, 157, 143));
 				source.dueDateBtn.setEnabled(true);
 			}

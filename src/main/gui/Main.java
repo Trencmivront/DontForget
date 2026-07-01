@@ -1,7 +1,6 @@
 package main.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -34,17 +33,16 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import main.cmp.CustomIcon;
-import main.entities.IconColor;
 import main.entities.Project;
 import main.enums.LightColors;
 import main.gui.panels.InboxPanel;
 import main.gui.panels.ProjectInfoPanel;
+import main.gui.panels.ProjectRowPanel;
 import main.gui.panels.ReminderPanel;
-import main.gui.panels.TagPanel;
+import main.gui.panels.TagsPanel;
 import main.gui.panels.TodayPanel;
 import main.gui.windows.CreateProjectWindow;
-import main.services.icon.GetIconColorOfProjectService;
+import main.gui.windows.SearchWindow;
 import main.services.project.DeleteProjectService;
 import main.services.project.GetProjectsService;
 
@@ -60,10 +58,10 @@ public class Main extends JFrame {
 	private JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
-	private JButton deleteProjectsButton;
+	public static JButton deleteProjectsButton;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	public static Main main;
-	private List<JPanel> selectedProjects = new ArrayList<>();
+	public static List<JPanel> selectedProjects = new ArrayList<>();
 	/**
 	 * Create the frame.
 	 */
@@ -155,8 +153,9 @@ public class Main extends JFrame {
 //		add action listeners for buttons
 		addNavigationButtonActionListener(remindersButton, ReminderPanel.class.getName());
 		addNavigationButtonActionListener(inboxButton, InboxPanel.class.getName());
-		addNavigationButtonActionListener(tagsButton, TagPanel.class.getName());
+		addNavigationButtonActionListener(tagsButton, TagsPanel.class.getName());
 		addNavigationButtonActionListener(todayButton, TodayPanel.class.getName());
+		addSearchButtonActionListener(searchButton);
 		setSplitDivider();
 		
 		listProjects(projectsContainer);
@@ -197,38 +196,11 @@ public class Main extends JFrame {
 		ckContainer.setLayout(new BoxLayout(ckContainer, BoxLayout.Y_AXIS));
 		
 		for(int i = 0; i < size; i++) {
-			
-			Project p = projects.get(i);
-			JCheckBox ck =  new JCheckBox();
-			
-			JLabel label = new JLabel(p.project_title());
-			
-			int projectId = p.project_id();
-			
-			JPanel ckSet = new JPanel();
-
-			ckSet.putClientProperty("project_title", p.project_title());
-			ckSet.putClientProperty("description", p.description());
-			ckSet.putClientProperty("project_id", projectId);
-			ckSet.putClientProperty("list_order", p.list_order());
-			ckSet.putClientProperty("icon_color_id", p.icon_color_id());
-			
-			ckSet.setLayout(new BoxLayout(ckSet, BoxLayout.X_AXIS));
-			ckSet.setAlignmentX(LEFT_ALIGNMENT);
-			
-			IconColor ic = GetIconColorOfProjectService.execute(projectId);
-			if(ic != null) {
-				Color color = new Color(ic.red(), ic.green(), ic.blue());
-				label.setIcon(new CustomIcon(color, 12, 12));
-			}
-			
-			ckSet.add(ck);
-			ckSet.add(label);
-			
+			JCheckBox ck = new JCheckBox();
+			JPanel panel = new ProjectRowPanel(ck, projects.get(i));
 			addCheckBoxEventListener(ck);
-			addProjectEventListener(ckSet);
-							
-			ckContainer.add(ckSet);
+			addProjectEventListener(panel);
+			ckContainer.add(panel);
 		}
 		// we put it in a viewport
 		// that's how components are displayed in a JScrollPane
@@ -239,6 +211,19 @@ public class Main extends JFrame {
 		container.setViewport(viewport);
 	}
 	
+	private void addProjectEventListener(JPanel panel) {
+		panel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// removing background color from previous project button
+				setProjectBackgroundColor(panel);
+				showInfoPanel.removeAll();
+				showInfoPanel.add(new ProjectInfoPanel(panel));
+				refreshWindow();
+			}
+		});
+	}
+	
 	private void addCheckBoxEventListener(JCheckBox ck) {
 		ck.addActionListener(_->{
 			JPanel panel = (JPanel) ck.getParent();
@@ -246,14 +231,14 @@ public class Main extends JFrame {
 				return;
 			}
 			if (ck.isSelected()) {
-				if (!selectedProjects.contains(panel)) {
-					selectedProjects.add(panel);
+				if (!Main.selectedProjects.contains(panel)) {
+					Main.selectedProjects.add(panel);
 				}
 			} else {
-				selectedProjects.remove(panel);
+				Main.selectedProjects.remove(panel);
 			}
 
-			if (deleteProjectsButton != null) {
+			if (selectedProjects != null) {
 				if (!selectedProjects.isEmpty()) {
 					deleteProjectsButton.setEnabled(true);
 					deleteProjectsButton.setVisible(true);
@@ -309,19 +294,6 @@ public class Main extends JFrame {
 		});
 	}
 	
-	private void addProjectEventListener(JPanel panel) {
-		panel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// removing background color from previous project button
-				setProjectBackgroundColor(panel);
-				showInfoPanel.removeAll();
-				showInfoPanel.add(new ProjectInfoPanel(panel));
-				refreshWindow();
-			}
-		});
-	}
-	
 	private void addNavigationButtonActionListener(JButton button, String className) {
 		button.addActionListener(_ ->{
 			setProjectBackgroundColor(null);
@@ -332,6 +304,12 @@ public class Main extends JFrame {
 				e.printStackTrace();
 			}
 			refreshWindow();
+		});
+	}
+	
+	private void addSearchButtonActionListener(JButton button) {
+		button.addActionListener(_->{
+			new SearchWindow();
 		});
 	}
 	

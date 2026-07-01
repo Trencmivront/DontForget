@@ -19,13 +19,13 @@ import main.entities.Tag;
 import main.services.icon.GetIconColorOfTagService;
 import main.services.tag.GetTagsService;
 
-public class TagPanel extends JPanel {
+public class TagsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = Logger.getLogger(TagPanel.class.getName());
+	private static final Logger logger = Logger.getLogger(TagsPanel.class.getName());
 	private JScrollPane scrollPane;
 
-	public TagPanel() {
-		logger.info("Drawing TagPanel.");
+	public TagsPanel() {
+		logger.info("Drawing TagsPanel.");
 		setLayout(new BorderLayout());
 		
 		add(new HeaderPanel("Tags"), BorderLayout.NORTH);

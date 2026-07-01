@@ -30,6 +30,7 @@ import main.entities.IconColor;
 import main.entities.Reminder;
 import main.entities.Tag;
 import main.gui.Main;
+import main.gui.panels.ProjectInfoPanel;
 import main.gui.popup.ErrorDialog;
 import main.services.icon.GetIconColorOfTagService;
 import main.services.reminder.GetReminderByIdService;
@@ -265,6 +266,9 @@ public class TaskWindow extends JDialog {
 				if (confirm == JOptionPane.YES_OPTION) {
 					if (DeleteTaskService.execute(taskId)) {
 //						refreshing both gui
+						if(source instanceof ProjectInfoPanel) {
+							((ProjectInfoPanel) source).listTasks();
+						}
 						source.revalidate();
 						Main.refreshWindow();
 						dispose();

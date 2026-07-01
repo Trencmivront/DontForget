@@ -1,36 +1,26 @@
 package main.gui.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
 import main.entities.Task;
 import main.gui.Main;
 import main.gui.windows.CreateTaskWindow;
-import main.gui.windows.TaskWindow;
 import main.services.task.DeleteCompletedTasksService;
 import main.services.task.GetTasksOfProjectService;
-import main.services.task.UpdateTaskService;
 
 public class ProjectInfoPanel extends JPanel{
 	
@@ -60,7 +50,7 @@ public class ProjectInfoPanel extends JPanel{
 		
 	}
 	
-	private void listTasks() {
+	public void listTasks() {
 		int id = (int)projectPanel.getClientProperty("project_id");
 		List<Task> tasks = GetTasksOfProjectService.execute(id);
 		
@@ -82,7 +72,7 @@ public class ProjectInfoPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
-			tasksContainer.add(createTaskContainer(i.next()));
+			tasksContainer.add(new TaskRowPanel(this, i.next()));
 		}
 		
 		infoScrollPane.setViewportView(tasksContainer);
@@ -138,119 +128,4 @@ public class ProjectInfoPanel extends JPanel{
 			}
 		});
 	}
-	
-	private JPanel createTaskContainer(Task task){
-		
-		JPanel taskPanel = new JPanel();
-		taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.X_AXIS));
-		
-		taskPanel.putClientProperty("task_id", task.task_id());
-		taskPanel.putClientProperty("task_title", task.task_title());
-		taskPanel.putClientProperty("description", task.description());
-		taskPanel.putClientProperty("status_id", task.status_id());
-		taskPanel.putClientProperty("priority", task.priority());
-		taskPanel.putClientProperty("due_date", task.due_date());
-		taskPanel.putClientProperty("list_order", task.list_order());
-		taskPanel.putClientProperty("project_id", task.project_id());
-		taskPanel.putClientProperty("created_at", task.created_at());
-		taskPanel.putClientProperty("updated_at", task.updated_at());
-		taskPanel.putClientProperty("completed_at", task.completed_at());
-		
-		JCheckBox chk = new JCheckBox();
-		JLabel title = new JLabel(task.task_title());
-//		means that task is completed
-		
-		switch (task.status_id()) {
-		case 1, 0:
-		break;
-		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.task_title() + "</i></s></html>");
-		chk.setSelected(true);}
-			break;
-		case 3: {title.setText("<html><i style='color: rgb(94, 75, 39);'>" + task.task_title() + "</i></html>");
-		chk.setEnabled(false);}
-			break;
-		default:
-			logger.warning("Task Status id is invalid.");
-			break;
-		}
-		
-		chk.setBorderPainted(true);
-
-		switch(task.priority()) {
-		case 1: chk.setBorder(new LineBorder(Color.RED, 1, true));
-		break;
-		case 2: chk.setBorder(new LineBorder(Color.ORANGE, 1, true));
-		break;
-		case 3: chk.setBorder(new LineBorder(Color.GREEN, 1, true));
-		break;
-			default: chk.setBorder(new LineBorder(Color.GRAY, 1, true));
-			break;
-		}
-		
-		addCheckBoxEventListener(chk);
-		
-		taskPanel.add(chk);
-		taskPanel.add(title);
-		
-		taskPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-		
-		taskPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				new TaskWindow(ProjectInfoPanel.this ,taskPanel);
-			}
-		});
-		return taskPanel;
-	}
-	
-//	we want to update task as completed when the checkbox is selected
-	private void addCheckBoxEventListener(JCheckBox chk) {
-		chk.addActionListener(_->{
-			JPanel parentContainer = (JPanel)chk.getParent();
-			if (parentContainer == null) {
-				return;
-			}
-			
-			Integer taskId = (Integer) parentContainer.getClientProperty("task_id");
-			String taskTitle = (String) parentContainer.getClientProperty("task_title");
-			String description = (String) parentContainer.getClientProperty("description");
-			Integer priority = (Integer) parentContainer.getClientProperty("priority");
-			Timestamp dueDate = (Timestamp) parentContainer.getClientProperty("due_date");
-			Integer listOrder = (Integer) parentContainer.getClientProperty("list_order");
-			Integer projectId = (Integer) parentContainer.getClientProperty("project_id");
-			Timestamp createdAt = (Timestamp) parentContainer.getClientProperty("created_at");
-
-			int newStatusId = 1;
-			Timestamp completedAt = null;
-			if (chk.isSelected()) {
-				newStatusId = 2; // COMPLETED
-				completedAt = new Timestamp(System.currentTimeMillis());
-			} else {
-				if (dueDate != null && dueDate.toLocalDateTime().toLocalDate().isBefore(LocalDate.now())) {
-					newStatusId = 3; // PAST
-				} else {
-					newStatusId = 1; // ACTIVE
-				}
-			}
-
-			Task updatedTask = new Task(
-				taskId,
-				taskTitle,
-				description,
-				newStatusId,
-				priority,
-				dueDate,
-				listOrder,
-				projectId,
-				createdAt,
-				new Timestamp(System.currentTimeMillis()),
-				completedAt
-			);
-			
-			if (UpdateTaskService.execute(updatedTask)) {
-				listTasks();
-			}
-		});
-	}
-
 }
