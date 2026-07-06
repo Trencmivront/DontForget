@@ -2,13 +2,12 @@ package main.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,30 +25,46 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+
+import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.dco.ProjectDCO;
 import main.entities.IconColor;
+import main.gui.panels.ProjectRowPanel;
 import main.gui.popup.ErrorDialog;
+import main.services.icon.GetIconColorOfProjectService;
 import main.services.icon.GetIconColorsService;
 import main.services.project.CreateProjectService;
+import main.services.project.UpdateProjectService;
 
-public class CreateProjectWindow extends JDialog {
+public class CreateUpdateProjectWindow extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 	private JTextField projectTitleTextField;
 	private JTextArea descriptionTextArea;
 	private ButtonGroup bg;
-	private static final Logger logger = Logger.getLogger(CreateProjectWindow.class.getName());
+	private static final Logger logger = Logger.getLogger(CreateUpdateProjectWindow.class.getName());
 
+	private static final int TITLE_MAX_CHARACTER = 50;
+	private static final int BODY_MAX_CHARACTER = 500;
+	private boolean isUpdate = false;
+	private ProjectRowPanel updatedProject;
+	
 	/**
 	 * Create the dialog.
 	 */
-	public CreateProjectWindow(JFrame source) {
+	public CreateUpdateProjectWindow(JFrame source, Boolean isUpdate, ProjectRowPanel updatedProject) {
 		logger.info("Drawing the window.");
 		
 		super(source, "Create Project", true);
-
+		this.isUpdate = isUpdate;
+		this.updatedProject = updatedProject;
+		
 		setResizable(false);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -69,6 +84,8 @@ public class CreateProjectWindow extends JDialog {
 		projectTitleTextField.setFont(new Font("Dialog", Font.BOLD, 15));
 		projectTitleTextField.putClientProperty("JTextField.placeholderText", "Title of the project");
 		projectTitleTextField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
+		addTextFieldDocumentFilter(projectTitleTextField);
+		
 		contentPanel.add(projectTitleTextField, BorderLayout.NORTH);
 
 		// 2. Center Panel (Description + Options/Colors)
@@ -81,15 +98,7 @@ public class CreateProjectWindow extends JDialog {
 		descriptionTextArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
 		descriptionTextArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		
-		descriptionTextArea.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				String text = descriptionTextArea.getText();
-				if(text.length() >= 1000) {
-					descriptionTextArea.setText(text.substring(0, 1000));
-				}
-			}
-		});
+		addTextAreaDocumentFilter(descriptionTextArea);
 
 		JScrollPane descScrollPane = new JScrollPane(descriptionTextArea);
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
@@ -102,7 +111,7 @@ public class CreateProjectWindow extends JDialog {
 		colorLabel.setFont(new Font("Dialog", Font.BOLD, 14));
 		colorPanel.add(colorLabel);
 
-		JPanel colorRadioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		JPanel colorRadioPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 5, 0));
 		colorPanel.add(colorRadioPanel);
 
 		centerPanel.add(colorPanel, BorderLayout.SOUTH);
@@ -118,20 +127,26 @@ public class CreateProjectWindow extends JDialog {
 		cancelButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cancelButton.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton createButton = new JButton("CREATE");
-		createButton.setFont(new Font("Dialog", Font.BOLD, 14));
-		createButton.putClientProperty("JButton.buttonType", "roundRect");
+		JButton okButton = new JButton("OK");
+		okButton.setFont(new Font("Dialog", Font.BOLD, 14));
+		okButton.putClientProperty("JButton.buttonType", "roundRect");
 
 		buttonPane.add(cancelButton);
-		buttonPane.add(createButton);
+		buttonPane.add(okButton);
 		footerPanel.add(buttonPane, BorderLayout.EAST);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
 
-		getRootPane().setDefaultButton(createButton);
-
+		getRootPane().setDefaultButton(okButton);
+		
 		listColors(colorRadioPanel);
-		addCreateButtonActionListener(createButton);
+		addOkButtonActionListener(okButton);
 		addCancelButtonActionListener(cancelButton);
+
+		if (isUpdate && (updatedProject != null)) {
+			projectTitleTextField.setText((String)updatedProject.getClientProperty("project_title"));
+			descriptionTextArea.setText((String)updatedProject.getClientProperty("description"));
+			setSelectedRadioButton(colorRadioPanel);
+		}
 
 		revalidate();
 		repaint();
@@ -147,7 +162,7 @@ public class CreateProjectWindow extends JDialog {
 		});
 	}
 	
-	private void addCreateButtonActionListener(JButton button) {
+	private void addOkButtonActionListener(JButton button) {
 		button.addActionListener(_ -> {
 			logger.info("Running function.");
 			String title = projectTitleTextField.getText();
@@ -164,8 +179,16 @@ public class CreateProjectWindow extends JDialog {
 				iconColorId = (int) selectedRadioButton.getClientProperty("icon_color_id");
 			}
 			
-			if(!CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
-				new ErrorDialog("Database Error", "Error while creating project");
+			if(isUpdate) {
+				int id = (int) updatedProject.getClientProperty("project_id");
+				if(!UpdateProjectService.execute(new ProjectDCO(title, description, iconColorId), id)) {
+					new ErrorDialog("Database Error", "Error while updating project");
+				}
+			}
+			else {
+				if(!CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
+					new ErrorDialog("Database Error", "Error while creating project");
+				}
 			}
 			dispose();
 
@@ -207,6 +230,81 @@ public class CreateProjectWindow extends JDialog {
 	        }
 	    }
 	    return null; // Return null if no button is selected
+	}
+	
+	private void setSelectedRadioButton(JPanel colorRadioPanel) {
+		if (updatedProject == null) {
+			return;
+		}
+		Object projIdObj = updatedProject.getClientProperty("project_id");
+		if (projIdObj instanceof Integer) {
+			int projectId = (int) projIdObj;
+			IconColor projectColor = GetIconColorOfProjectService.execute(projectId);
+			if (projectColor != null) {
+				for (Component comp : colorRadioPanel.getComponents()) {
+					if (comp instanceof JRadioButton) {
+						JRadioButton rb = (JRadioButton) comp;
+						Object rbColorIdObj = rb.getClientProperty("icon_color_id");
+						if (rbColorIdObj instanceof Integer) {
+							int rbColorId = (int) rbColorIdObj;
+							if (rbColorId == projectColor.icon_color_id()) {
+								rb.setSelected(true);
+								bg.setSelected(rb.getModel(), true);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void addTextFieldDocumentFilter(JTextField field) {
+		((AbstractDocument) field.getDocument()).setDocumentFilter(createDocumentFilter(TITLE_MAX_CHARACTER));
+	}
+	
+	private void addTextAreaDocumentFilter(JTextArea area) {
+		((AbstractDocument) area.getDocument()).setDocumentFilter(createDocumentFilter(BODY_MAX_CHARACTER));
+	}
+	
+	private DocumentFilter createDocumentFilter(int maxCharacter) {
+		return new DocumentFilter() {
+//			Here we update the text area same way we update jtable.
+			@Override
+			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+				if (string == null) {
+//					and there is no string to be inserted
+					return;
+				}
+//				Insert the string if it length is smaller than max character length
+				if ((fb.getDocument().getLength() + string.length()) <= maxCharacter) {
+					super.insertString(fb, offset, string, attr);
+				} else {
+//					get substring of string if text size is bigger than max character
+					int remaining = maxCharacter - fb.getDocument().getLength();
+					if (remaining > 0) {
+						super.insertString(fb, offset, string.substring(0, remaining), attr);
+					}
+				}
+			}
+
+			@Override
+			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+				if (text == null) {
+					super.replace(fb, offset, length, null, attrs);
+					return;
+				}
+				int currentLength = fb.getDocument().getLength();
+				if ((currentLength - length + text.length()) <= maxCharacter) {
+					super.replace(fb, offset, length, text, attrs);
+				} else {
+					int remaining = maxCharacter - currentLength + length;
+					if (remaining > 0) {
+						super.replace(fb, offset, length, text.substring(0, remaining), attrs);
+					}
+				}
+			}
+		};
 	}
 
 }

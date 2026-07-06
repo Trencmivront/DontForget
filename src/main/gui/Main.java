@@ -41,7 +41,7 @@ import main.gui.panels.ProjectRowPanel;
 import main.gui.panels.ReminderPanel;
 import main.gui.panels.TagsPanel;
 import main.gui.panels.TodayPanel;
-import main.gui.windows.CreateProjectWindow;
+import main.gui.windows.CreateUpdateProjectWindow;
 import main.gui.windows.SearchWindow;
 import main.services.project.DeleteProjectService;
 import main.services.project.GetProjectsService;
@@ -55,7 +55,7 @@ public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JSplitPane mainContainer;
-	private JScrollPane projectsContainer;
+	public static JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
 	public static JButton deleteProjectsButton;
@@ -283,8 +283,9 @@ public class Main extends JFrame {
 	
 	private void addCreateProjectActionListener(JButton button) {
 		button.addActionListener(_ -> {
-			CreateProjectWindow createProjectWindow = new CreateProjectWindow(Main.this);
-			createProjectWindow.addWindowListener(new WindowAdapter() {
+//			Here we want to create the project
+			CreateUpdateProjectWindow createUpdateProjectWindow = new CreateUpdateProjectWindow(Main.this, false, null);
+			createUpdateProjectWindow.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent e) {
 					listProjects(projectsContainer);

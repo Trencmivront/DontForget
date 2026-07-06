@@ -37,7 +37,10 @@ public class ProjectRowPanel extends JPanel{
 			label.setIcon(new CustomIcon(color, 12, 12));
 		}
 		
-		add(ck);
+		if(ck != null) {
+			add(ck);
+		}
+
 		add(label);
 		
 	}

@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS TASK_STATUS (
 -- Create PROJECTS table
 CREATE TABLE IF NOT EXISTS PROJECT (
     project_id INT AUTO_INCREMENT PRIMARY KEY,
-    project_title VARCHAR(255) NOT NULL UNIQUE,
-    description VARCHAR(1000),
+    project_title VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(500),
     list_order INT,
     icon_color_id INT NOT NULL,
     FOREIGN KEY (icon_color_id) REFERENCES ICON_COLOR(icon_color_id)
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS TAG (
 -- Create TASKS table
 CREATE TABLE IF NOT EXISTS TASK (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    task_title VARCHAR(255) NOT NULL UNIQUE,
+    task_title VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(1000),
     status_id INT,
     priority INT CHECK (priority IN (1, 2, 3)),

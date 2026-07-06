@@ -16,6 +16,10 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import main.gui.Main;
@@ -44,53 +48,31 @@ public class App {
             return; // Exit this secondary instance immediately
         }
     	
-    	System.setProperty("sun.java2d.uiScale", "2.0");
-    	System.setProperty("awt.useSystemAAFontSettings", "on");
-    	System.setProperty("swing.aatext", "true");
-    	
     	if(Main.main != null) {
     		Main.main.setVisible(true);
     		return;
     	}
 
+    	applySettings();
+    	
         SwingUtilities.invokeLater(() ->{
+//			Displaying app
 			try {
-				// Initializing the connection and statement
-				connection = DriverManager.getConnection("jdbc:h2:./src/data/dontforget", "sa", "");
-				Statement stmt = connection.createStatement();
-
+		        logger.info("Starting DontForget application...");
 		        // Initialize the look and feel
 		        UIManager.setLookAndFeel(new FlatMacDarkLaf());
-
-		        logger.info("Starting DontForget application...");
-
-		        // Initialize database tables using crTables.sql
-		        Path crTablesPath = Path.of("/usr/share/DontForget/db/crTables.sql");
-		        if (Files.exists(crTablesPath)) {
-//		        	stmt.execute("RUNSCRIPT FROM 'src/main/resources/db/tables/delTables.sql'");
-		        	stmt.execute("RUNSCRIPT FROM '/usr/share/DontForget/db/crTables.sql'");
-//		        	stmt.execute("RUNSCRIPT FROM '/usr/share/DontForget/db/testRecords.sql'");
-		        	logger.info("Database tables initialized successfully using crTables.sql.");
-		        	
-//			        show window
-			        new Main();
-//			        Start background listener
-					startSingleInstanceListener();
-//			        initialize the notification manager
-			        NotificationManager nm = new NotificationManager();
-			        nm.initialize();
-		        } else {
-		            logger.severe("crTables.sql file not found at " + crTablesPath.toAbsolutePath());
-		        }
 		        
-		    }catch (SQLException s) {
-		    	s.printStackTrace();
-				JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't initialize database.", "ok", JOptionPane.WARNING_MESSAGE);
+//		        show window
+		        new Main();
+//		        Start background listener
+				startSingleInstanceListener();
+		        
+//		        initialize the notification manager
+		        NotificationManager nm = new NotificationManager();
+		        nm.initialize();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		    catch (Exception e){
-				JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
-		        e.printStackTrace();
-		    }
 			
 		});
         
@@ -144,5 +126,86 @@ public class App {
                 }
             }
         }).start();
+        logger.info("Background listener started.");
+    }
+    
+    private static void applySettings() {
+        boolean initialized = false;
+        Path settingsPath = Path.of("src/data/settings/settings.json");
+        ObjectMapper mapper = new ObjectMapper();
+        
+        if (!Files.exists(settingsPath)) {
+            try {
+                Files.createDirectories(settingsPath.getParent());
+                ObjectNode rootNode = mapper.createObjectNode();
+                rootNode.put("isDatabaseInitialized", false);
+                mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
+                logger.info("settings.json did not exist. Created and initialized with isDatabaseInitialized=false.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                JsonNode rootNode = mapper.readTree(settingsPath.toFile());
+                JsonNode initNode = rootNode.get("isDatabaseInitialized");
+                if (initNode != null && initNode.asBoolean()) {
+                    initialized = true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (initialized) {
+            try {
+                connection = DriverManager.getConnection("jdbc:h2:./src/data/db/dontforget", "sa", "");
+                logger.info("Database connection established. Skipped database initialization scripts.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't connect to database.", "ok", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            initializeDatabase();
+            try {
+                ObjectNode rootNode = mapper.createObjectNode();
+                rootNode.put("isDatabaseInitialized", true);
+                mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
+                logger.info("Saved isDatabaseInitialized=true to settings.json using Jackson");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        System.setProperty("sun.java2d.uiScale", "2.0");
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
+    }
+    
+    private static void initializeDatabase() {
+    	
+//    	initializing the database
+		try {
+			Statement stmt = connection.createStatement();
+
+	        // Initialize database tables using crTables.sql
+	        Path crTablesPath = Path.of("/usr/share/DontForget/db/crTables.sql");
+	        if (Files.exists(crTablesPath)) {
+	        	stmt.execute("RUNSCRIPT FROM '/usr/share/DontForget/db/delTables.sql'");
+	        	stmt.execute("RUNSCRIPT FROM '/usr/share/DontForget/db/crTables.sql'");
+	        	stmt.execute("RUNSCRIPT FROM '/usr/share/DontForget/db/testRecords.sql'");
+	        	logger.info("Database tables initialized successfully.");
+	        } else {
+	            logger.severe("crTables.sql file not found at " + crTablesPath.toAbsolutePath());
+	        }
+	        
+	    }catch (SQLException s) {
+	    	s.printStackTrace();
+			JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't initialize database.", "ok", JOptionPane.WARNING_MESSAGE);
+		}
+	    catch (Exception e){
+			JOptionPane.showMessageDialog(new JDialog(), e.getMessage());
+	        e.printStackTrace();
+	    }
+		
     }
 }

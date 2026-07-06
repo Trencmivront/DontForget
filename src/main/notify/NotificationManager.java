@@ -27,6 +27,7 @@ public class NotificationManager {
 				scheduleReminder(reminder);
 			}
 		}
+        logger.info("Notification manager is initialized.");
 	}
 
 	public void scheduleReminder(Reminder reminder) {
