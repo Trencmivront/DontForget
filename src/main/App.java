@@ -135,7 +135,7 @@ public class App {
                 ObjectNode rootNode = mapper.createObjectNode();
                 rootNode.put("isDatabaseInitialized", false);
                 mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
-                logger.info("settings.json did not exist. Created and initialized with isDatabaseInitialized=false.");
+                logger.info("settings.json did not exist. Created and initialized.");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -151,24 +151,25 @@ public class App {
             }
         }
 
-        if (initialized) {
-            try {
-                connection = DriverManager.getConnection("jdbc:h2:./src/data/db/dontforget", "sa", "");
-                logger.info("Database connection established. Skipped database initialization scripts.");
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't connect to database.", "ok", JOptionPane.WARNING_MESSAGE);
+        try {
+            connection = DriverManager.getConnection("jdbc:h2:./src/data/db/dontforget", "sa", "");
+            if (initialized) {
+                logger.info("Database connection established.");
+            } else {
+                logger.info("Database connection established. Initializing database...");
+                initializeDatabase();
+                try {
+                    ObjectNode rootNode = mapper.createObjectNode();
+                    rootNode.put("isDatabaseInitialized", true);
+                    mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
+                    logger.info("Saved settings.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } else {
-            initializeDatabase();
-            try {
-                ObjectNode rootNode = mapper.createObjectNode();
-                rootNode.put("isDatabaseInitialized", true);
-                mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
-                logger.info("Saved isDatabaseInitialized=true to settings.json using Jackson");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't connect to database.", "ok", JOptionPane.WARNING_MESSAGE);
         }
         
         System.setProperty("sun.java2d.uiScale", "2.0");

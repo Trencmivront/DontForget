@@ -28,3 +28,5 @@ replay_pid*
 
 # deb package settings
 deb/
+# settings file
+settings.json
