@@ -125,7 +125,7 @@ public class SearchedItemsPanel extends JPanel{
 							JPanel showInfoPanel = (JPanel) field.get(Main.main);
 							showInfoPanel.removeAll();
 							showInfoPanel.add(new ProjectInfoPanel(panel));
-							Main.refreshWindow();
+							Main.main.refreshWindow();
 							
 							if (window instanceof JDialog) {
 								window.dispose();

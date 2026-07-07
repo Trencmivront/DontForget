@@ -18,7 +18,7 @@ import javax.swing.border.EmptyBorder;
 
 import main.entities.Task;
 import main.gui.Main;
-import main.gui.windows.CreateTaskWindow;
+import main.gui.windows.CreateUpdateTaskWindow;
 import main.services.task.DeleteCompletedTasksService;
 import main.services.task.GetTasksOfProjectService;
 
@@ -29,9 +29,11 @@ public class ProjectInfoPanel extends JPanel{
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	private JPanel projectPanel;
+	public static ProjectInfoPanel projectInfoPanel;
 	
 	public ProjectInfoPanel(JPanel panel) {
 		projectPanel = panel;
+		projectInfoPanel = this;
 		setLayout(new BorderLayout());
 		
 		add(createHeaderPanel(), BorderLayout.NORTH);
@@ -59,7 +61,7 @@ public class ProjectInfoPanel extends JPanel{
 			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
 			revalidate();
 			repaint();
-			Main.refreshWindow();
+			Main.main.refreshWindow();
 			logger.info("No task found for project.");
 			return;
 		}
@@ -72,7 +74,7 @@ public class ProjectInfoPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
-			tasksContainer.add(new TaskRowPanel(this, i.next()));
+			tasksContainer.add(new TaskRowPanel(projectPanel, i.next()));
 		}
 		
 		infoScrollPane.setViewportView(tasksContainer);
@@ -93,7 +95,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_-> new CreateTaskWindow(projectPanel));
+		button.addActionListener(_-> new CreateUpdateTaskWindow(Main.main ,projectPanel, false, null));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);

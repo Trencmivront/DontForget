@@ -31,7 +31,10 @@ public class NotificationManager {
 	}
 
 	public void scheduleReminder(Reminder reminder) {
-		if (reminder == null) return;
+		if (reminder == null) {
+			logger.warning("Attempted to schedule a null reminder.");
+			return;
+		}
 		
 		// If already scheduled, cancel the existing one first
 		cancelReminder(reminder.task_id());
@@ -43,6 +46,9 @@ public class NotificationManager {
 		}
 
 		Task task = new GetTaskByIdService().execute(reminder.task_id().intValue());
+		if (task == null) {
+			logger.warning("Could not find task with ID " + reminder.task_id() + " for scheduling reminder.");
+		}
 		String title = task != null ? task.task_title() : "Reminder";
 		String message = reminder.cstm_message() != null ? reminder.cstm_message() 
 				: (task != null && task.description() != null ? task.description() : "");
@@ -54,6 +60,7 @@ public class NotificationManager {
 			TimeUnit.MILLISECONDS
 		);
 		scheduledTasks.put(reminder.task_id(), future);
+		logger.info("Reminder successfully scheduled and tracked for task ID " + reminder.task_id());
 	}
 
 	public void cancelReminder(long taskId) {
@@ -61,11 +68,14 @@ public class NotificationManager {
 		if (future != null) {
 			logger.info("Cancelling scheduled reminder for task ID " + taskId);
 			future.cancel(true);
+		} else {
+			logger.fine("No scheduled reminder found to cancel for task ID " + taskId);
 		}
 	}
 
 	public void shutdown() {
 		logger.info("Shutting down NotificationManager scheduler...");
 		scheduler.shutdown();
+		logger.info("Scheduler shutdown initiated.");
 	}
 }

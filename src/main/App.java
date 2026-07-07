@@ -47,11 +47,6 @@ public class App {
             }
             return; // Exit this secondary instance immediately
         }
-    	
-    	if(Main.main != null) {
-    		Main.main.setVisible(true);
-    		return;
-    	}
 
     	applySettings();
     	

@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
@@ -13,7 +14,10 @@ import main.services.inbox.CreateMessageService;
 
 public class WaylandNotification {
 
-    public static void sendNotification(String title, String body) {
+    private static final Logger logger = Logger.getLogger(WaylandNotification.class.getName());
+
+    public static void sendNotification(int taskId, String title, String body) {
+        logger.info("Preparing to send notification. Task ID: " + taskId + ", Title: " + title);
         // Run in a new thread so it doesn't block your main application
         new Thread(() -> {
             try {
@@ -35,21 +39,23 @@ public class WaylandNotification {
                 command.add("['default', 'Open Application']"); // actions (default = clicking the body)
                 command.add("{}");                              // hints
                 command.add("0");                              // expire_timeout (default)
+                
+                logger.info("Executing notification process command: " + String.join(" ", command));
                 Process process = new ProcessBuilder(command).start();
 
                 // Listen to the command output
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;
-//                  Send message to inbox
+                    logger.info("Saving notification message to inbox DB: " + body);
                 	CreateMessageService.execute(body);
                     while ((line = reader.readLine()) != null) {
+                        logger.info("gdbus response: " + line);
                         // If the user clicks the notification body, 'default' is returned
                         if (line.contains("'default'")) {
+                            logger.info("User clicked the default action of notification.");
                             SwingUtilities.invokeLater(() -> {
                                 if (Main.main != null) {
-                                    if (Main.main.getState() == Frame.ICONIFIED) {
-                                        Main.main.setState(Frame.NORMAL);
-                                    }
+                                    Main.main.setState(Frame.NORMAL); // De-iconify if minimized
                                     Main.main.setVisible(true);
                                     Main.main.toFront();
                                     Main.main.requestFocus();
@@ -60,6 +66,7 @@ public class WaylandNotification {
                     }
                 }
             } catch (Exception e) {
+                logger.severe("Error sending Wayland notification: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();

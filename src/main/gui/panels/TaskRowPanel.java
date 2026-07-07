@@ -15,7 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 import main.entities.Task;
-import main.gui.windows.TaskWindow;
+import main.gui.Main;
+import main.gui.windows.CreateUpdateTaskWindow;
 import main.services.task.UpdateTaskService;
 
 public class TaskRowPanel extends JPanel{
@@ -23,12 +24,12 @@ public class TaskRowPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = Logger.getLogger(TaskRowPanel.class.getName());
-	private ProjectInfoPanel panel;
+	private JPanel projectPanel;
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
-	public TaskRowPanel(ProjectInfoPanel panel, Task task) {
-		this.panel = panel;
+	public TaskRowPanel(JPanel projectPanel, Task task) {
+		this.projectPanel = projectPanel;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		putClientProperty("task_id", task.task_id());
@@ -80,11 +81,15 @@ public class TaskRowPanel extends JPanel{
 		add(title);
 		
 		setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+		addTaskActionListener();
 		
+	}
+	
+	private void addTaskActionListener() {
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				new TaskWindow(panel ,TaskRowPanel.this);
+				new CreateUpdateTaskWindow(Main.main, projectPanel, true,TaskRowPanel.this);
 			}
 		});
 	}
@@ -135,7 +140,7 @@ public class TaskRowPanel extends JPanel{
 			);
 			
 			if (UpdateTaskService.execute(updatedTask)) {
-				panel.listTasks();
+				ProjectInfoPanel.projectInfoPanel.listTasks();
 			}
 		});
 	}

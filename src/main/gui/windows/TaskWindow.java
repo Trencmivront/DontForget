@@ -67,7 +67,7 @@ public class TaskWindow extends JDialog {
 			setLocation(200, 200);
 		}
 
-		// Content Panel with standard margin (15, 15) and border 20 like CreateTaskWindow
+		// Content Panel with standard margin (15, 15) and border 20 like CreateUpdateTaskWindow
 		contentPanel = new JPanel(new BorderLayout(15, 15));
 		contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -83,7 +83,7 @@ public class TaskWindow extends JDialog {
 			getReminders(taskId);
 		}
 		
-		// 1. Task Title (Header Panel) - Styled like titleField in CreateTaskWindow
+		// 1. Task Title (Header Panel) - Styled like titleField in CreateUpdateTaskWindow
 		JTextField titleField = new JTextField(taskTitle);
 		titleField.setEditable(false);
 //		set caret invisible
@@ -92,7 +92,7 @@ public class TaskWindow extends JDialog {
 		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		contentPanel.add(titleField, BorderLayout.NORTH);
 
-		// 2. Center Panel (Description + Options) - Styled like centerPanel in CreateTaskWindow
+		// 2. Center Panel (Description + Options) - Styled like centerPanel in CreateUpdateTaskWindow
 		JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
 
 		String description = (String) taskPanel.getClientProperty("description");
@@ -270,7 +270,7 @@ public class TaskWindow extends JDialog {
 							((ProjectInfoPanel) source).listTasks();
 						}
 						source.revalidate();
-						Main.refreshWindow();
+						Main.main.refreshWindow();
 						dispose();
 					} else {
 						new ErrorDialog("Error", "Failed to delete the task.");

@@ -289,6 +289,7 @@ public class Main extends JFrame {
 				@Override
 				public void windowClosed(WindowEvent e) {
 					listProjects(projectsContainer);
+					refreshWindow();
 				}
 				
 			});
@@ -330,9 +331,9 @@ public class Main extends JFrame {
 		});
 	}
 	
-	public static void refreshWindow() {
-		main.revalidate();
-		main.repaint();
+	public void refreshWindow() {
+		revalidate();
+		repaint();
 	}
 	
 	private void setProjectBackgroundColor(JPanel project) {

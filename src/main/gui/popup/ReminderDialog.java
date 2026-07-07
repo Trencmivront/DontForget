@@ -27,7 +27,7 @@ import javax.swing.border.EmptyBorder;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import main.gui.windows.CreateTaskWindow;
+import main.gui.windows.CreateUpdateTaskWindow;
 
 public class ReminderDialog extends JDialog {
 
@@ -38,7 +38,7 @@ public class ReminderDialog extends JDialog {
 	private ButtonGroup radioGroup = new ButtonGroup();
 	private JPanel radioPanel;
 	
-	public ReminderDialog(CreateTaskWindow source, JButton reminderBtn) {
+	public ReminderDialog(CreateUpdateTaskWindow source, JButton reminderBtn) {
 		super(source, "Set Reminder", true);
 		setAlwaysOnTop(true);
 		setResizable(false);
@@ -223,7 +223,7 @@ public class ReminderDialog extends JDialog {
 		cancelButton.addActionListener(_ -> dispose());
 	}
 
-	private void addOkButtonActionListener(JButton okButton, DateTimePicker picker, JTextField msgField, CreateTaskWindow source, JButton reminderBtn) {
+	private void addOkButtonActionListener(JButton okButton, DateTimePicker picker, JTextField msgField, CreateUpdateTaskWindow source, JButton reminderBtn) {
 		okButton.addActionListener(_ -> {
 			LocalDateTime ldt = picker.getDateTimeStrict();
 			if (ldt == null) {
