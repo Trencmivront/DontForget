@@ -12,7 +12,7 @@ public class GetIconColorOfProjectService {
 	
 	private static final Logger logger = Logger.getLogger(GetIconColorOfProjectService.class.getName());
 	
-	public static IconColor execute(int id) {
+	public static IconColor execute(Long id) {
 		
 		logger.info("The class " + logger.getName() + " is executed.");
 		
@@ -21,20 +21,20 @@ public class GetIconColorOfProjectService {
 			String sql = "SELECT * FROM ICON_COLOR ic JOIN PROJECT p "
 					+ "ON p.icon_color_id = ic.icon_color_id WHERE p.project_id = (?)";
 			
-			PreparedStatement stm = App.connection.prepareStatement(sql); 
-			
-			stm.setInt(1, id);
-			ResultSet rs =  stm.executeQuery();
-			
-			if(rs.next()) {
-				return new IconColor(rs.getInt("icon_color_id"),
-						rs.getInt("red"),
-						rs.getInt("green"),
-						rs.getInt("blue"));
+			try (PreparedStatement stm = App.getConnection().prepareStatement(sql)) {
+				stm.setLong(1, id);
+				try (ResultSet rs = stm.executeQuery()) {
+					if(rs.next()) {
+						return new IconColor(rs.getLong("icon_color_id"),
+								rs.getInt("red"),
+								rs.getInt("green"),
+								rs.getInt("blue"));
+					}
+				}
 			}
 			
 			return null;
-		}catch (SQLException s) {
+		} catch (SQLException s) {
 			s.printStackTrace();
 			return null;
 		}

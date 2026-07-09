@@ -13,7 +13,7 @@ public class GetTagsService {
 	
 	public static List<Tag> execute(){
 		
-		try (Statement stm = App.connection.createStatement()){
+		try (Statement stm = App.getConnection().createStatement()){
 			
 			String sql = "SELECT * FROM TAG";
 			
@@ -22,9 +22,9 @@ public class GetTagsService {
 			List<Tag> tags = new ArrayList<Tag>();
 			
 			while(rs.next()) {
-				tags.add(new Tag(rs.getInt("tag_id"),
+				tags.add(new Tag(rs.getLong("tag_id"),
 						rs.getString("tag_name"),
-						rs.getInt("icon_color_id")));
+						rs.getLong("icon_color_id")));
 			}
 			
 			return tags.isEmpty() ? null : tags;

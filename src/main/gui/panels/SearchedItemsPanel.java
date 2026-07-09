@@ -122,10 +122,10 @@ public class SearchedItemsPanel extends JPanel{
 						try {
 							Field field = Main.class.getDeclaredField("showInfoPanel");
 							field.setAccessible(true);
-							JPanel showInfoPanel = (JPanel) field.get(Main.main);
+							JPanel showInfoPanel = (JPanel) field.get(Main.getMain());
 							showInfoPanel.removeAll();
 							showInfoPanel.add(new ProjectInfoPanel(panel));
-							Main.main.refreshWindow();
+							Main.getMain().refreshWindow();
 							
 							if (window instanceof JDialog) {
 								window.dispose();

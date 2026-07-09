@@ -10,13 +10,13 @@ import javax.sound.sampled.Clip;
 public class NotificationWorker implements Runnable{
 	private static final Logger logger = Logger.getLogger(NotificationWorker.class.getName());
 //	id of the task to open
-	private int id;
+	private Long id;
 //	title of the reminder
 	private String title;
 //	message of the reminder
 	private String message;
 	
-	public NotificationWorker(int id, String title, String message) {
+	public NotificationWorker(Long id, String title, String message) {
 		super();
 		this.id = id;
 		this.title = title;

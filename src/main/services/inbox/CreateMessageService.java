@@ -17,7 +17,7 @@ public class CreateMessageService {
 
 		String sql = "INSERT INTO INBOX (message) VALUES (?)";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 			pstm.setString(1, message);
 			int rowsAffected = pstm.executeUpdate();
 			logger.info("Message saved successfully.");

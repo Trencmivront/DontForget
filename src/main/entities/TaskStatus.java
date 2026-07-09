@@ -1,3 +1,3 @@
 package main.entities;
 
-public record TaskStatus(Integer status_id, String status_name) {}
+public record TaskStatus(Long status_id, String status_name) {}

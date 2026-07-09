@@ -15,7 +15,7 @@ public class GetIconColorsService {
 	
 	public static List<IconColor> execute(){
 		
-		try (Statement stm = App.connection.createStatement()){
+		try (Statement stm = App.getConnection().createStatement()){
 			
 			String sql = "SELECT * FROM ICON_COLOR";
 			
@@ -26,7 +26,7 @@ public class GetIconColorsService {
 			List<IconColor> ic = new ArrayList<>();
 			
 			while(rs.next()) {
-				ic.add(new IconColor(rs.getInt("icon_color_id"),
+				ic.add(new IconColor(rs.getLong("icon_color_id"),
 						rs.getInt("red"),
 						rs.getInt("green"),
 						rs.getInt("blue")));

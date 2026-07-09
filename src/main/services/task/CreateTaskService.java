@@ -17,14 +17,18 @@ public class CreateTaskService {
 
 	private CreateTaskService() {}
 
-	public static int execute(TaskDCO task) {
+	public static Long execute(TaskDCO task) {
 		logger.info("Executing CreateTaskService.");
 
-		int projectId = task.project_id();
+		Long projectId = task.project_id();
 		int listOrder = 1;
 		String maxOrderSql = "SELECT MAX(list_order) as max_order FROM TASK WHERE project_id = ?";
-		try (PreparedStatement pstm = App.connection.prepareStatement(maxOrderSql)) {
-			pstm.setInt(1, projectId);
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(maxOrderSql)) {
+			if (projectId != null) {
+				pstm.setLong(1, projectId);
+			} else {
+				pstm.setNull(1, Types.BIGINT);
+			}
 			try (ResultSet rs = pstm.executeQuery()) {
 				if (rs.next()) {
 					listOrder = rs.getInt("max_order") + 1;
@@ -38,11 +42,11 @@ public class CreateTaskService {
 		String insertTaskSql = "INSERT INTO TASK (task_title, description, status_id, priority, due_date, list_order, project_id, created_at, updated_at) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(insertTaskSql, Statement.RETURN_GENERATED_KEYS)){
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(insertTaskSql, Statement.RETURN_GENERATED_KEYS)){
 
 				pstm.setString(1, task.task_title());
 				pstm.setString(2, task.description() == null || task.description().isEmpty() ? null : task.description());
-				pstm.setInt(3, task.status_id() != null ? task.status_id() : 1); // 1 = ACTIVE
+				pstm.setLong(3, task.status_id() != null ? task.status_id() : 1L); // 1 = ACTIVE
 
 				if (task.priority() != null) {
 					pstm.setInt(4, task.priority());
@@ -57,21 +61,25 @@ public class CreateTaskService {
 				}
 
 				pstm.setInt(6, listOrder);
-				pstm.setInt(7, projectId);
+				if (projectId != null) {
+					pstm.setLong(7, projectId);
+				} else {
+					pstm.setNull(7, Types.BIGINT);
+				}
 
 				pstm.execute();
 
 				logger.info("Task saved successfully.");
 				ResultSet rs = pstm.getGeneratedKeys();
 				if(rs.next()) {
-					return rs.getInt(1);
+					return rs.getLong(1);
 				}
-				return 0;
+				return 0L;
 
 		} catch (SQLException e) {
 			logger.severe("Database connection error: " + e.getMessage());
 			e.printStackTrace();
-			return 0;
+			return 0L;
 		}
 	}
 }

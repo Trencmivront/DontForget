@@ -29,7 +29,11 @@ public class ProjectInfoPanel extends JPanel{
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	private JPanel projectPanel;
-	public static ProjectInfoPanel projectInfoPanel;
+	private static ProjectInfoPanel projectInfoPanel;
+	
+	public static ProjectInfoPanel getProjectInfoPanel() {
+		return projectInfoPanel;
+	}
 	
 	public ProjectInfoPanel(JPanel panel) {
 		projectPanel = panel;
@@ -53,7 +57,7 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	public void listTasks() {
-		int id = (int)projectPanel.getClientProperty("project_id");
+		Long id = (Long)projectPanel.getClientProperty("project_id");
 		List<Task> tasks = GetTasksOfProjectService.execute(id);
 		
 		if(tasks.isEmpty()) {
@@ -61,7 +65,7 @@ public class ProjectInfoPanel extends JPanel{
 			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
 			revalidate();
 			repaint();
-			Main.main.refreshWindow();
+			Main.getMain().refreshWindow();
 			logger.info("No task found for project.");
 			return;
 		}
@@ -95,7 +99,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_-> new CreateUpdateTaskWindow(Main.main ,projectPanel, false, null));
+		button.addActionListener(_-> new CreateUpdateTaskWindow(Main.getMain() ,(Long)projectPanel.getClientProperty("project_id"), false, null));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);
@@ -124,7 +128,7 @@ public class ProjectInfoPanel extends JPanel{
 					JOptionPane.WARNING_MESSAGE
 				);
 			if(confirm == JOptionPane.YES_OPTION) {
-				int id = (int) projectPanel.getClientProperty("project_id");
+				Long id = (Long) projectPanel.getClientProperty("project_id");
 				DeleteCompletedTasksService.execute(id);
 				listTasks();
 			}

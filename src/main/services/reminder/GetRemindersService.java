@@ -22,7 +22,7 @@ public class GetRemindersService {
 		String sql = "SELECT * FROM REMINDER ORDER BY remind_at ASC";
 		List<Reminder> reminders = new ArrayList<>();
 		
-		try (Statement stm = App.connection.createStatement();
+		try (Statement stm = App.getConnection().createStatement();
 			 ResultSet rs = stm.executeQuery(sql)) {
 			
 			while (rs.next()) {

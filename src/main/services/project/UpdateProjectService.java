@@ -13,7 +13,7 @@ public class UpdateProjectService {
 
 	private UpdateProjectService() {}
 
-	public static boolean execute(ProjectDCO p, int id) {
+	public static boolean execute(ProjectDCO p, Long id) {
 		logger.info("Class " + logger.getName() + " is executed with project ID: " + id);
 
 		if (p == null) {
@@ -23,11 +23,11 @@ public class UpdateProjectService {
 
 		String sql = "UPDATE PROJECT SET project_title = ?, description = ?, icon_color_id = ? WHERE project_id = ?";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 			pstm.setString(1, p.project_title());
 			pstm.setString(2, p.description() == null || p.description().isEmpty() ? null : p.description());
-			pstm.setInt(3, p.icon_color_id());
-			pstm.setInt(4, id);
+			pstm.setLong(3, p.icon_color_id());
+			pstm.setLong(4, id);
 
 			int rowsAffected = pstm.executeUpdate();
 			logger.info("Project update complete. Rows affected: " + rowsAffected);

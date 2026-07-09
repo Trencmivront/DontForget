@@ -16,20 +16,20 @@ public class GetTaskTagByTaskService {
 
 	private static final Logger logger = Logger.getLogger(GetTaskTagByTaskService.class.getName());
 
-	public static List<TaskTag> execute(int taskId) {
+	public static List<TaskTag> execute(Long taskId) {
 		logger.info("Executing GetTaskTagByTaskService with taskId: " + taskId);
 
 		String sql = "SELECT * FROM TASK_TAG WHERE task_id = ?";
 		List<TaskTag> taskTags = new ArrayList<>();
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
-			pstm.setInt(1, taskId);
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
+			pstm.setLong(1, taskId);
 
 			try (ResultSet rs = pstm.executeQuery()) {
 				while (rs.next()) {
 					taskTags.add(new TaskTag(
-						rs.getInt("task_id"),
-						rs.getInt("tag_id")
+						rs.getLong("task_id"),
+						rs.getLong("tag_id")
 					));
 				}
 			}

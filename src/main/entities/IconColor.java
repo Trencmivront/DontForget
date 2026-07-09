@@ -1,3 +1,3 @@
 package main.entities;
 
-public record IconColor(Integer icon_color_id, Integer red, Integer green, Integer blue) {}
+public record IconColor(Long icon_color_id, Integer red, Integer green, Integer blue) {}

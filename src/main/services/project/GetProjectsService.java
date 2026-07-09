@@ -17,7 +17,7 @@ public class GetProjectsService {
 
 	public static List<Project> execute(){
 		logger.info("Class " + logger.getName() + " is executed.");
-		try(Statement stm = App.connection.createStatement()) {
+		try(Statement stm = App.getConnection().createStatement()) {
 			
 			String sql = "SELECT * FROM PROJECT ORDER BY list_order";
 			
@@ -27,11 +27,11 @@ public class GetProjectsService {
 			
 			while(rs.next()) {
 				projects.add(new Project(
-						rs.getInt("project_id"),
+						rs.getLong("project_id"),
 						rs.getString("project_title"),
 						rs.getString("description"),
 						rs.getInt("list_order"),
-						rs.getInt("icon_color_id")
+						rs.getLong("icon_color_id")
 						));
 			}
 			return projects;

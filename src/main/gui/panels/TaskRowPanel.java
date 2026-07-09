@@ -48,7 +48,7 @@ public class TaskRowPanel extends JPanel{
 		JLabel title = new JLabel(task.task_title());
 //		means that task is completed
 		
-		switch (task.status_id()) {
+		switch (task.status_id() != null ? task.status_id().intValue() : 1) {
 		case 1, 0:
 		break;
 		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.task_title() + "</i></s></html>");
@@ -89,7 +89,7 @@ public class TaskRowPanel extends JPanel{
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				new CreateUpdateTaskWindow(Main.main, projectPanel, true,TaskRowPanel.this);
+				new CreateUpdateTaskWindow(Main.getMain(), (Long) getClientProperty("project_id"), true, TaskRowPanel.this);
 			}
 		});
 	}
@@ -102,26 +102,26 @@ public class TaskRowPanel extends JPanel{
 				return;
 			}
 			
-			Integer taskId = (Integer) parentContainer.getClientProperty("task_id");
+			Long taskId = (Long) parentContainer.getClientProperty("task_id");
 			String taskTitle = (String) parentContainer.getClientProperty("task_title");
 			String description = (String) parentContainer.getClientProperty("description");
 			Integer priority = (Integer) parentContainer.getClientProperty("priority");
 			Timestamp dueDate = (Timestamp) parentContainer.getClientProperty("due_date");
 			Integer listOrder = (Integer) parentContainer.getClientProperty("list_order");
-			Integer projectId = (Integer) parentContainer.getClientProperty("project_id");
+			Long projectId = (Long) parentContainer.getClientProperty("project_id");
 			Timestamp createdAt = (Timestamp) parentContainer.getClientProperty("created_at");
 
-			int newStatusId = 1;
+			Long newStatusId = 1L;
 			Timestamp completedAt = null;
 			if (chk.isSelected()) {
-				newStatusId = 2; // COMPLETED
+				newStatusId = 2L; // COMPLETED
 				completedAt = new Timestamp(System.currentTimeMillis());
 				dueDate = null;
 			} else {
 				if (dueDate != null && dueDate.toLocalDateTime().toLocalDate().isBefore(LocalDate.now())) {
-					newStatusId = 3; // PAST
+					newStatusId = 3L; // PAST
 				} else {
-					newStatusId = 1; // ACTIVE
+					newStatusId = 1L; // ACTIVE
 				}
 			}
 
@@ -140,7 +140,7 @@ public class TaskRowPanel extends JPanel{
 			);
 			
 			if (UpdateTaskService.execute(updatedTask)) {
-				ProjectInfoPanel.projectInfoPanel.listTasks();
+				ProjectInfoPanel.getProjectInfoPanel().listTasks();
 			}
 		});
 	}

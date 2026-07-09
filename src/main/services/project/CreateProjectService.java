@@ -20,8 +20,8 @@ public class CreateProjectService {
 		
 		String listOrderSql = "SELECT MAX(list_order) as list_order FROM PROJECT";
 		
-		try(PreparedStatement pstm = App.connection.prepareStatement(createSql);
-				Statement stm = App.connection.createStatement()) {
+		try(PreparedStatement pstm = App.getConnection().prepareStatement(createSql);
+				Statement stm = App.getConnection().createStatement()) {
 			
 			stm.execute(listOrderSql);
 			
@@ -36,7 +36,7 @@ public class CreateProjectService {
 			pstm.setString(1, p.project_title());
 			pstm.setString(2, p.description());
 			pstm.setInt(3, listOrder);
-			pstm.setInt(4, p.icon_color_id());
+			pstm.setLong(4, p.icon_color_id());
 			
 			//if the result is empty
 			return !pstm.execute();

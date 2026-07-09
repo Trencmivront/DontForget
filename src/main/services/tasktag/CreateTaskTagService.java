@@ -18,10 +18,10 @@ public class CreateTaskTagService {
 
 		String sql = "INSERT INTO TASK_TAG (task_id, tag_id) VALUES (?, ?)";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 
-			pstm.setInt(1, taskTag.task_id());
-			pstm.setInt(2, taskTag.tag_id());
+			pstm.setLong(1, taskTag.task_id());
+			pstm.setLong(2, taskTag.tag_id());
 
 			pstm.executeUpdate();
 

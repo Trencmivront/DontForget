@@ -114,7 +114,7 @@ public class InboxPanel extends JPanel {
 				if (row != -1) {
 					int modelRow = table.convertRowIndexToModel(row);
 					Inbox item = inboxItems.get(modelRow);
-					DeleteMessageByIdService.execute(item.inbox_id().intValue());
+					DeleteMessageByIdService.execute(item.inbox_id());
 					model.removeRow(modelRow);
 					inboxItems.remove(modelRow);
 				}

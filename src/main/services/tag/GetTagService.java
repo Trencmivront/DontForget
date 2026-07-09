@@ -14,20 +14,20 @@ public class GetTagService {
 
 	private static final Logger logger = Logger.getLogger(GetTagService.class.getName());
 
-	public static Tag execute(int tagId) {
+	public static Tag execute(Long tagId) {
 		logger.info("Executing GetTagService with tagId: " + tagId);
 
 		String sql = "SELECT * FROM TAG WHERE tag_id = ?";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
-			pstm.setInt(1, tagId);
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
+			pstm.setLong(1, tagId);
 
 			try (ResultSet rs = pstm.executeQuery()) {
 				if (rs.next()) {
 					return new Tag(
-						rs.getInt("tag_id"),
+						rs.getLong("tag_id"),
 						rs.getString("tag_name"),
-						rs.getInt("icon_color_id")
+						rs.getLong("icon_color_id")
 					);
 				}
 			}

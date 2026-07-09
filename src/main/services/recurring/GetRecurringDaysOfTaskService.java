@@ -16,16 +16,16 @@ public class GetRecurringDaysOfTaskService {
 
 	private GetRecurringDaysOfTaskService() {}
 
-	public static List<DayOfWeek> execute(int taskId) {
+	public static List<DayOfWeek> execute(Long taskId) {
 		logger.info("Executing GetRecurringDaysOfTaskService for taskId: " + taskId);
 		List<DayOfWeek> days = new ArrayList<>();
 		String sql = "SELECT week_day_id FROM RECURRING_TASK WHERE task_id = ?";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
-			pstm.setInt(1, taskId);
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
+			pstm.setLong(1, taskId);
 			try (ResultSet rs = pstm.executeQuery()) {
 				while (rs.next()) {
-					int dayValue = rs.getInt("week_day_id");
+					int dayValue = (int) rs.getLong("week_day_id");
 					days.add(DayOfWeek.of(dayValue));
 				}
 			}

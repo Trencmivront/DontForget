@@ -25,10 +25,10 @@ public class UpdateTaskService {
 
 		String sql = "UPDATE TASK SET task_title = ?, description = ?, status_id = ?, priority = ?, due_date = ?, list_order = ?, project_id = ?, updated_at = CURRENT_TIMESTAMP, completed_at = ? WHERE task_id = ?";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 			pstm.setString(1, task.task_title());
 			pstm.setString(2, task.description() == null || task.description().isEmpty() ? null : task.description());
-			pstm.setInt(3, task.status_id() != null ? task.status_id() : 1);
+			pstm.setLong(3, task.status_id() != null ? task.status_id() : 1L);
 
 			if (task.priority() != 0) {
 				pstm.setInt(4, task.priority());
@@ -48,16 +48,16 @@ public class UpdateTaskService {
 				pstm.setNull(6, Types.INTEGER);
 			}
 
-			if (task.project_id() != 0) {
-				pstm.setInt(7, task.project_id());
+			if (task.project_id() != null && task.project_id() != 0L) {
+				pstm.setLong(7, task.project_id());
 			} else {
-				pstm.setNull(7, Types.INTEGER);
+				pstm.setNull(7, Types.BIGINT);
 			}
 
 			// Handle completed_at timestamp:
 			// If status is COMPLETED (2), set completed_at (either provided or current time).
 			// Otherwise (ACTIVE or other), reset completed_at to null.
-			if (task.status_id() != 0 && task.status_id() == 2) {
+			if (task.status_id() != null && task.status_id() == 2L) {
 				if (task.completed_at() != null) {
 					pstm.setTimestamp(8, task.completed_at());
 				} else {
@@ -67,7 +67,7 @@ public class UpdateTaskService {
 				pstm.setNull(8, Types.TIMESTAMP);
 			}
 
-			pstm.setInt(9, task.task_id());
+			pstm.setLong(9, task.task_id());
 
 			int rowsAffected = pstm.executeUpdate();
 			logger.info("Task update complete. Rows affected: " + rowsAffected);

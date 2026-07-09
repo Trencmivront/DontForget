@@ -27,15 +27,19 @@ import main.notify.NotificationManager;
 
 public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
-	public static Connection connection; 
+	private static Connection connection;
 	private static ServerSocket serverSocket;
+	
+	public static Connection getConnection(){
+		return connection;
+	}
     
-    public static void main(String[] args) {
+    public static void main() {
     	// Try binding to the single-instance port immediately
         try {
             serverSocket = new ServerSocket(19999);
             logger.info("Successfully bound port 19999. Starting primary instance.");
-        } catch (IOException e) {
+        } catch (IOException _) {
             // Port already in use. Connect to the existing instance and ask it to show.
             logger.info("Another instance is running. Attempting to bring it to front...");
             try (Socket socket = new Socket("localhost", 19999);
@@ -102,10 +106,10 @@ public class App {
                         String message = bf.readLine();
                         if ("SHOW".equals(message)) {
                             SwingUtilities.invokeLater(() -> {
-                                if (Main.main != null) {
-                                    Main.main.setVisible(true);
-                                    Main.main.toFront();
-                                    Main.main.requestFocus();
+                                if (Main.getMain() != null) {
+                                    Main.getMain().setVisible(true);
+                                    Main.getMain().toFront();
+                                    Main.getMain().requestFocus();
                                 }
                             });
                         }
@@ -125,16 +129,26 @@ public class App {
     }
     
     private static void applySettings() {
-        boolean initialized = false;
-        Path settingsPath = Path.of("src/data/settings/settings.json");
-        ObjectMapper mapper = new ObjectMapper();
+    	
+    	Path settingsPath = Path.of("src/data/settings/settings.json");
+    	ObjectMapper mapper = new ObjectMapper();
+    	
+    	checkDatabaseInitialized(settingsPath, mapper);
+        
+        System.setProperty("sun.java2d.uiScale", "2.0");
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
+    }
+    
+    private static void checkDatabaseInitialized(Path settingsPath, ObjectMapper mapper) {
+    	
+    	boolean value = false;
+        String key = "isDatabaseInitialized";
         
         if (!Files.exists(settingsPath)) {
             try {
                 Files.createDirectories(settingsPath.getParent());
-                ObjectNode rootNode = mapper.createObjectNode();
-                rootNode.put("isDatabaseInitialized", false);
-                mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
+                setKeyValue(key, false, mapper, settingsPath);
                 logger.info("settings.json did not exist. Created and initialized.");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -142,9 +156,9 @@ public class App {
         } else {
             try {
                 JsonNode rootNode = mapper.readTree(settingsPath.toFile());
-                JsonNode initNode = rootNode.get("isDatabaseInitialized");
+                JsonNode initNode = rootNode.get(key);
                 if (initNode != null && initNode.asBoolean()) {
-                    initialized = true;
+                    value = true;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -153,35 +167,40 @@ public class App {
 
         try {
             connection = DriverManager.getConnection("jdbc:h2:./src/data/db/dontforget", "sa", "");
-            if (initialized) {
+            if (value) {
                 logger.info("Database connection established.");
             } else {
                 logger.info("Database connection established. Initializing database...");
                 initializeDatabase();
-                try {
-                    ObjectNode rootNode = mapper.createObjectNode();
-                    rootNode.put("isDatabaseInitialized", true);
-                    mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
-                    logger.info("Saved settings.");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                setKeyValue(key, true, mapper, settingsPath);
             }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(new JDialog(), "ERROR: Couldn't connect to database.", "ok", JOptionPane.WARNING_MESSAGE);
         }
         
-        System.setProperty("sun.java2d.uiScale", "2.0");
-        System.setProperty("awt.useSystemAAFontSettings", "on");
-        System.setProperty("swing.aatext", "true");
+    }
+    
+    private static void setKeyValue(String key, Object value, ObjectMapper mapper, Path settingsPath) {
+        try {
+            ObjectNode rootNode = mapper.createObjectNode();
+            if(rootNode.get(key) != null) {
+                rootNode.replace(key, (JsonNode)value);
+            }
+            else {
+            	rootNode.putIfAbsent(key, (JsonNode)value);
+            }
+            mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
+            logger.info("Saved settings.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     private static void initializeDatabase() {
     	
 //    	initializing the database
-		try {
-			Statement stmt = connection.createStatement();
+		try (Statement stmt = connection.createStatement()){
 
 	        // Initialize database tables using crTables.sql
 	        Path crTablesPath = Path.of("/usr/share/DontForget/db/crTables.sql");

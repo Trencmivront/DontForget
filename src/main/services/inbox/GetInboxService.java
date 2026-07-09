@@ -21,7 +21,7 @@ public class GetInboxService {
 		String sql = "SELECT * FROM INBOX ORDER BY inbox_id DESC";
 		List<Inbox> inboxList = new ArrayList<>();
 		
-		try (Statement stm = App.connection.createStatement();
+		try (Statement stm = App.getConnection().createStatement();
 			 ResultSet rs = stm.executeQuery(sql)) {
 			
 			while (rs.next()) {

@@ -1,3 +1,3 @@
 package main.entities;
 
-public record Tag(Integer tag_id, String tag_name, Integer icon_color_id) {}
+public record Tag(Long tag_id, String tag_name, Long icon_color_id) {}

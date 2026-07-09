@@ -13,7 +13,7 @@ public class DeleteTaskService {
 
 	private static final Logger logger = Logger.getLogger(DeleteTaskService.class.getName());
 
-	public static boolean execute(int id) {
+	public static boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		// 1. Delete associated connections using the specialized service classes
@@ -23,8 +23,8 @@ public class DeleteTaskService {
 		// 2. Delete the task record itself
 		String deleteTaskSql = "DELETE FROM TASK WHERE task_id = ?";
 
-		try (PreparedStatement pstmTask = App.connection.prepareStatement(deleteTaskSql)) {
-			pstmTask.setInt(1, id);
+		try (PreparedStatement pstmTask = App.getConnection().prepareStatement(deleteTaskSql)) {
+			pstmTask.setLong(1, id);
 			int rowsAffected = pstmTask.executeUpdate();
 			logger.info("Task deleted. Rows affected: " + rowsAffected);
 			return rowsAffected > 0;

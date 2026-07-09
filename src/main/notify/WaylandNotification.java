@@ -13,10 +13,12 @@ import main.gui.Main;
 import main.services.inbox.CreateMessageService;
 
 public class WaylandNotification {
+    private WaylandNotification() {
+    }
 
     private static final Logger logger = Logger.getLogger(WaylandNotification.class.getName());
 
-    public static void sendNotification(int taskId, String title, String body) {
+    public static void sendNotification(Long taskId, String title, String body) {
         logger.info("Preparing to send notification. Task ID: " + taskId + ", Title: " + title);
         // Run in a new thread so it doesn't block your main application
         new Thread(() -> {
@@ -54,11 +56,11 @@ public class WaylandNotification {
                         if (line.contains("'default'")) {
                             logger.info("User clicked the default action of notification.");
                             SwingUtilities.invokeLater(() -> {
-                                if (Main.main != null) {
-                                    Main.main.setState(Frame.NORMAL); // De-iconify if minimized
-                                    Main.main.setVisible(true);
-                                    Main.main.toFront();
-                                    Main.main.requestFocus();
+                                if (Main.getMain() != null) {
+                                    Main.getMain().setState(Frame.NORMAL); // De-iconify if minimized
+                                    Main.getMain().setVisible(true);
+                                    Main.getMain().toFront();
+                                    Main.getMain().requestFocus();
                                 }
                             });
                             break; 

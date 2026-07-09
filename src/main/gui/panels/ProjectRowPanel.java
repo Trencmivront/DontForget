@@ -35,7 +35,7 @@ public class ProjectRowPanel extends JPanel {
 		
 		JLabel label = new JLabel(project.project_title());
 		
-		int projectId = project.project_id();
+		Long projectId = project.project_id();
 		
 		putClientProperty("project_title", project.project_title());
 		putClientProperty("description", project.description());
@@ -111,7 +111,7 @@ public class ProjectRowPanel extends JPanel {
 				JOptionPane.WARNING_MESSAGE
 			);
 			if (confirm == JOptionPane.YES_OPTION) {
-				int projectId = (int) getClientProperty("project_id");
+				Long projectId = (Long) getClientProperty("project_id");
 				if (DeleteProjectService.execute(projectId)) {
 					refreshProjectsList();
 				} else {
@@ -122,12 +122,12 @@ public class ProjectRowPanel extends JPanel {
 	}
 
 	private void refreshProjectsList() {
-		if (Main.main != null && Main.projectsContainer != null) {
+		if (Main.getMain() != null && Main.getMain().getProjectsContainer() != null) {
 			try {
 				Method method = Main.class.getDeclaredMethod("listProjects", JScrollPane.class);
 				method.setAccessible(true);
-				method.invoke(Main.main, Main.projectsContainer);
-				Main.main.refreshWindow();
+				method.invoke(Main.getMain(), Main.getMain().getProjectsContainer());
+				Main.getMain().refreshWindow();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

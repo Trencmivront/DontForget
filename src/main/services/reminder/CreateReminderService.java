@@ -19,7 +19,7 @@ public class CreateReminderService {
 
 		String sql = "INSERT INTO REMINDER (task_id, remind_at, cstm_message) VALUES (?, ?, ?)";
 
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)) {
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 
 			pstm.setLong(1, reminder.task_id());
 			pstm.setTimestamp(2, reminder.remind_at());

@@ -173,16 +173,21 @@ public class CreateUpdateProjectWindow extends JDialog {
 				return;
 			}
 			JRadioButton selectedRadioButton = getSelectedRadioButton(bg);
-//			if color is not picked, make color red by default
-			int iconColorId = 1;
+			Long iconColorId = 1L;
 			if(selectedRadioButton != null) {
-				iconColorId = (int) selectedRadioButton.getClientProperty("icon_color_id");
+				Object colorIdObj = selectedRadioButton.getClientProperty("icon_color_id");
+				if (colorIdObj instanceof Number) {
+					iconColorId = ((Number) colorIdObj).longValue();
+				}
 			}
 			
 			if(isUpdate) {
-				int id = (int) updatedProject.getClientProperty("project_id");
-				if(!UpdateProjectService.execute(new ProjectDCO(title, description, iconColorId), id)) {
-					new ErrorDialog("Database Error", "Error while updating project");
+				Object idObj = updatedProject.getClientProperty("project_id");
+				if (idObj instanceof Number) {
+					Long id = ((Number) idObj).longValue();
+					if(!UpdateProjectService.execute(new ProjectDCO(title, description, iconColorId), id)) {
+						new ErrorDialog("Database Error", "Error while updating project");
+					}
 				}
 			}
 			else {
@@ -205,7 +210,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 		for(IconColor color : ic) {
 			
 			JRadioButton rb = new JRadioButton();
-			rb.setActionCommand(Integer.toString(color.icon_color_id()));
+			rb.setActionCommand(Long.toString(color.icon_color_id()));
 			rb.setBackground(new Color(color.red(), color.green(), color.blue()));
 			rb.putClientProperty("icon_color_id", color.icon_color_id());
 			bg.add(rb);
@@ -237,17 +242,17 @@ public class CreateUpdateProjectWindow extends JDialog {
 			return;
 		}
 		Object projIdObj = updatedProject.getClientProperty("project_id");
-		if (projIdObj instanceof Integer) {
-			int projectId = (int) projIdObj;
+		if (projIdObj instanceof Number) {
+			Long projectId = ((Number) projIdObj).longValue();
 			IconColor projectColor = GetIconColorOfProjectService.execute(projectId);
 			if (projectColor != null) {
 				for (Component comp : colorRadioPanel.getComponents()) {
 					if (comp instanceof JRadioButton) {
 						JRadioButton rb = (JRadioButton) comp;
 						Object rbColorIdObj = rb.getClientProperty("icon_color_id");
-						if (rbColorIdObj instanceof Integer) {
-							int rbColorId = (int) rbColorIdObj;
-							if (rbColorId == projectColor.icon_color_id()) {
+						if (rbColorIdObj instanceof Number) {
+							Long rbColorId = ((Number) rbColorIdObj).longValue();
+							if (rbColorId.equals(projectColor.icon_color_id())) {
 								rb.setSelected(true);
 								bg.setSelected(rb.getModel(), true);
 								break;

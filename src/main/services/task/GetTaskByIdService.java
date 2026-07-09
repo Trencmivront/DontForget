@@ -12,24 +12,24 @@ public class GetTaskByIdService {
 	
 	private static final Logger logger = Logger.getLogger(GetTaskByIdService.class.getName());
 	
-	public Task execute(int id) {
+	public Task execute(Long id) {
 		
 		String sql = "SELECT * FROM TASK WHERE task_id=?";
 		
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)){
-			pstm.setInt(1, id);
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)){
+			pstm.setLong(1, id);
 			
 			ResultSet rs = pstm.executeQuery();
 			
 			if(rs.next()) {
-				return new Task(rs.getInt("task_id"),
+				return new Task(rs.getLong("task_id"),
 						rs.getString("task_title"),
 						rs.getString("description"),
-						rs.getInt("status_id"),
+						rs.getLong("status_id"),
 						rs.getInt("priority"),
 						rs.getTimestamp("due_date"),
 						rs.getInt("list_order"),
-						rs.getInt("project_id"),
+						rs.getLong("project_id"),
 						rs.getTimestamp("created_at"),
 						rs.getTimestamp("updated_at"),
 						rs.getTimestamp("completed_at"));

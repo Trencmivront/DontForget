@@ -16,27 +16,27 @@ public class GetTasksOfProjectService {
  private GetTasksOfProjectService() {}
 	private static final Logger logger = Logger.getLogger(GetTasksOfProjectService.class.getName());
 	
-	public static List<Task> execute(int id){
+	public static List<Task> execute(Long id){
 		logger.info("Service executed.");
 		
 		String sql = "SELECT * FROM TASK WHERE project_id = ?";
 		List<Task> tasks = new ArrayList<Task>();
 		
-		try (PreparedStatement pstm = App.connection.prepareStatement(sql)){
+		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)){
 			
-			pstm.setInt(1, id);
+			pstm.setLong(1, id);
 			ResultSet rs = pstm.executeQuery();
 						
 			while(rs.next()) {
 				tasks.add(new Task(
-						rs.getInt("task_id"),
+						rs.getLong("task_id"),
 						rs.getString("task_title"),
 						rs.getString("description"),
-						rs.getInt("status_id"),
+						rs.getLong("status_id"),
 						rs.getInt("priority"),
 						rs.getTimestamp("due_date"),
 						rs.getInt("list_order"),
-						rs.getInt("project_id"),
+						rs.getLong("project_id"),
 						rs.getTimestamp("created_at"),
 						rs.getTimestamp("updated_at"),
 						rs.getTimestamp("completed_at")));

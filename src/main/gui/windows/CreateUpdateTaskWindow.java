@@ -65,31 +65,119 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(CreateUpdateTaskWindow.class.getName());
 
-	public LocalDate selectedDueDate = null;
-	public Integer selectedPriority = null;
+	private LocalDate selectedDueDate = null;
+	private Integer selectedPriority = null;
 
-	public JPanel projectPanel;
-	public JTextField titleField;
-	public JTextArea descArea;
-	public List<Tag> selectedTags = new ArrayList<>();
+	private Long projectId;
+	private JTextField titleField;
+	private JTextArea descArea;
+	private List<Tag> selectedTags = new ArrayList<>();
 
-	public Timestamp selectedReminderTime = null;
-	public String selectedReminderMsg = null;
-	public boolean isRecurring = false;
-	public List<DayOfWeek> selectedRecurringDays = new ArrayList<>();
+	private Timestamp selectedReminderTime = null;
+	private String selectedReminderMsg = null;
+	private boolean isRecurring = false;
+	private List<DayOfWeek> selectedRecurringDays = new ArrayList<>();
 
-	public JButton dueDateBtn;
+	private JButton dueDateBtn;	
 
-	public CreateUpdateTaskWindow(JFrame source ,JPanel panel, boolean isUpdate, JPanel taskPanel) {
+	public LocalDate getSelectedDueDate() {
+		return selectedDueDate;
+	}
+
+	public void setSelectedDueDate(LocalDate selectedDueDate) {
+		this.selectedDueDate = selectedDueDate;
+	}
+
+	public Integer getSelectedPriority() {
+		return selectedPriority;
+	}
+
+	public void setSelectedPriority(Integer selectedPriority) {
+		this.selectedPriority = selectedPriority;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public JTextField getTitleField() {
+		return titleField;
+	}
+
+	public void setTitleField(JTextField titleField) {
+		this.titleField = titleField;
+	}
+
+	public JTextArea getDescArea() {
+		return descArea;
+	}
+
+	public void setDescArea(JTextArea descArea) {
+		this.descArea = descArea;
+	}
+
+	public List<Tag> getSelectedTags() {
+		return selectedTags;
+	}
+
+	public void setSelectedTags(List<Tag> selectedTags) {
+		this.selectedTags = selectedTags;
+	}
+
+	public Timestamp getSelectedReminderTime() {
+		return selectedReminderTime;
+	}
+
+	public void setSelectedReminderTime(Timestamp selectedReminderTime) {
+		this.selectedReminderTime = selectedReminderTime;
+	}
+
+	public String getSelectedReminderMsg() {
+		return selectedReminderMsg;
+	}
+
+	public void setSelectedReminderMsg(String selectedReminderMsg) {
+		this.selectedReminderMsg = selectedReminderMsg;
+	}
+
+	public boolean isRecurring() {
+		return isRecurring;
+	}
+
+	public void setRecurring(boolean isRecurring) {
+		this.isRecurring = isRecurring;
+	}
+
+	public List<DayOfWeek> getSelectedRecurringDays() {
+		return selectedRecurringDays;
+	}
+
+	public void setSelectedRecurringDays(List<DayOfWeek> selectedRecurringDays) {
+		this.selectedRecurringDays = selectedRecurringDays;
+	}
+
+	public JButton getDueDateBtn() {
+		return dueDateBtn;
+	}
+
+	public void setDueDateBtn(JButton dueDateBtn) {
+		this.dueDateBtn = dueDateBtn;
+	}
+
+	public CreateUpdateTaskWindow(JFrame source ,Long projectId, boolean isUpdate, JPanel taskPanel) {
 		logger.info("Initializing CreateUpdateTaskWindow.");
 		super(source, isUpdate ? "Update Task" : "Create Task", true);
 		
-		projectPanel = panel;
+		this.projectId = projectId;
 				
 		setResizable(false);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
-		Window activeWindow = Main.main;
+		Window activeWindow = Main.getMain();
 
 		if (activeWindow != null) {
 			Dimension size = activeWindow.getSize();
@@ -196,7 +284,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 				descArea.setText(description);
 			}
 			
-			Integer taskId = (Integer) taskPanel.getClientProperty("task_id");
+			Long taskId = (Long) taskPanel.getClientProperty("task_id");
 			
 			// Load due date
 			Timestamp dueDate = (Timestamp) taskPanel.getClientProperty("due_date");
@@ -274,18 +362,16 @@ public class CreateUpdateTaskWindow extends JDialog {
 				JOptionPane.showMessageDialog(CreateUpdateTaskWindow.this, "Task title cannot be empty.", "Validation Error",
 						JOptionPane.WARNING_MESSAGE);
 				return;
-			}
+			};
 
-			Integer projectId = (int)projectPanel.getClientProperty("project_id");
-
-			Integer taskId = null;
+			Long taskId = null;
 			if (isUpdate) {
-				taskId = (Integer) taskPanel.getClientProperty("task_id");
-				Integer statusId = (Integer) taskPanel.getClientProperty("status_id");
+				taskId = (Long) taskPanel.getClientProperty("task_id");
+				Long statusId = (Long) taskPanel.getClientProperty("status_id");
 				Integer listOrder = (Integer) taskPanel.getClientProperty("list_order");
 				Timestamp createdAt = (Timestamp) taskPanel.getClientProperty("created_at");
 				Timestamp completedAt = (Timestamp) taskPanel.getClientProperty("completed_at");
-				if (statusId == null) statusId = 1;
+				if (statusId == null) statusId = 1L;
 				if (listOrder == null) listOrder = 1;
 				if (createdAt == null) createdAt = new Timestamp(System.currentTimeMillis());
 
@@ -314,8 +400,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 				DeleteTaskTagService.execute(taskId);
 				DeleteRecurringTaskService.execute(taskId);
 			} else {
-				int newId = CreateTaskService.execute(new TaskDCO(title, description, 1, selectedPriority, selectedDueDate, projectId));
-				if (newId == 0) {
+				Long newId = CreateTaskService.execute(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
+				if (newId == 0L) {
 					new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 					return;
 				}
@@ -323,7 +409,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			}
 
 			if (selectedReminderTime != null && taskId != null) {
-				Reminder reminder = new Reminder(taskId.longValue(), selectedReminderTime, selectedReminderMsg);
+				Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
 				CreateReminderService.execute(reminder);
 			}
 
@@ -337,8 +423,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 				CreateRecurringTaskService.execute(taskId, selectedRecurringDays);
 			}
 //				Refresh main ui
-				projectPanel.dispatchEvent(new MouseEvent(projectPanel, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, projectPanel.getWidth()/2, projectPanel.getHeight()/2, 1, false));
-				Main.main.refreshWindow();
+				Main.getMain().dispatchEvent(new MouseEvent(Main.getMain(), MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, Main.getMain().getWidth()/2, Main.getMain().getHeight()/2, 1, false));
+				Main.getMain().refreshWindow();
 //				Close this ui
 				dispose();
 		});

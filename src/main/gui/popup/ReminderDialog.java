@@ -46,16 +46,16 @@ public class ReminderDialog extends JDialog {
 
 		DateTimePicker picker = new DateTimePicker();
 		picker.setDateTimePermissive(LocalDateTime.now().plusHours(1));
-		if (source.selectedReminderTime != null) {
-			picker.setDateTimePermissive(source.selectedReminderTime.toLocalDateTime());
+		if (source.getSelectedReminderTime() != null) {
+			picker.setDateTimePermissive(source.getSelectedReminderTime().toLocalDateTime());
 		}
 
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 		
 		// Temporary variables to track recurring choices inside this dialog
-		tempIsRecurring = source.isRecurring;
-		tempSelectedRecurringDays = new ArrayList<>(source.selectedRecurringDays);
+		tempIsRecurring = source.isRecurring();
+		tempSelectedRecurringDays = new ArrayList<>(source.getSelectedRecurringDays());
 		
 		// Content fields panel containing DatePicker, Custom message, and repeat checkbox
 		JPanel fieldsPanel = new JPanel();
@@ -68,8 +68,8 @@ public class ReminderDialog extends JDialog {
 		JTextField msgField = new JTextField();
 		msgField.putClientProperty("JTextField.placeholderText", "Custom message (optional)");
 		msgField.putClientProperty("JTextField.margin", new Insets(4, 6, 4, 6));
-		if (source.selectedReminderMsg != null) {
-			msgField.setText(source.selectedReminderMsg);
+		if (source.getSelectedReminderMsg() != null) {
+			msgField.setText(source.getSelectedReminderMsg());
 		}
 		fieldsPanel.add(msgField);
 		
@@ -235,28 +235,28 @@ public class ReminderDialog extends JDialog {
 				return;
 			}
 			
-			source.selectedReminderTime = Timestamp.valueOf(ldt);
+			source.setSelectedReminderTime(Timestamp.valueOf(ldt));
 			String msgText = msgField.getText().trim();
-			source.selectedReminderMsg = msgText.isEmpty() ? null : msgText;
+			source.setSelectedReminderMsg(msgText.isEmpty() ? null : msgText);
 			
 			reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 			reminderBtn.setForeground(new Color(59, 130, 246));
 
 			// Commit recurring state from temp variables
-			source.isRecurring = tempIsRecurring;
-			source.selectedRecurringDays.clear();
-			source.selectedRecurringDays.addAll(tempSelectedRecurringDays);
-			source.selectedDueDate = null;
+			source.setRecurring(tempIsRecurring);
+			source.getSelectedRecurringDays().clear();
+			source.getSelectedRecurringDays().addAll(tempSelectedRecurringDays);
+			source.setSelectedDueDate(null);
 
-			if (source.isRecurring) {
-				source.dueDateBtn.setText("Disabled");
-				source.dueDateBtn.setToolTipText("Can't set due date when\nrecurring task is enabled");	
-				source.dueDateBtn.setForeground(null);
-				source.dueDateBtn.setEnabled(false);
+			if (source.isRecurring()) {
+				source.getDueDateBtn().setText("Disabled");
+				source.getDueDateBtn().setToolTipText("Can't set due date when\nrecurring task is enabled");	
+				source.getDueDateBtn().setForeground(null);
+				source.getDueDateBtn().setEnabled(false);
 			} else {
-				source.dueDateBtn.setText(source.selectedDueDate != null ? source.selectedDueDate.toString():null);
-				source.dueDateBtn.setForeground(new Color(42, 157, 143));
-				source.dueDateBtn.setEnabled(true);
+				source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():null);
+				source.getDueDateBtn().setForeground(new Color(42, 157, 143));
+				source.getDueDateBtn().setEnabled(true);
 			}
 			source.revalidate();
 			source.repaint();

@@ -1,3 +1,3 @@
 package main.entities;
 
-public record TaskTag(Integer task_id, Integer tag_id) {}
+public record TaskTag(Long task_id, Long tag_id) {}

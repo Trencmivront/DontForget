@@ -14,7 +14,7 @@ public class GetTagsOfTaskService {
 
 	private static final Logger logger = Logger.getLogger(GetTagsOfTaskService.class.getName());
 
-	public static List<Tag> execute(int taskId) {
+	public static List<Tag> execute(Long taskId) {
 		logger.info("Executing GetTagsOfTaskService for taskId: " + taskId);
 
 		List<Tag> tags = new ArrayList<>();

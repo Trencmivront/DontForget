@@ -1,6 +1,7 @@
 package main.gui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -55,20 +56,34 @@ public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JSplitPane mainContainer;
-	public static JScrollPane projectsContainer;
+	private JScrollPane projectsContainer;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
-	public static JButton deleteProjectsButton;
+	private JButton deleteProjectsButton;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
-	public static Main main;
-	public static List<JPanel> selectedProjects = new ArrayList<>();
-	/**
-	 * Create the frame.
-	 */
+	private static Main main;
+	private List<JPanel> selectedProjects = new ArrayList<>();
+	
+	public JScrollPane getProjectsContainer(){
+		return projectsContainer;
+	}
+	
+	public JButton getDeleteProjectsButton() {
+		return deleteProjectsButton;
+	}
+	
+	public static Main getMain() {
+		return main;
+	}
+	
+	public List<JPanel> getSelectedProjects(){
+		return selectedProjects;
+	}
+	
 	public Main() {
 		logger.info("Drawing Main window.");
 //		setting the global toucher for main, freaky
-		main =  Main.this;
+		main = this;
 		
 		setTitle("DontForget");
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -125,7 +140,7 @@ public class Main extends JFrame {
 		rightContainer.setLayout(new BorderLayout(0, 0));
 		
 		JPanel buttonMenuPanel = new JPanel();
-		buttonMenuPanel.setLayout(new WrapLayout(WrapLayout.CENTER, 20, 5));
+		buttonMenuPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 20, 5));
 		
 		JButton tagsButton = new JButton("tags");
 		buttonMenuPanel.add(tagsButton);
@@ -231,11 +246,11 @@ public class Main extends JFrame {
 				return;
 			}
 			if (ck.isSelected()) {
-				if (!Main.selectedProjects.contains(panel)) {
-					Main.selectedProjects.add(panel);
+				if (!Main.getMain().getSelectedProjects().contains(panel)) {
+					Main.getMain().getSelectedProjects().add(panel);
 				}
 			} else {
-				Main.selectedProjects.remove(panel);
+				Main.getMain().getSelectedProjects().remove(panel);
 			}
 
 			if (selectedProjects != null) {
@@ -267,7 +282,7 @@ public class Main extends JFrame {
 
 			if (confirm == JOptionPane.YES_OPTION) {
 				for (JPanel panel : selectedProjects) {
-					Integer projectId = (Integer) panel.getClientProperty("project_id");
+					Long projectId = (Long) panel.getClientProperty("project_id");
 					if (projectId != null) {
 						DeleteProjectService.execute(projectId);
 					}
@@ -310,9 +325,7 @@ public class Main extends JFrame {
 	}
 	
 	private void addSearchButtonActionListener(JButton button) {
-		button.addActionListener(_->{
-			new SearchWindow();
-		});
+		button.addActionListener(_->new SearchWindow());
 	}
 	
 	private void setSplitDivider() {

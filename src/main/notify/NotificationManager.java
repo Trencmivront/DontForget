@@ -45,17 +45,17 @@ public class NotificationManager {
 			return;
 		}
 
-		Task task = new GetTaskByIdService().execute(reminder.task_id().intValue());
+		Task task = new GetTaskByIdService().execute(reminder.task_id());
 		if (task == null) {
 			logger.warning("Could not find task with ID " + reminder.task_id() + " for scheduling reminder.");
 		}
 		String title = task != null ? task.task_title() : "Reminder";
 		String message = reminder.cstm_message() != null ? reminder.cstm_message() 
 				: (task != null && task.description() != null ? task.description() : "");
-
+ 
 		logger.info("Scheduling reminder for task ID " + reminder.task_id() + " in " + delay + " ms.");
 		ScheduledFuture<?> future = scheduler.schedule(
-			new NotificationWorker(reminder.task_id().intValue(), title, message),
+			new NotificationWorker(reminder.task_id(), title, message),
 			delay,
 			TimeUnit.MILLISECONDS
 		);

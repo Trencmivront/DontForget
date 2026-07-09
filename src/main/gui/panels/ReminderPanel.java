@@ -30,7 +30,8 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.entities.Reminder;
 import main.entities.Task;
-import main.gui.windows.TaskWindow;
+import main.gui.Main;
+import main.gui.windows.CreateUpdateTaskWindow;
 import main.services.reminder.GetRemindersService;
 import main.services.task.GetTaskByIdService;
 
@@ -122,7 +123,7 @@ public class ReminderPanel extends JPanel{
 				LocalDateTime localDateTime = reminder.remind_at().toLocalDateTime();
 				int day = localDateTime.getDayOfMonth();
 				
-				Task task = taskService.execute(reminder.task_id().intValue());
+				Task task = taskService.execute(reminder.task_id());
 				String taskTitle = (task != null) ? task.task_title() : "Unknown Task";
 				
 				model.addRow(new Object[] { day, taskTitle, "" });
@@ -183,9 +184,9 @@ public class ReminderPanel extends JPanel{
 					if (row >= 0 && col == 1) {
 						int modelRow = table.convertRowIndexToModel(row);
 						Reminder reminder = reminders.get(modelRow);
-						Task task = taskService.execute(reminder.task_id().intValue());
+						Task task = taskService.execute(reminder.task_id());
 						if (task != null) {
-							JPanel taskPanel = new JPanel();
+							TaskRowPanel taskPanel = new TaskRowPanel(null, task);
 							taskPanel.setLayout(new BorderLayout());
 							JLabel title = new JLabel(task.task_title());
 							taskPanel.putClientProperty("task_title", task.task_title());
@@ -201,7 +202,7 @@ public class ReminderPanel extends JPanel{
 							taskPanel.putClientProperty("completed_at", task.completed_at());
 							taskPanel.add(title, BorderLayout.CENTER);
 							
-							new TaskWindow(ReminderPanel.this, taskPanel);
+							new CreateUpdateTaskWindow(Main.getMain(), task.project_id(), true, taskPanel);
 						}
 					}
 				}

@@ -25,10 +25,10 @@ public class SearchWindow extends JDialog{
 	
 	public SearchWindow() {
 				
-		super(Main.main, "Search", true);
+		super(Main.getMain(), "Search", true);
 		
 		searchedItemsPanel = new SearchedItemsPanel(this);
-		source = Main.main;
+		source = Main.getMain();
 		
 		setSize(source.getWidth() / 2, source.getHeight() / 2);
 		setResizable(false);
