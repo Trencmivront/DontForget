@@ -39,9 +39,10 @@ public class ReminderDialog extends JDialog {
 	private JPanel radioPanel;
 	
 	public ReminderDialog(CreateUpdateTaskWindow source, JButton reminderBtn) {
-		super(source, "Set Reminder", true);
+		super(source, "Set Reminder", false);
 		setAlwaysOnTop(true);
 		setResizable(false);
+		setUndecorated(true);
 		setLayout(new BorderLayout(10, 10));
 
 		DateTimePicker picker = new DateTimePicker();

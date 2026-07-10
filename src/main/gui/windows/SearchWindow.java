@@ -32,6 +32,7 @@ public class SearchWindow extends JDialog{
 		
 		setSize(source.getWidth() / 2, source.getHeight() / 2);
 		setResizable(false);
+		setUndecorated(true);
 		
 		JPanel searchPanel = new JPanel();
 		getContentPane().add(searchPanel, BorderLayout.NORTH);

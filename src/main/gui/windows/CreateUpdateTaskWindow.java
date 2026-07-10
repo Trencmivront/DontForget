@@ -178,7 +178,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 		this.projectId = projectId;
 				
 		setResizable(false);
-		
+		setUndecorated(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
 		Window activeWindow = Main.getMain();

@@ -61,11 +61,12 @@ public class CreateUpdateProjectWindow extends JDialog {
 	public CreateUpdateProjectWindow(JFrame source, Boolean isUpdate, ProjectRowPanel updatedProject) {
 		logger.info("Drawing the window.");
 		
-		super(source, "Create Project", true);
+		super(source, "Create Project", false);
 		this.isUpdate = isUpdate;
 		this.updatedProject = updatedProject;
 		
 		setResizable(false);
+		setUndecorated(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		Dimension size = source.getSize();

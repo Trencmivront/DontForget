@@ -30,6 +30,9 @@ public class ProjectInfoPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	private JPanel projectPanel;
 	private static ProjectInfoPanel projectInfoPanel;
+	{
+		projectInfoPanel = this;
+	}
 	
 	public static ProjectInfoPanel getProjectInfoPanel() {
 		return projectInfoPanel;
@@ -37,9 +40,8 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public ProjectInfoPanel(JPanel panel) {
 		projectPanel = panel;
-		projectInfoPanel = this;
-		setLayout(new BorderLayout());
 		
+		setLayout(new BorderLayout());
 		add(createHeaderPanel(), BorderLayout.NORTH);
 		
 		infoScrollPane = new JScrollPane();

@@ -7,7 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-import javax.swing.JDialog;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,10 +31,8 @@ public class SearchedItemsPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private final JTable itemsTable = new JTable();
 	private DefaultTableModel model;
-	private SearchWindow window;
 	
 	public SearchedItemsPanel(SearchWindow window) {
-		this.window = window;
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane(itemsTable);
@@ -75,7 +73,7 @@ public class SearchedItemsPanel extends JPanel{
 	
 	private JPanel createHeader(String title) {
 		JPanel panel = new JPanel();
-		panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.X_AXIS));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.setBorder(new EmptyBorder(3, 2, 3, 2));
 		JLabel label = new JLabel(title);
@@ -115,35 +113,6 @@ public class SearchedItemsPanel extends JPanel{
 			return null;
 		});
 		
-		addItemTableMouseListener();
-	}
-	
-	private void addItemTableMouseListener() {
-		itemsTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int row = itemsTable.rowAtPoint(e.getPoint());
-				if (row >= 0) {
-					int modelRow = itemsTable.convertRowIndexToModel(row);
-					Object value = model.getValueAt(modelRow, 0);
-//					A different way of casting
-					if (value instanceof ProjectRowPanel panel) {
-						try {
-							JPanel showInfoPanel = Main.getMain().getShowInfoPanel();
-							showInfoPanel.removeAll();
-							showInfoPanel.add(new ProjectInfoPanel(panel));
-							Main.getMain().refreshWindow();
-							
-							if (window instanceof JDialog) {
-								window.dispose();
-							}
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}
-			}
-		});
 	}
 	
 	private void listProjects() {
@@ -152,12 +121,7 @@ public class SearchedItemsPanel extends JPanel{
 			model.addRow(new Object[] { createHeader("Projects") });
 			for (Project project : projects) {
 				ProjectRowPanel row = new ProjectRowPanel(project);
-				row.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						Main.getMain().destroyChildWindows();
-					}
-				});
+				addRowMouseListener(row);
 				model.addRow(new Object[] { row });
 			}
 		}
@@ -168,7 +132,9 @@ public class SearchedItemsPanel extends JPanel{
 		if (tasks != null && !tasks.isEmpty()) {
 			model.addRow(new Object[] { createHeader("Tasks") });
 			for (Task task : tasks) {
-				model.addRow(new Object[] { new TaskRowPanel(task) });
+				TaskRowPanel row = new TaskRowPanel(task);
+				addRowMouseListener(row);
+				model.addRow(new Object[] { row });
 			}
 		}
 	}
@@ -178,9 +144,20 @@ public class SearchedItemsPanel extends JPanel{
 		if (tags != null && !tags.isEmpty()) {
 			model.addRow(new Object[] { createHeader("Tags") });
 			for (Tag tag : tags) {
-				model.addRow(new Object[] { new TagRowPanel(tag) });
+				TagRowPanel row = new TagRowPanel(tag);
+				addRowMouseListener(row);
+				model.addRow(new Object[] { row });
 			}
 		}
+	}
+	
+	private void addRowMouseListener(JPanel row){
+		row.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Main.getMain().destroyChildWindows();
+			}
+		});
 	}
 	
 }
