@@ -184,12 +184,8 @@ public class App {
     private static void setKeyValue(String key, Object value, ObjectMapper mapper, Path settingsPath) {
         try {
             ObjectNode rootNode = mapper.createObjectNode();
-            if(rootNode.get(key) != null) {
-                rootNode.replace(key, (JsonNode)value);
-            }
-            else {
-            	rootNode.putIfAbsent(key, (JsonNode)value);
-            }
+            // put object and let json cast it
+            rootNode.putPOJO(key, value);
             mapper.writerWithDefaultPrettyPrinter().writeValue(settingsPath.toFile(), rootNode);
             logger.info("Saved settings.");
         } catch (IOException e) {

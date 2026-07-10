@@ -1,22 +1,17 @@
 package main.gui.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
-import main.cmp.CustomIcon;
-import main.entities.IconColor;
 import main.entities.Tag;
-import main.services.icon.GetIconColorOfTagService;
 import main.services.tag.GetTagsService;
 
 public class TagsPanel extends JPanel {
@@ -55,22 +50,7 @@ public class TagsPanel extends JPanel {
 		
 		for (Tag tag : tags) {
 			JCheckBox ck = new JCheckBox();
-			JLabel label = new JLabel(tag.tag_name());
-			label.setFont(new Font("Dialog", Font.PLAIN, 20));
-			
-			JPanel tagRow = new JPanel();
-			tagRow.setLayout(new BoxLayout(tagRow, BoxLayout.X_AXIS));
-			tagRow.setAlignmentX(LEFT_ALIGNMENT);
-			
-			IconColor ic = GetIconColorOfTagService.execute(tag.tag_id());
-			// if color not found, make it gray
-			Color color = (ic == null) ? Color.GRAY:new Color(ic.red(), ic.green(), ic.blue());
-			
-			label.setIcon(new CustomIcon(color, 12, 12));
-			
-			tagRow.add(ck);
-			tagRow.add(label);
-			
+			JPanel tagRow = new TagRowPanel(ck, tag);
 			tagContainer.add(tagRow);
 		}
 		

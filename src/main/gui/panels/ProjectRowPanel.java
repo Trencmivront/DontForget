@@ -30,7 +30,13 @@ import main.services.project.DeleteProjectService;
 public class ProjectRowPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Main main = Main.getMain();
 
+	public ProjectRowPanel(Project project) {
+		this(null, project);
+	}
+	
 	public ProjectRowPanel(JCheckBox ck, Project project) {
 		
 		JLabel label = new JLabel(project.project_title());
@@ -60,6 +66,21 @@ public class ProjectRowPanel extends JPanel {
 
 		add(label);
 		addPopUpMenuItem();
+		addMouseListener();
+	}
+	
+	private void addMouseListener() {
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// removing background color from previous project button
+				main.setProjectBackgroundColorOfProject(ProjectRowPanel.this);
+				JPanel showInfoPanel = main.getShowInfoPanel();
+				showInfoPanel.removeAll();
+				showInfoPanel.add(new ProjectInfoPanel(ProjectRowPanel.this));
+				main.refreshWindow();
+			}
+		});
 	}
 	
 	private void addPopUpMenuItem() {
@@ -122,12 +143,12 @@ public class ProjectRowPanel extends JPanel {
 	}
 
 	private void refreshProjectsList() {
-		if (Main.getMain() != null && Main.getMain().getProjectsContainer() != null) {
+		if (main != null && main.getProjectsContainer() != null) {
 			try {
 				Method method = Main.class.getDeclaredMethod("listProjects", JScrollPane.class);
 				method.setAccessible(true);
-				method.invoke(Main.getMain(), Main.getMain().getProjectsContainer());
-				Main.getMain().refreshWindow();
+				method.invoke(main, main.getProjectsContainer());
+				main.refreshWindow();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

@@ -24,12 +24,10 @@ public class TaskRowPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = Logger.getLogger(TaskRowPanel.class.getName());
-	private JPanel projectPanel;
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
-	public TaskRowPanel(JPanel projectPanel, Task task) {
-		this.projectPanel = projectPanel;
+	public TaskRowPanel(Task task) {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		putClientProperty("task_id", task.task_id());

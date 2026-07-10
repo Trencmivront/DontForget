@@ -25,7 +25,7 @@ public class SearchWindow extends JDialog{
 	
 	public SearchWindow() {
 				
-		super(Main.getMain(), "Search", true);
+		super(Main.getMain(), "Search", false);
 		
 		searchedItemsPanel = new SearchedItemsPanel(this);
 		source = Main.getMain();

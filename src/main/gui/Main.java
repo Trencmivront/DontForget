@@ -3,10 +3,12 @@ package main.gui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,7 +39,6 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 import main.entities.Project;
 import main.enums.LightColors;
 import main.gui.panels.InboxPanel;
-import main.gui.panels.ProjectInfoPanel;
 import main.gui.panels.ProjectRowPanel;
 import main.gui.panels.ReminderPanel;
 import main.gui.panels.TagsPanel;
@@ -63,6 +64,9 @@ public class Main extends JFrame {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	private static Main main;
 	private List<JPanel> selectedProjects = new ArrayList<>();
+	{
+		main = this;
+	}
 	
 	public JScrollPane getProjectsContainer(){
 		return projectsContainer;
@@ -79,11 +83,13 @@ public class Main extends JFrame {
 	public List<JPanel> getSelectedProjects(){
 		return selectedProjects;
 	}
+	public JPanel getShowInfoPanel() {
+		return showInfoPanel;
+	}
 	
 	public Main() {
 		logger.info("Drawing Main window.");
 //		setting the global toucher for main, freaky
-		main = this;
 		
 		setTitle("DontForget");
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -172,6 +178,7 @@ public class Main extends JFrame {
 		addNavigationButtonActionListener(todayButton, TodayPanel.class.getName());
 		addSearchButtonActionListener(searchButton);
 		setSplitDivider();
+		addWindowFocusListener();
 		
 		listProjects(projectsContainer);
 		
@@ -214,7 +221,6 @@ public class Main extends JFrame {
 			JCheckBox ck = new JCheckBox();
 			JPanel panel = new ProjectRowPanel(ck, projects.get(i));
 			addCheckBoxEventListener(ck);
-			addProjectEventListener(panel);
 			ckContainer.add(panel);
 		}
 		// we put it in a viewport
@@ -224,19 +230,6 @@ public class Main extends JFrame {
 		viewport.add(ckContainer);
 		
 		container.setViewport(viewport);
-	}
-	
-	private void addProjectEventListener(JPanel panel) {
-		panel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// removing background color from previous project button
-				setProjectBackgroundColor(panel);
-				showInfoPanel.removeAll();
-				showInfoPanel.add(new ProjectInfoPanel(panel));
-				refreshWindow();
-			}
-		});
 	}
 	
 	private void addCheckBoxEventListener(JCheckBox ck) {
@@ -313,7 +306,7 @@ public class Main extends JFrame {
 	
 	private void addNavigationButtonActionListener(JButton button, String className) {
 		button.addActionListener(_ ->{
-			setProjectBackgroundColor(null);
+			setProjectBackgroundColorOfProject(null);
 			showInfoPanel.removeAll();
 			try {
 				showInfoPanel.add((JPanel)Class.forName(className).getDeclaredConstructor().newInstance());
@@ -343,13 +336,38 @@ public class Main extends JFrame {
 			}
 		});
 	}
+
+	private void addWindowFocusListener() {
+		addWindowFocusListener(new WindowFocusListener() {
+			@Override
+			public void windowLostFocus(WindowEvent e) {
+				
+			}
+			
+			@Override
+			public void windowGainedFocus(WindowEvent e) {
+				for(Window w : getOwnedWindows()) {
+					w.dispose();
+				}
+				
+			}
+		});
+	}
+	
+	public void destroyChildWindows() {
+		this.dispatchEvent(new MouseEvent(this, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
+		        0,
+		        this.getX(), this.getY(),
+		        1,
+		        false));
+	}
 	
 	public void refreshWindow() {
 		revalidate();
 		repaint();
 	}
 	
-	private void setProjectBackgroundColor(JPanel project) {
+	public void setProjectBackgroundColorOfProject(JPanel project) {
 		if(prevProjectPanel != null) prevProjectPanel.setBackground(null);
 		if(project != null) project.setBackground(LightColors.PRIMARY_HOVER.getColor());
 		prevProjectPanel = project;

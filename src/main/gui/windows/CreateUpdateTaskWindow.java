@@ -71,14 +71,17 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private Long projectId;
 	private JTextField titleField;
 	private JTextArea descArea;
-	private List<Tag> selectedTags = new ArrayList<>();
+	private static List<Tag> selectedTags = new ArrayList<>();
 
 	private Timestamp selectedReminderTime = null;
 	private String selectedReminderMsg = null;
 	private boolean isRecurring = false;
 	private List<DayOfWeek> selectedRecurringDays = new ArrayList<>();
 
-	private JButton dueDateBtn;	
+	private JButton dueDateBtn;
+	private JButton tagsBtn;
+	private JButton priorityBtn;
+	private JButton reminderBtn;
 
 	public LocalDate getSelectedDueDate() {
 		return selectedDueDate;
@@ -124,8 +127,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 		return selectedTags;
 	}
 
-	public void setSelectedTags(List<Tag> selectedTags) {
-		this.selectedTags = selectedTags;
+	public static void setSelectedTags(List<Tag> selectedTags) {
+		CreateUpdateTaskWindow.selectedTags = selectedTags;
 	}
 
 	public Timestamp getSelectedReminderTime() {
@@ -170,11 +173,12 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 	public CreateUpdateTaskWindow(JFrame source ,Long projectId, boolean isUpdate, JPanel taskPanel) {
 		logger.info("Initializing CreateUpdateTaskWindow.");
-		super(source, isUpdate ? "Update Task" : "Create Task", true);
+		super(source, isUpdate ? "Update Task" : "Create Task", false);
 		
 		this.projectId = projectId;
 				
 		setResizable(false);
+		
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
 		Window activeWindow = Main.getMain();
@@ -222,13 +226,13 @@ public class CreateUpdateTaskWindow extends JDialog {
 		dueDateBtn = new JButton("Set Due Date");
 		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton priorityBtn = new JButton("Set Priority");
+		priorityBtn = new JButton("Set Priority");
 		priorityBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton reminderBtn = new JButton("Set Reminder");
+		reminderBtn = new JButton("Set Reminder");
 		reminderBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		JButton tagsBtn = new JButton("Set Tags");
+		tagsBtn = new JButton("Set Tags");
 		tagsBtn.putClientProperty("JButton.buttonType", "roundRect");
 
 		optionsPanel.add(dueDateBtn);
@@ -285,74 +289,83 @@ public class CreateUpdateTaskWindow extends JDialog {
 			}
 			
 			Long taskId = (Long) taskPanel.getClientProperty("task_id");
-			
-			// Load due date
 			Timestamp dueDate = (Timestamp) taskPanel.getClientProperty("due_date");
-			if (dueDate != null) {
-				selectedDueDate = dueDate.toLocalDateTime().toLocalDate();
-				dueDateBtn.setText(selectedDueDate.toString());
-				dueDateBtn.setForeground(new Color(42, 157, 143));
-			}
-
-			// Load priority
 			Integer priority = (Integer) taskPanel.getClientProperty("priority");
-			if (priority != null) {
-				selectedPriority = priority;
-				if (priority == 1) {
-					priorityBtn.setText("High");
-					priorityBtn.setForeground(new Color(239, 68, 68));
-				} else if (priority == 2) {
-					priorityBtn.setText("Medium");
-					priorityBtn.setForeground(new Color(245, 158, 11));
-				} else if (priority == 3) {
-					priorityBtn.setText("Low");
-					priorityBtn.setForeground(new Color(16, 185, 129));
-				}
+			
+			setDueDate(dueDate);
+			setPriority(priority);
+			if(taskId != null) {
+				setReminder(taskId);
+				setRecurringDays(taskId);
+				setTag(taskId);
 			}
-
-			// Load reminder
-			if (taskId != null) {
-				Reminder reminder = GetReminderByIdService.execute(taskId);
-				if (reminder != null) {
-					selectedReminderTime = reminder.remind_at();
-					selectedReminderMsg = reminder.cstm_message();
-					if (selectedReminderTime != null) {
-						LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
-						reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-						reminderBtn.setForeground(new Color(59, 130, 246));
-					}
-				}
-			}
-
-			// Load recurring days
-			if (taskId != null) {
-				List<DayOfWeek> recurringDays = GetRecurringDaysOfTaskService.execute(taskId);
-				if (recurringDays != null && !recurringDays.isEmpty()) {
-					selectedRecurringDays.addAll(recurringDays);
-					isRecurring = true;
-					dueDateBtn.setText("Disabled");
-					dueDateBtn.setToolTipText("Can't set due date when\nrecurring task is enabled");
-					dueDateBtn.setForeground(null);
-					dueDateBtn.setEnabled(false);
-				}
-			}
-
-			// Load tags
-			if (taskId != null) {
-				List<Tag> tags = GetTagsOfTaskService.execute(taskId);
-				if (tags != null && !tags.isEmpty()) {
-					selectedTags.addAll(tags);
-					updateTagsButton(tagsBtn);
-				}
-			}
+			
 		}
-
+		
 		revalidate();
 		repaint();
-		setVisible(true);
+		javax.swing.SwingUtilities.invokeLater(() -> setVisible(true));
 		logger.info("CreateUpdateTaskWindow display complete.");
 	}
 	
+	private void setDueDate(Timestamp dueDate) {
+		if (dueDate != null) {
+			selectedDueDate = dueDate.toLocalDateTime().toLocalDate();
+			dueDateBtn.setText(selectedDueDate.toString());
+			dueDateBtn.setForeground(new Color(42, 157, 143));
+		}		
+	}
+
+	private void setTag(Long taskId) {
+			List<Tag> tags = GetTagsOfTaskService.execute(taskId);
+			if (tags != null && !tags.isEmpty()) {
+				selectedTags.addAll(tags);
+				updateTagsButton(tagsBtn);
+			}
+	}
+
+	private void setRecurringDays(Long taskId) {
+		List<DayOfWeek> recurringDays = GetRecurringDaysOfTaskService.execute(taskId);
+		if (recurringDays != null && !recurringDays.isEmpty()) {
+			selectedRecurringDays.addAll(recurringDays);
+			isRecurring = true;
+			dueDateBtn.setText("Disabled");
+			dueDateBtn.setToolTipText("Can't set due date when\nrecurring task is enabled");
+			dueDateBtn.setForeground(null);
+			dueDateBtn.setEnabled(false);
+		}
+	}
+
+	private void setReminder(Long taskId) {
+		Reminder reminder = GetReminderByIdService.execute(taskId);
+		if (reminder != null) {
+			selectedReminderTime = reminder.remind_at();
+			selectedReminderMsg = reminder.cstm_message();
+			if (selectedReminderTime != null) {
+				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
+				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				reminderBtn.setForeground(new Color(59, 130, 246));
+			}
+		}
+	}
+
+	private void setPriority(Integer priority) {
+		if (priority != null) {
+			selectedPriority = priority;
+			if (priority == 1) {
+				priorityBtn.setText("High");
+				priorityBtn.setForeground(new Color(239, 68, 68));
+			} else if (priority == 2) {
+				priorityBtn.setText("Medium");
+				priorityBtn.setForeground(new Color(245, 158, 11));
+			} else if (priority == 3) {
+				priorityBtn.setText("Low");
+				priorityBtn.setForeground(new Color(16, 185, 129));
+			}
+		}
+		
+	}
+
 	private void addCreateButtonActionListener(JButton button, boolean isUpdate, JPanel taskPanel) {
 		button.addActionListener(_->{
 			String title = titleField.getText().trim();
@@ -484,9 +497,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			contentPane.add(buttonPanel);
 			
 			JButton cancelButton = new JButton("Cancel");
-			cancelButton.addActionListener(_->{
-				inputDialog.dispose();
-			});
+			cancelButton.addActionListener(_->inputDialog.dispose());
 			buttonPanel.add(cancelButton);
 			
 			JButton addButton = new JButton("Add");
@@ -561,9 +572,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			reminderMenu.show(button, 0, -button.getHeight());
 		});
 
-		addReminderItem.addActionListener(_ -> {
-			new ReminderDialog(CreateUpdateTaskWindow.this, button);
-		});
+		addReminderItem.addActionListener(_ ->new ReminderDialog(CreateUpdateTaskWindow.this, button));
 
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;

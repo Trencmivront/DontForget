@@ -78,7 +78,7 @@ public class ProjectInfoPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
-			tasksContainer.add(new TaskRowPanel(projectPanel, i.next()));
+			tasksContainer.add(new TaskRowPanel(i.next()));
 		}
 		
 		infoScrollPane.setViewportView(tasksContainer);
