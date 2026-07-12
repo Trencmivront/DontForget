@@ -28,7 +28,7 @@ public class ProjectInfoPanel extends JPanel{
 	private JScrollPane infoScrollPane;
 	
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
-	private JPanel projectPanel;
+	private ProjectRowPanel projectPanel;
 	private static ProjectInfoPanel projectInfoPanel;
 	{
 		projectInfoPanel = this;
@@ -38,7 +38,7 @@ public class ProjectInfoPanel extends JPanel{
 		return projectInfoPanel;
 	}
 	
-	public ProjectInfoPanel(JPanel panel) {
+	public ProjectInfoPanel(ProjectRowPanel panel) {
 		projectPanel = panel;
 		
 		setLayout(new BorderLayout());
@@ -86,6 +86,7 @@ public class ProjectInfoPanel extends JPanel{
 		infoScrollPane.setViewportView(tasksContainer);
 		infoScrollPane.revalidate();
 		infoScrollPane.repaint();
+		Main.getMain().refreshWindow();
 	}
 	
 	private JPanel createHeaderPanel() {

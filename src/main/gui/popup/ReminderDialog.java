@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Insets;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -39,7 +41,7 @@ public class ReminderDialog extends JDialog {
 	private JPanel radioPanel;
 	
 	public ReminderDialog(CreateUpdateTaskWindow source, JButton reminderBtn) {
-		super(source, "Set Reminder", false);
+		super(source, "Reminder", false);
 		setAlwaysOnTop(true);
 		setResizable(false);
 		setUndecorated(true);
@@ -129,6 +131,7 @@ public class ReminderDialog extends JDialog {
 		
 		getRootPane().setDefaultButton(okButton);
 
+		addFocusListener();
 		pack();
 		setLocationRelativeTo(source);
 		setVisible(true);
@@ -255,7 +258,7 @@ public class ReminderDialog extends JDialog {
 				source.getDueDateBtn().setForeground(null);
 				source.getDueDateBtn().setEnabled(false);
 			} else {
-				source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():null);
+				source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():"Due Date");
 				source.getDueDateBtn().setForeground(new Color(42, 157, 143));
 				source.getDueDateBtn().setEnabled(true);
 			}
@@ -263,6 +266,21 @@ public class ReminderDialog extends JDialog {
 			source.repaint();
 
 			dispose();
+		});
+	}
+	
+	private void addFocusListener() {
+		addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				dispose();
+				
+			}
+			@Override
+			public void focusGained(FocusEvent arg0) {			
+				// I don't use it
+			}
 		});
 	}
 }

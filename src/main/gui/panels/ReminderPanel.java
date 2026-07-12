@@ -9,15 +9,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -25,8 +25,6 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.ListSelectionEvent;
-
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.entities.Reminder;
 import main.entities.Task;
@@ -47,7 +45,7 @@ public class ReminderPanel extends JPanel{
 		logger.info("Drawing the Reminder panel.");
 		setLayout(new BorderLayout());
 		
-		monthTabbedPane = new JTabbedPane(JTabbedPane.LEFT);
+		monthTabbedPane = new JTabbedPane(SwingConstants.LEFT);
 		monthTabbedPane.setSelectedIndex(-1);
 		
 		addTabs();
@@ -61,7 +59,7 @@ public class ReminderPanel extends JPanel{
 		
 		HashMap<String, List<Reminder>> monthlyReminders = getMonthlyReminders();
 		
-		if(monthlyReminders == null) {
+		if(monthlyReminders.isEmpty()) {
 			monthTabbedPane.addTab("Empty", new EmptyPanel("You don't have any reminder."));
 			return;
 		}
@@ -72,11 +70,11 @@ public class ReminderPanel extends JPanel{
 	private HashMap<String, List<Reminder>> getMonthlyReminders() {
 		List<Reminder> reminders = GetRemindersService.execute();
 		
-		if(reminders.isEmpty() || reminders == null) {
-			return null;
+		if(reminders.isEmpty()) {
+			return new HashMap<>();
 		}
 		
-		HashMap<String, List<Reminder>> monthReminderHash = new HashMap<String, List<Reminder>>();
+		HashMap<String, List<Reminder>> monthReminderHash = new HashMap<>();
 		
 		for(Reminder reminder : reminders) {
 			
@@ -85,7 +83,7 @@ public class ReminderPanel extends JPanel{
 			
 			// if month has not been set yet, create a month with new list
 			if(monthReminderHash.get(monthName) == null) {
-				List<Reminder> r = new ArrayList<Reminder>();
+				List<Reminder> r = new ArrayList<>();
 				r.add(reminder);
 				monthReminderHash.putIfAbsent(monthName, r);
 			}else {
@@ -99,7 +97,8 @@ public class ReminderPanel extends JPanel{
 	private void createTab(HashMap<String, List<Reminder>> hashMap){
 		GetTaskByIdService taskService = new GetTaskByIdService();
 		
-		for (String monthName : hashMap.keySet()) {
+		for (Map.Entry<String, List<Reminder>> entry : hashMap.entrySet()) {
+			String monthName = entry.getKey();
 			List<Reminder> reminders = hashMap.get(monthName);
 			
 			DefaultTableModel model = new DefaultTableModel(new Object[] { "Day", "Task", "Action" }, 0) {
@@ -115,6 +114,9 @@ public class ReminderPanel extends JPanel{
 					if (columnIndex == 0) {
 						return Integer.class;
 					}
+					if (columnIndex == 2) {
+						return Long.class;
+					}
 					return String.class;
 				}
 			};
@@ -126,7 +128,7 @@ public class ReminderPanel extends JPanel{
 				Task task = taskService.execute(reminder.task_id());
 				String taskTitle = (task != null) ? task.task_title() : "Unknown Task";
 				
-				model.addRow(new Object[] { day, taskTitle, "" });
+				model.addRow(new Object[] { day, taskTitle, reminder.task_id() });
 			}
 			
 			JTable table = new JTable(model);
@@ -140,8 +142,7 @@ public class ReminderPanel extends JPanel{
 						
 			// Adjust row height when action column is too narrow to fit buttons in a single line
 			table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-				private final int minSingleRowWidth = new ActionPanel().getPreferredSize().width;
-
+				private final int minSingleRowWidth = new ReminderActionPanel().getPreferredSize().width;
 				@Override
 				public void columnMarginChanged(ChangeEvent e) {
 					int actionColWidth = table.getColumnModel().getColumn(2).getWidth();
@@ -151,10 +152,19 @@ public class ReminderPanel extends JPanel{
 					}
 				}
 //				These are useless
-				@Override public void columnAdded(TableColumnModelEvent e) {}
-				@Override public void columnRemoved(TableColumnModelEvent e) {}
-				@Override public void columnMoved(TableColumnModelEvent e) {}
-				@Override public void columnSelectionChanged(ListSelectionEvent e) {}
+				@Override public void columnAdded(TableColumnModelEvent e) {handleException();}
+				@Override public void columnRemoved(TableColumnModelEvent e) {handleException();}
+				@Override public void columnMoved(TableColumnModelEvent e) {handleException();}
+				@Override public void columnSelectionChanged(ListSelectionEvent e) {handleException();}
+				
+				private void handleException() {
+					try {
+						throw new UnsupportedOperationException();
+					} catch (UnsupportedOperationException _) {
+						// We throw this exception for unused functions and
+						// catch it so our console won't be messy with it.
+					}
+				}
 			});
 			
 			// Set cell renderer and editor for action column
@@ -186,23 +196,8 @@ public class ReminderPanel extends JPanel{
 						Reminder reminder = reminders.get(modelRow);
 						Task task = taskService.execute(reminder.task_id());
 						if (task != null) {
-							TaskRowPanel taskPanel = new TaskRowPanel(task);
-							taskPanel.setLayout(new BorderLayout());
-							JLabel title = new JLabel(task.task_title());
-							taskPanel.putClientProperty("task_title", task.task_title());
-							taskPanel.putClientProperty("task_id", task.task_id());
-							taskPanel.putClientProperty("description", task.description());
-							taskPanel.putClientProperty("status_id", task.status_id());
-							taskPanel.putClientProperty("priority", task.priority());
-							taskPanel.putClientProperty("due_date", task.due_date());
-							taskPanel.putClientProperty("list_order", task.list_order());
-							taskPanel.putClientProperty("project_id", task.project_id());
-							taskPanel.putClientProperty("created_at", task.created_at());
-							taskPanel.putClientProperty("updated_at", task.updated_at());
-							taskPanel.putClientProperty("completed_at", task.completed_at());
-							taskPanel.add(title, BorderLayout.CENTER);
-							
-							new CreateUpdateTaskWindow(Main.getMain(), task.project_id(), true, taskPanel);
+							ReminderRowPanel reminderPanel = new ReminderRowPanel(reminder, task);
+							new CreateUpdateTaskWindow(Main.getMain(), task.project_id(), true, reminderPanel);
 						}
 					}
 				}
@@ -216,24 +211,15 @@ public class ReminderPanel extends JPanel{
 		}
 	}
 
-	private static class ActionPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		private final JButton editButton = new JButton("Edit");
-		private final JButton deleteButton = new JButton("Delete");
-
-		public ActionPanel() {
-			setLayout(new WrapLayout(WrapLayout.CENTER, 5, 1));
-			add(editButton);
-			add(deleteButton);
-		}
-	}
-
 	private static class ActionCellRenderer implements TableCellRenderer {
-		private final ActionPanel panel = new ActionPanel();
+		private final ReminderActionPanel panel = new ReminderActionPanel();
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
+			if (value instanceof Long reminderId) {
+				panel.setReminderId(reminderId);
+			}
 			if (isSelected) {
 				panel.setBackground(table.getSelectionBackground());
 			} else {
@@ -245,22 +231,19 @@ public class ReminderPanel extends JPanel{
 
 	private static class ActionCellEditor extends AbstractCellEditor implements TableCellEditor {
 		private static final long serialVersionUID = 1L;
-		private final ActionPanel panel = new ActionPanel();
+		private final ReminderActionPanel panel = new ReminderActionPanel();
 
 		public ActionCellEditor() {
-			panel.editButton.addActionListener(_ -> {
-				// Logic for update button will be written later
-				fireEditingStopped();
-			});
-			panel.deleteButton.addActionListener(_ -> {
-				// Logic for delete button will be written later
-				fireEditingStopped();
-			});
+			panel.editButton.addActionListener(_ -> fireEditingStopped());
+			panel.deleteButton.addActionListener(_ -> fireEditingStopped());
 		}
 
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value,
 				boolean isSelected, int row, int column) {
+			if (value instanceof Long reminderId) {
+				panel.setReminderId(reminderId);
+			}
 			panel.setBackground(table.getSelectionBackground());
 			return panel;
 		}

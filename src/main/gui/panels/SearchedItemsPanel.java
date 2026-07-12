@@ -20,11 +20,11 @@ import javax.swing.table.TableRowSorter;
 import main.entities.Project;
 import main.entities.Task;
 import main.entities.Tag;
-import main.gui.Main;
 import main.gui.windows.SearchWindow;
 import main.services.project.GetProjectsService;
 import main.services.task.GetTasksService;
 import main.services.tag.GetTagsService;
+import main.services.tag.GetTagsOfTaskService;
 
 public class SearchedItemsPanel extends JPanel{
 
@@ -39,6 +39,7 @@ public class SearchedItemsPanel extends JPanel{
 		add(scrollPane, BorderLayout.CENTER);
 		
 		listItems();
+		addRowMouseListener();
 	}
 
 	
@@ -57,7 +58,12 @@ public class SearchedItemsPanel extends JPanel{
 							for (Component comp : panel.getComponents()) {
 								if (comp instanceof JLabel label) {
 									String text = label.getText();
-									if (text != null && text.toLowerCase().contains(lowerKey)) {
+									String toolTipText = ((JPanel)label.getParent()).getToolTipText();
+									
+									boolean isTitleMatch = text != null && text.toLowerCase().contains(lowerKey);
+									boolean isToolTipMatch = toolTipText != null && toolTipText.toLowerCase().contains(lowerKey);
+
+									if (isTitleMatch || isToolTipMatch) {
 										return true;
 									}
 								}
@@ -101,7 +107,7 @@ public class SearchedItemsPanel extends JPanel{
 		
 		itemsTable.getColumnModel().getColumn(0).setCellRenderer((table, value, isSelected, hasFocus, row, column) -> {
 			if (value instanceof Component c) {
-				if (isSelected) {
+				if(hasFocus) {
 					c.setBackground(table.getSelectionBackground());
 					c.setForeground(table.getSelectionForeground());
 				} else {
@@ -121,7 +127,6 @@ public class SearchedItemsPanel extends JPanel{
 			model.addRow(new Object[] { createHeader("Projects") });
 			for (Project project : projects) {
 				ProjectRowPanel row = new ProjectRowPanel(project);
-				addRowMouseListener(row);
 				model.addRow(new Object[] { row });
 			}
 		}
@@ -133,7 +138,14 @@ public class SearchedItemsPanel extends JPanel{
 			model.addRow(new Object[] { createHeader("Tasks") });
 			for (Task task : tasks) {
 				TaskRowPanel row = new TaskRowPanel(task);
-				addRowMouseListener(row);
+				List<Tag> tags = GetTagsOfTaskService.execute(task.task_id());
+				if (tags != null && !tags.isEmpty()) {
+					StringBuilder tagsBuilder = new StringBuilder();
+					for (Tag tag : tags) {
+						tagsBuilder.append(" ").append(tag.tag_name());
+					}
+					row.setToolTipText(tagsBuilder.toString());
+				}
 				model.addRow(new Object[] { row });
 			}
 		}
@@ -145,17 +157,49 @@ public class SearchedItemsPanel extends JPanel{
 			model.addRow(new Object[] { createHeader("Tags") });
 			for (Tag tag : tags) {
 				TagRowPanel row = new TagRowPanel(tag);
-				addRowMouseListener(row);
 				model.addRow(new Object[] { row });
 			}
 		}
 	}
 	
-	private void addRowMouseListener(JPanel row){
-		row.addMouseListener(new MouseAdapter() {
+	private void addRowMouseListener(){
+		itemsTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				Main.getMain().destroyChildWindows();
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			private void handleMouseEvent(MouseEvent e) {
+				int row = itemsTable.rowAtPoint(e.getPoint());
+				if (row >= 0) {
+					if (itemsTable.getSelectedRow() != row) {
+						itemsTable.setRowSelectionInterval(row, row);
+					}
+					Object value = itemsTable.getValueAt(row, 0);
+					if (value instanceof JPanel panel) {
+						panel.dispatchEvent(new MouseEvent(
+							itemsTable,
+							e.getID(),
+							e.getWhen(),
+							e.getModifiersEx(),
+							e.getX(),
+							e.getY(),
+							e.getClickCount(),
+							e.isPopupTrigger(),
+							e.getButton()
+						));
+					}
+				}
 			}
 		});
 	}

@@ -55,15 +55,21 @@ public class Main extends JFrame {
 	private static final int WINDOW_Y = 100;
 	
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	private JSplitPane mainContainer;
 	private JScrollPane projectsContainer;
+	private JPanel contentPane;
 	private JPanel showInfoPanel;
 	private JPanel prevProjectPanel;
-	private JButton deleteProjectsButton;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	private static Main main;
 	private List<JPanel> selectedProjects = new ArrayList<>();
+	
+	private JButton deleteProjectsButton;
+	private JButton tagsButton;
+	private JButton inboxButton;
+	private JButton todayButton;
+	private JButton remindersButton;
+	
 	{
 		main = this;
 	}
@@ -85,6 +91,18 @@ public class Main extends JFrame {
 	}
 	public JPanel getShowInfoPanel() {
 		return showInfoPanel;
+	}
+	public JButton getTagsButton() {
+		return tagsButton;
+	}
+	public JButton getInboxButton() {
+		return inboxButton;
+	}
+	public JButton getTodayButton() {
+		return todayButton;
+	}
+	public JButton getRemindersButton() {
+		return remindersButton;
 	}
 	
 	public Main() {
@@ -148,16 +166,16 @@ public class Main extends JFrame {
 		JPanel buttonMenuPanel = new JPanel();
 		buttonMenuPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 20, 5));
 		
-		JButton tagsButton = new JButton("tags");
+		tagsButton = new JButton("tags");
 		buttonMenuPanel.add(tagsButton);
 		
-		JButton inboxButton = new JButton("inbox");
+		inboxButton = new JButton("inbox");
 		buttonMenuPanel.add(inboxButton);
 		
-		JButton todayButton = new JButton("today");
+		todayButton = new JButton("today");
 		buttonMenuPanel.add(todayButton);
 		
-		JButton remindersButton = new JButton("reminders");
+		remindersButton = new JButton("reminders");
 		buttonMenuPanel.add(remindersButton);
 		
 		JPanel navigationPanel = new JPanel();
@@ -202,7 +220,7 @@ public class Main extends JFrame {
 		logger.info("Main window is ready.");
 	}
 	
-	private void listProjects(JScrollPane container) {
+	public void listProjects(JScrollPane container) {
 		List<Project> projects = null;
 		container.removeAll();
 
@@ -355,11 +373,7 @@ public class Main extends JFrame {
 	}
 	
 	public void destroyChildWindows() {
-		this.dispatchEvent(new MouseEvent(this, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
-		        0,
-		        this.getX(), this.getY(),
-		        1,
-		        false));
+		requestFocus();
 	}
 	
 	public void refreshWindow() {

@@ -70,6 +70,7 @@ public class App {
 		        NotificationManager nm = new NotificationManager();
 		        nm.initialize();
 			} catch (Exception e) {
+	            JOptionPane.showMessageDialog(new JDialog(), e.getMessage(), "ok", JOptionPane.WARNING_MESSAGE);
 				e.printStackTrace();
 			}
 			
@@ -101,23 +102,7 @@ public class App {
         new Thread(() -> {
             try {
                 while (!serverSocket.isClosed()) {
-                    try (Socket clientSocket = serverSocket.accept();
-                         BufferedReader bf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                        String message = bf.readLine();
-                        if ("SHOW".equals(message)) {
-                            SwingUtilities.invokeLater(() -> {
-                                if (Main.getMain() != null) {
-                                    Main.getMain().setVisible(true);
-                                    Main.getMain().toFront();
-                                    Main.getMain().requestFocus();
-                                }
-                            });
-                        }
-                    } catch (Exception e) {
-                        if (!serverSocket.isClosed()) {
-                            e.printStackTrace();
-                        }
-                    }
+                    readPortMessage();
                 }
             } catch (Exception e) {
                 if (!serverSocket.isClosed()) {
@@ -126,6 +111,26 @@ public class App {
             }
         }).start();
         logger.info("Background listener started.");
+    }
+    
+    private static void readPortMessage() {
+    	try (Socket clientSocket = serverSocket.accept();
+                BufferedReader bf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+               String message = bf.readLine();
+               if ("SHOW".equals(message)) {
+                   SwingUtilities.invokeLater(() -> {
+                       if (Main.getMain() != null) {
+                           Main.getMain().setVisible(true);
+                           Main.getMain().toFront();
+                           Main.getMain().requestFocus();
+                       }
+                   });
+               }
+           } catch (Exception e) {
+               if (!serverSocket.isClosed()) {
+                   e.printStackTrace();
+               }
+           }
     }
     
     private static void applySettings() {

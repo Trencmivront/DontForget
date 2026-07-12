@@ -6,17 +6,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Method;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import main.cmp.CustomIcon;
@@ -66,21 +62,6 @@ public class ProjectRowPanel extends JPanel {
 
 		add(label);
 		addPopUpMenuItem();
-		addMouseListener();
-	}
-	
-	private void addMouseListener() {
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// removing background color from previous project button
-				main.setProjectBackgroundColorOfProject(ProjectRowPanel.this);
-				JPanel showInfoPanel = main.getShowInfoPanel();
-				showInfoPanel.removeAll();
-				showInfoPanel.add(new ProjectInfoPanel(ProjectRowPanel.this));
-				main.refreshWindow();
-			}
-		});
 	}
 	
 	private void addPopUpMenuItem() {
@@ -96,8 +77,16 @@ public class ProjectRowPanel extends JPanel {
 		
 		MouseAdapter mouseAdapter = new MouseAdapter() {
 			@Override
-			public void mousePressed(MouseEvent e) {
-				if(e.getButton() == MouseEvent.BUTTON3) {
+			public void mouseClicked(MouseEvent e) {
+				// removing background color from previous project button
+				if(e.getButton() == MouseEvent.BUTTON1) {
+					main.setProjectBackgroundColorOfProject(ProjectRowPanel.this);
+					JPanel showInfoPanel = main.getShowInfoPanel();
+					showInfoPanel.removeAll();
+					showInfoPanel.add(new ProjectInfoPanel(ProjectRowPanel.this));
+					main.refreshWindow();
+				}
+				else if(e.getButton() == MouseEvent.BUTTON3) {
 					showPopup(e);
 				}
 			}
@@ -111,12 +100,11 @@ public class ProjectRowPanel extends JPanel {
 
 	private void addEditActionListener(JMenuItem button) {
 		button.addActionListener(_ -> {
-			JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-			CreateUpdateProjectWindow dialog = new CreateUpdateProjectWindow(frame, true, this);
+			CreateUpdateProjectWindow dialog = new CreateUpdateProjectWindow(main, true, this);
 			dialog.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent we) {
-					refreshProjectsList();
+					main.listProjects(main.getProjectsContainer());
 				}
 			});
 		});
@@ -134,24 +122,11 @@ public class ProjectRowPanel extends JPanel {
 			if (confirm == JOptionPane.YES_OPTION) {
 				Long projectId = (Long) getClientProperty("project_id");
 				if (DeleteProjectService.execute(projectId)) {
-					refreshProjectsList();
+					main.listProjects(main.getProjectsContainer());
 				} else {
 					JOptionPane.showMessageDialog(this, "Failed to delete the project.");
 				}
 			}
 		});
-	}
-
-	private void refreshProjectsList() {
-		if (main != null && main.getProjectsContainer() != null) {
-			try {
-				Method method = Main.class.getDeclaredMethod("listProjects", JScrollPane.class);
-				method.setAccessible(true);
-				method.invoke(main, main.getProjectsContainer());
-				main.refreshWindow();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
 	}
 }

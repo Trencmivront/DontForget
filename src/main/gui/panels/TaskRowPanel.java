@@ -79,15 +79,17 @@ public class TaskRowPanel extends JPanel{
 		add(title);
 		
 		setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-		addTaskTitleActionListener(title);
+		addTaskActionListener();
 		
 	}
 	
-	private void addTaskTitleActionListener(JLabel title) {
-		title.addMouseListener(new MouseAdapter() {
+	private void addTaskActionListener() {
+		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				new CreateUpdateTaskWindow(Main.getMain(), (Long) getClientProperty("project_id"), true, TaskRowPanel.this);
+				if(e.getButton() == MouseEvent.BUTTON1) {
+					new CreateUpdateTaskWindow(Main.getMain(), (Long) getClientProperty("project_id"), true, TaskRowPanel.this);
+				}
 			}
 		});
 	}
