@@ -323,7 +323,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 	}
 
 	private void setTag(Long taskId) {
-			List<Tag> tags = GetTagsOfTaskService.execute(taskId);
+			List<Tag> tags = new GetTagsOfTaskService().execute(taskId);
 			if (tags != null && !tags.isEmpty()) {
 				selectedTags.addAll(tags);
 				updateTagsButton(tagsBtn);
@@ -331,7 +331,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 	}
 
 	private void setRecurringDays(Long taskId) {
-		List<DayOfWeek> recurringDays = GetRecurringDaysOfTaskService.execute(taskId);
+		List<DayOfWeek> recurringDays = new GetRecurringDaysOfTaskService().execute(taskId);
 		if (recurringDays != null && !recurringDays.isEmpty()) {
 			selectedRecurringDays.addAll(recurringDays);
 			isRecurring = true;
@@ -343,7 +343,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 	}
 
 	private void setReminder(Long taskId) {
-		Reminder reminder = GetReminderByIdService.execute(taskId);
+		Reminder reminder = new GetReminderByIdService().execute(taskId);
 		if (reminder != null) {
 			selectedReminderTime = reminder.remind_at();
 			selectedReminderMsg = reminder.cstm_message();
@@ -410,16 +410,16 @@ public class CreateUpdateTaskWindow extends JDialog {
 					completedAt
 				);
 
-				if (!UpdateTaskService.execute(task)) {
+				if (!new UpdateTaskService().execute(task)) {
 					new ErrorDialog("Error", "Failed to update task. Make sure the title is unique.");
 					return;
 				}
 
-				DeleteReminderService.execute(taskId);
-				DeleteTaskTagService.execute(taskId);
-				DeleteRecurringTaskService.execute(taskId);
+				new DeleteReminderService().execute(taskId);
+				new DeleteTaskTagService().execute(taskId);
+				new DeleteRecurringTaskService().execute(taskId);
 			} else {
-				Long newId = CreateTaskService.execute(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
+				Long newId = new CreateTaskService().execute(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
 				if (newId == 0L) {
 					new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 					return;
@@ -429,17 +429,17 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 			if (selectedReminderTime != null && taskId != null) {
 				Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
-				CreateReminderService.execute(reminder);
+				new CreateReminderService().execute(reminder);
 			}
 
 			if (taskId != null && selectedTags != null) {
 				for (Tag tag : selectedTags) {
-					CreateTaskTagService.execute(new TaskTag(taskId, tag.tag_id()));
+					new CreateTaskTagService().execute(new TaskTag(taskId, tag.tag_id()));
 				}
 			}
 
 			if (taskId != null && isRecurring && selectedRecurringDays != null && !selectedRecurringDays.isEmpty()) {
-				CreateRecurringTaskService.execute(taskId, selectedRecurringDays);
+				new CreateRecurringTaskService().execute(taskId, selectedRecurringDays);
 			}
 //				Refresh main ui
 				main.destroyChildWindows();
@@ -634,7 +634,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-			List<Tag> allTags = GetTagsService.execute();
+			List<Tag> allTags = new GetTagsService().execute();
 			List<JCheckBox> checkBoxes = new ArrayList<>();
 			List<Tag> tagsList = new ArrayList<>();
 
@@ -650,7 +650,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 					JLabel label = new JLabel(tag.tag_name());
 					label.setFont(new Font("Dialog", Font.PLAIN, 14));
 
-					IconColor ic = GetIconColorOfTagService.execute(tag.tag_id());
+					IconColor ic = new GetIconColorOfTagService().execute(tag.tag_id());
 					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
 					label.setIcon(new CustomIcon(color, 12, 12));
 

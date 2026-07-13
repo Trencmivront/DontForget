@@ -12,11 +12,10 @@ import main.entities.TaskTag;
 
 public class GetTaskTagByTaskService {
 
-	private GetTaskTagByTaskService() {}
 
 	private static final Logger logger = Logger.getLogger(GetTaskTagByTaskService.class.getName());
 
-	public static List<TaskTag> execute(Long taskId) {
+	public List<TaskTag> execute(Long taskId) {
 		logger.info("Executing GetTaskTagByTaskService with taskId: " + taskId);
 
 		String sql = "SELECT * FROM TASK_TAG WHERE task_id = ?";

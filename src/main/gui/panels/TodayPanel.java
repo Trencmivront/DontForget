@@ -33,7 +33,7 @@ public class TodayPanel extends JPanel{
 	
 	private void listTasks(){
 		
-		List<Task> tasks = GetTodaysTasksService.execute();
+		List<Task> tasks = new GetTodaysTasksService().execute();
 		if(tasks.isEmpty()) {
 			add(new EmptyPanel("No task for today."));
 		}

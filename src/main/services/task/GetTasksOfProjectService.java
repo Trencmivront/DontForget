@@ -13,10 +13,9 @@ import main.App;
 import main.entities.Task;
 
 public class GetTasksOfProjectService {
- private GetTasksOfProjectService() {}
 	private static final Logger logger = Logger.getLogger(GetTasksOfProjectService.class.getName());
 	
-	public static List<Task> execute(Long id){
+	public List<Task> execute(Long id){
 		logger.info("Service executed.");
 		
 		String sql = "SELECT * FROM TASK WHERE project_id = ?";

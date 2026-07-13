@@ -9,16 +9,15 @@ import main.services.tasktag.DeleteTaskTagService;
 
 public class DeleteTaskService {
 
-	private DeleteTaskService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteTaskService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		// 1. Delete associated connections using the specialized service classes
-		DeleteReminderService.execute(id);
-		DeleteTaskTagService.execute(id);
+		new DeleteReminderService().execute(id);
+		new DeleteTaskTagService().execute(id);
 
 		// 2. Delete the task record itself
 		String deleteTaskSql = "DELETE FROM TASK WHERE task_id = ?";

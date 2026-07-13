@@ -186,13 +186,13 @@ public class CreateUpdateProjectWindow extends JDialog {
 				Object idObj = updatedProject.getClientProperty("project_id");
 				if (idObj instanceof Number) {
 					Long id = ((Number) idObj).longValue();
-					if(!UpdateProjectService.execute(new ProjectDCO(title, description, iconColorId), id)) {
+					if(!new UpdateProjectService().execute(new ProjectDCO(title, description, iconColorId), id)) {
 						new ErrorDialog("Database Error", "Error while updating project");
 					}
 				}
 			}
 			else {
-				if(!CreateProjectService.execute(new ProjectDCO(title, description, iconColorId))) {
+				if(!new CreateProjectService().execute(new ProjectDCO(title, description, iconColorId))) {
 					new ErrorDialog("Database Error", "Error while creating project");
 				}
 			}
@@ -204,7 +204,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 	private void listColors(Container container) {
 		logger.info("Running function.");
 
-		List<IconColor> ic = GetIconColorsService.execute();
+		List<IconColor> ic = new GetIconColorsService().execute();
 		// initialize the ButtonGroup here
 		bg = new ButtonGroup();
 		
@@ -245,7 +245,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 		Object projIdObj = updatedProject.getClientProperty("project_id");
 		if (projIdObj instanceof Number) {
 			Long projectId = ((Number) projIdObj).longValue();
-			IconColor projectColor = GetIconColorOfProjectService.execute(projectId);
+			IconColor projectColor = new GetIconColorOfProjectService().execute(projectId);
 			if (projectColor != null) {
 				for (Component comp : colorRadioPanel.getComponents()) {
 					if (comp instanceof JRadioButton) {

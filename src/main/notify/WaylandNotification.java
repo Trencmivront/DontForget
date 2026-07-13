@@ -49,7 +49,7 @@ public class WaylandNotification {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;
                     logger.info("Saving notification message to inbox DB: " + body);
-                	CreateMessageService.execute(body);
+                	new CreateMessageService().execute(body);
                     while ((line = reader.readLine()) != null) {
                         logger.info("gdbus response: " + line);
                         // If the user clicks the notification body, 'default' is returned

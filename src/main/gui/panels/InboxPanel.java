@@ -32,10 +32,9 @@ public class InboxPanel extends JPanel {
 		setLayout(new BorderLayout());
 
 		add(new HeaderPanel("Messages"), BorderLayout.NORTH);
-		
-		List<Inbox> inboxItems = null;
+				List<Inbox> inboxItems = null;
 
-		inboxItems = GetInboxService.execute();
+		inboxItems = new GetInboxService().execute();
 
 		if (inboxItems == null || inboxItems.isEmpty()) {
 			add(new EmptyPanel("Your inbox is empty."), BorderLayout.CENTER);
@@ -114,7 +113,7 @@ public class InboxPanel extends JPanel {
 				if (row != -1) {
 					int modelRow = table.convertRowIndexToModel(row);
 					Inbox item = inboxItems.get(modelRow);
-					DeleteMessageByIdService.execute(item.inbox_id());
+					new DeleteMessageByIdService().execute(item.inbox_id());
 					model.removeRow(modelRow);
 					inboxItems.remove(modelRow);
 				}

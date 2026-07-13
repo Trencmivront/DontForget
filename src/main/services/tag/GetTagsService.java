@@ -11,7 +11,7 @@ import main.entities.Tag;
 
 public class GetTagsService {
 	
-	public static List<Tag> execute(){
+	public List<Tag> execute(){
 		
 		try (Statement stm = App.getConnection().createStatement()){
 			

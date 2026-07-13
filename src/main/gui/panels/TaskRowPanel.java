@@ -139,7 +139,7 @@ public class TaskRowPanel extends JPanel{
 				completedAt
 			);
 			
-			if (UpdateTaskService.execute(updatedTask)) {
+			if (new UpdateTaskService().execute(updatedTask)) {
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
 			}
 		});

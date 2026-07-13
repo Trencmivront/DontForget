@@ -8,11 +8,10 @@ import main.App;
 
 public class CreateMessageService {
 
-	private CreateMessageService() {}
 
 	private static final Logger logger = Logger.getLogger(CreateMessageService.class.getName());
 
-	public static boolean execute(String message) {
+	public boolean execute(String message) {
 		logger.info("Executing CreateMessageService.");
 
 		String sql = "INSERT INTO INBOX (message) VALUES (?)";

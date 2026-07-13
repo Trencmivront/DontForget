@@ -11,7 +11,7 @@ import main.entities.Task;
 
 public class GetTasksService {
 
-	public static List<Task> execute() {
+	public List<Task> execute() {
 		try (Statement stm = App.getConnection().createStatement()) {
 			String sql = "SELECT * FROM TASK";
 			ResultSet rs = stm.executeQuery(sql);

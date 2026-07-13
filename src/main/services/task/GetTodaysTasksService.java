@@ -10,10 +10,9 @@ import main.App;
 import main.entities.Task;
 
 public class GetTodaysTasksService {
- private GetTodaysTasksService() {}
 	private static final Logger logger = Logger.getLogger(GetTodaysTasksService.class.getName());
 	
-	public static List<Task> execute(){
+	public List<Task> execute(){
 		logger.info("Service executed.");
 				
 		try (Statement pstm = App.getConnection().createStatement()) {

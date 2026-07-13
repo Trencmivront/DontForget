@@ -12,11 +12,10 @@ import main.entities.Reminder;
 
 public class GetRemindersService {
 	
-	private GetRemindersService() {}
 	
 	private static final Logger logger = Logger.getLogger(GetRemindersService.class.getName());
 
-	public static List<Reminder> execute() {
+	public List<Reminder> execute() {
 		logger.info("Class " + logger.getName() + " is executed.");
 		
 		String sql = "SELECT * FROM REMINDER ORDER BY remind_at ASC";

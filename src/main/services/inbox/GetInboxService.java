@@ -11,11 +11,10 @@ import main.entities.Inbox;
 
 public class GetInboxService {
 	
-	private GetInboxService() {}
 	
 	private static final Logger logger = Logger.getLogger(GetInboxService.class.getName());
 
-	public static List<Inbox> execute() {
+	public List<Inbox> execute() {
 		logger.info("Class " + logger.getName() + " is executed.");
 		
 		String sql = "SELECT * FROM INBOX ORDER BY inbox_id DESC";

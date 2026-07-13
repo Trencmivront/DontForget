@@ -13,9 +13,8 @@ public class CreateRecurringTaskService {
 
 	private static final Logger logger = Logger.getLogger(CreateRecurringTaskService.class.getName());
 
-	private CreateRecurringTaskService() {}
 
-	public static boolean execute(Long taskId, List<DayOfWeek> days) {
+	public boolean execute(Long taskId, List<DayOfWeek> days) {
 		logger.info("Executing CreateRecurringTaskService for taskId: " + taskId);
 
 		String insertRecurringSql = "INSERT INTO RECURRING_TASK (task_id, week_day_id) VALUES (?, ?)";

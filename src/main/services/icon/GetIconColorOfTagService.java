@@ -9,7 +9,7 @@ import main.entities.IconColor;
 
 public class GetIconColorOfTagService {
 	
-	public static IconColor execute(Long id) {
+	public IconColor execute(Long id) {
 		
 		String sql = "SELECT * FROM ICON_COLOR ic JOIN TAG t ON "
 				+ "t.icon_color_id=ic.icon_color_id WHERE t.tag_id=(?)";

@@ -50,7 +50,7 @@ public class ProjectRowPanel extends JPanel {
 		setBorder(new EmptyBorder(3, 2, 3, 2));
 		setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getFont().getSize() + 5));
 		
-		IconColor ic = GetIconColorOfProjectService.execute(projectId);
+		IconColor ic = new GetIconColorOfProjectService().execute(projectId);
 		if(ic != null) {
 			Color color = new Color(ic.red(), ic.green(), ic.blue());
 			label.setIcon(new CustomIcon(color, 12, 12));
@@ -121,7 +121,7 @@ public class ProjectRowPanel extends JPanel {
 			);
 			if (confirm == JOptionPane.YES_OPTION) {
 				Long projectId = (Long) getClientProperty("project_id");
-				if (DeleteProjectService.execute(projectId)) {
+				if (new DeleteProjectService().execute(projectId)) {
 					main.listProjects(main.getProjectsContainer());
 				} else {
 					JOptionPane.showMessageDialog(this, "Failed to delete the project.");

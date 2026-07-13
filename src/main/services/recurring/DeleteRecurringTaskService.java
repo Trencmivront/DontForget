@@ -7,11 +7,10 @@ import main.App;
 
 public class DeleteRecurringTaskService {
 
-	private DeleteRecurringTaskService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteRecurringTaskService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info(String.format("Class %s is executed with input id: %d", logger.getName(), id));
 		String sql = "DELETE FROM RECURRING_TASK WHERE task_id = ?";
 		

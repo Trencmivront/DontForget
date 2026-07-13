@@ -12,7 +12,7 @@ public class GetIconColorOfProjectService {
 	
 	private static final Logger logger = Logger.getLogger(GetIconColorOfProjectService.class.getName());
 	
-	public static IconColor execute(Long id) {
+	public IconColor execute(Long id) {
 		
 		logger.info("The class " + logger.getName() + " is executed.");
 		

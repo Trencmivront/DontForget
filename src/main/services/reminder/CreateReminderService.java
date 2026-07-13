@@ -10,11 +10,10 @@ import main.notify.NotificationManager;
 
 public class CreateReminderService {
 
-	private CreateReminderService() {}
 
 	private static final Logger logger = Logger.getLogger(CreateReminderService.class.getName());
 
-	public static boolean execute(Reminder reminder) {
+	public boolean execute(Reminder reminder) {
 		logger.info("Executing CreateReminderService.");
 
 		String sql = "INSERT INTO REMINDER (task_id, remind_at, cstm_message) VALUES (?, ?, ?)";

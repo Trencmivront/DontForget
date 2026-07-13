@@ -7,11 +7,10 @@ import main.App;
 
 public class DeleteTagService {
 
-	private DeleteTagService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteTagService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		// 1. Delete references in the junction table TASK_TAG

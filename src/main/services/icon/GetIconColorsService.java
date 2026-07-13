@@ -10,10 +10,9 @@ import main.App;
 import main.entities.IconColor;
 
 public class GetIconColorsService {
- private GetIconColorsService() {}
 
 	
-	public static List<IconColor> execute(){
+	public List<IconColor> execute(){
 		
 		try (Statement stm = App.getConnection().createStatement()){
 			

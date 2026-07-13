@@ -11,9 +11,8 @@ public class UpdateProjectService {
 
 	private static final Logger logger = Logger.getLogger(UpdateProjectService.class.getName());
 
-	private UpdateProjectService() {}
 
-	public static boolean execute(ProjectDCO p, Long id) {
+	public boolean execute(ProjectDCO p, Long id) {
 		logger.info("Class " + logger.getName() + " is executed with project ID: " + id);
 
 		if (p == null) {

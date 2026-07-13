@@ -60,7 +60,7 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public void listTasks() {
 		Long id = (Long)projectPanel.getClientProperty("project_id");
-		List<Task> tasks = GetTasksOfProjectService.execute(id);
+		List<Task> tasks = new GetTasksOfProjectService().execute(id);
 		
 		if(tasks.isEmpty()) {
 			infoScrollPane.removeAll();
@@ -132,7 +132,7 @@ public class ProjectInfoPanel extends JPanel{
 				);
 			if(confirm == JOptionPane.YES_OPTION) {
 				Long id = (Long) projectPanel.getClientProperty("project_id");
-				DeleteCompletedTasksService.execute(id);
+				new DeleteCompletedTasksService().execute(id);
 				listTasks();
 			}
 		});

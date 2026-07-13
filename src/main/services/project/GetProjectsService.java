@@ -11,11 +11,10 @@ import main.entities.Project;
 
 public class GetProjectsService {
 	
-	private GetProjectsService() {}
 	
 	private static final Logger logger = Logger.getLogger(GetProjectsService.class.getName());
 
-	public static List<Project> execute(){
+	public List<Project> execute(){
 		logger.info("Class " + logger.getName() + " is executed.");
 		try(Statement stm = App.getConnection().createStatement()) {
 			

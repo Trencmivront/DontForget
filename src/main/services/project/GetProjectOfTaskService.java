@@ -10,11 +10,10 @@ import main.entities.Project;
 
 public class GetProjectOfTaskService {
 
-	private GetProjectOfTaskService() {}
 
 	private static final Logger logger = Logger.getLogger(GetProjectOfTaskService.class.getName());
 
-	public static Project execute(Long taskId) {
+	public Project execute(Long taskId) {
 		logger.info("Class " + logger.getName() + " is executed with task ID: " + taskId);
 
 		String sql = "SELECT P.* FROM PROJECT P JOIN TASK T ON P.project_id = T.project_id WHERE T.task_id = ?";

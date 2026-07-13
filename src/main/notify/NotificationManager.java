@@ -21,7 +21,7 @@ public class NotificationManager {
 
 	public void initialize() {
 		logger.info("Initializing NotificationManager and scheduling existing reminders...");
-		List<Reminder> reminders = GetRemindersService.execute();
+		List<Reminder> reminders = new GetRemindersService().execute();
 		if (reminders != null) {
 			for (Reminder reminder : reminders) {
 				scheduleReminder(reminder);

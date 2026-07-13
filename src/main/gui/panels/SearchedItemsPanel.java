@@ -122,7 +122,7 @@ public class SearchedItemsPanel extends JPanel{
 	}
 	
 	private void listProjects() {
-		List<Project> projects = GetProjectsService.execute();
+		List<Project> projects = new GetProjectsService().execute();
 		if (projects != null && !projects.isEmpty()) {
 			model.addRow(new Object[] { createHeader("Projects") });
 			for (Project project : projects) {
@@ -133,12 +133,12 @@ public class SearchedItemsPanel extends JPanel{
 	}
 
 	private void listTasks() {
-		List<Task> tasks = GetTasksService.execute();
+		List<Task> tasks = new GetTasksService().execute();
 		if (tasks != null && !tasks.isEmpty()) {
 			model.addRow(new Object[] { createHeader("Tasks") });
 			for (Task task : tasks) {
 				TaskRowPanel row = new TaskRowPanel(task);
-				List<Tag> tags = GetTagsOfTaskService.execute(task.task_id());
+				List<Tag> tags = new GetTagsOfTaskService().execute(task.task_id());
 				if (tags != null && !tags.isEmpty()) {
 					StringBuilder tagsBuilder = new StringBuilder();
 					for (Tag tag : tags) {
@@ -152,7 +152,7 @@ public class SearchedItemsPanel extends JPanel{
 	}
 
 	private void listTags() {
-		List<Tag> tags = GetTagsService.execute();
+		List<Tag> tags = new GetTagsService().execute();
 		if (tags != null && !tags.isEmpty()) {
 			model.addRow(new Object[] { createHeader("Tags") });
 			for (Tag tag : tags) {

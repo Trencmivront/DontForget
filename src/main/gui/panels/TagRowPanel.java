@@ -39,7 +39,7 @@ public class TagRowPanel extends JPanel {
 		JLabel label = new JLabel(tag.tag_name());
 		label.setFont(new Font("Dialog", Font.PLAIN, 20));
 
-		IconColor ic = GetIconColorOfTagService.execute(tag.tag_id());
+		IconColor ic = new GetIconColorOfTagService().execute(tag.tag_id());
 		// if color not found, make it gray
 		Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
 
@@ -78,7 +78,7 @@ public class TagRowPanel extends JPanel {
 	private void addDeleteActionListener(JMenuItem deleteItem) {
 		deleteItem.addActionListener(_ -> {
 				Long tagId = (Long) getClientProperty("tag_id");
-				if (DeleteTagService.execute(tagId)) {
+				if (new DeleteTagService().execute(tagId)) {
 					refreshTagsList();
 				} else {
 					JOptionPane.showMessageDialog(this, "Failed to delete the tag.");

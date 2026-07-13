@@ -9,11 +9,10 @@ import main.entities.Reminder;
 
 public class GetReminderByIdService {
 
-	private GetReminderByIdService() {}
 
 	private static final Logger logger = Logger.getLogger(GetReminderByIdService.class.getName());
 
-	public static Reminder execute(Long id) {
+	public Reminder execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with id: " + id);
 
 		String sql = "SELECT * FROM REMINDER WHERE task_id = ?";

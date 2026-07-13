@@ -10,11 +10,10 @@ import main.entities.Tag;
 
 public class GetTagService {
 
-	private GetTagService() {}
 
 	private static final Logger logger = Logger.getLogger(GetTagService.class.getName());
 
-	public static Tag execute(Long tagId) {
+	public Tag execute(Long tagId) {
 		logger.info("Executing GetTagService with tagId: " + tagId);
 
 		String sql = "SELECT * FROM TAG WHERE tag_id = ?";

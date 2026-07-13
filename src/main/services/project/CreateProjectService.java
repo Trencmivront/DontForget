@@ -12,7 +12,7 @@ public class CreateProjectService {
 	
 	private static final Logger logger = Logger.getLogger(CreateProjectService.class.getName());
 
-	public static boolean execute(ProjectDCO p){
+	public boolean execute(ProjectDCO p){
 		logger.info("Class " + logger.getName() + " is executed.");
 		
 		String createSql = "INSERT INTO PROJECT (project_title, description, list_order, icon_color_id)"

@@ -9,11 +9,10 @@ import main.entities.TaskTag;
 
 public class CreateTaskTagService {
 
-	private CreateTaskTagService() {}
 
 	private static final Logger logger = Logger.getLogger(CreateTaskTagService.class.getName());
 
-	public static boolean execute(TaskTag taskTag) {
+	public boolean execute(TaskTag taskTag) {
 		logger.info("Executing CreateTaskTagService.");
 
 		String sql = "INSERT INTO TASK_TAG (task_id, tag_id) VALUES (?, ?)";

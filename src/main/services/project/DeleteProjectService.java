@@ -11,11 +11,10 @@ import main.services.task.DeleteTaskService;
 
 public class DeleteProjectService {
 
-	private DeleteProjectService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteProjectService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		// 1. Fetch all task_ids of this project
@@ -37,7 +36,7 @@ public class DeleteProjectService {
 
 		// 2. Delete each task using DeleteTaskService
 		for (Long taskId : taskIds) {
-			boolean taskDeleted = DeleteTaskService.execute(taskId);
+			boolean taskDeleted = new DeleteTaskService().execute(taskId);
 			if (!taskDeleted) {
 				logger.warning("Failed to delete task with ID: " + taskId);
 			}

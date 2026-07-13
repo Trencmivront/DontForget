@@ -14,9 +14,8 @@ public class GetRecurringDaysOfTaskService {
 
 	private static final Logger logger = Logger.getLogger(GetRecurringDaysOfTaskService.class.getName());
 
-	private GetRecurringDaysOfTaskService() {}
 
-	public static List<DayOfWeek> execute(Long taskId) {
+	public List<DayOfWeek> execute(Long taskId) {
 		logger.info("Executing GetRecurringDaysOfTaskService for taskId: " + taskId);
 		List<DayOfWeek> days = new ArrayList<>();
 		String sql = "SELECT week_day_id FROM RECURRING_TASK WHERE task_id = ?";

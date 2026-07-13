@@ -38,7 +38,7 @@ public class TagsPanel extends JPanel {
 		List<Tag> tags = null;
 		scrollPane.removeAll();
 
-		tags = GetTagsService.execute();
+		tags = new GetTagsService().execute();
 		
 		if (tags == null || tags.isEmpty()) {
 			scrollPane.setViewportView(new EmptyPanel("No tag found."));

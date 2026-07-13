@@ -15,9 +15,8 @@ public class CreateTaskService {
 
 	private static final Logger logger = Logger.getLogger(CreateTaskService.class.getName());
 
-	private CreateTaskService() {}
 
-	public static Long execute(TaskDCO task) {
+	public Long execute(TaskDCO task) {
 		logger.info("Executing CreateTaskService.");
 
 		Long projectId = task.project_id();

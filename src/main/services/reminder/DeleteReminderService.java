@@ -9,18 +9,17 @@ import main.services.recurring.DeleteRecurringTaskService;
 
 public class DeleteReminderService {
 
-	private DeleteReminderService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteReminderService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		String sql = "DELETE FROM REMINDER WHERE task_id = ?";
 		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
 			pstm.setLong(1, id);
 //			we need to delete recurring task and it's connections first
-			DeleteRecurringTaskService.execute(id);
+			new DeleteRecurringTaskService().execute(id);
 			pstm.executeUpdate();
 			logger.info("Reminder deleted.");
 			

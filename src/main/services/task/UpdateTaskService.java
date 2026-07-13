@@ -13,9 +13,8 @@ public class UpdateTaskService {
 
 	private static final Logger logger = Logger.getLogger(UpdateTaskService.class.getName());
 
-	private UpdateTaskService() {}
 
-	public static boolean execute(Task task) {
+	public boolean execute(Task task) {
 		logger.info("Class " + logger.getName() + " is executed with task ID: " + (task != null ? task.task_id() : "null"));
 
 		if (task == null || task.task_id() == null) {

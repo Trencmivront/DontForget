@@ -224,7 +224,7 @@ public class Main extends JFrame {
 		List<Project> projects = null;
 		container.removeAll();
 
-		projects = GetProjectsService.execute();
+		projects = new GetProjectsService().execute();
 		
 		int size = projects.size();
 		
@@ -295,7 +295,7 @@ public class Main extends JFrame {
 				for (JPanel panel : selectedProjects) {
 					Long projectId = (Long) panel.getClientProperty("project_id");
 					if (projectId != null) {
-						DeleteProjectService.execute(projectId);
+						new DeleteProjectService().execute(projectId);
 					}
 				}
 				selectedProjects.clear();

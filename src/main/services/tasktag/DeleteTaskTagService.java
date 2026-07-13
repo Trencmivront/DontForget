@@ -7,11 +7,10 @@ import main.App;
 
 public class DeleteTaskTagService {
 
-	private DeleteTaskTagService() {}
 
 	private static final Logger logger = Logger.getLogger(DeleteTaskTagService.class.getName());
 
-	public static boolean execute(Long id) {
+	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
 
 		String sql = "DELETE FROM TASK_TAG WHERE task_id = ?";
