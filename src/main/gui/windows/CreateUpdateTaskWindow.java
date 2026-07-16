@@ -260,16 +260,10 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.setFont(new Font("Dialog", Font.PLAIN, 14));
-		cancelButton.putClientProperty("JButton.buttonType", "roundRect");
-		cancelButton.addActionListener(_ -> dispose());
-
 		JButton createButton = new JButton(isUpdate ? "UPDATE" : "CREATE");
 		createButton.setFont(new Font("Dialog", Font.BOLD, 14));
 		createButton.putClientProperty("JButton.buttonType", "roundRect");
 
-		buttonPane.add(cancelButton);
 		buttonPane.add(createButton);
 		footerPanel.add(buttonPane, BorderLayout.EAST);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);

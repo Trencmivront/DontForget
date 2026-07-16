@@ -30,3 +30,5 @@ replay_pid*
 deb/
 # settings file
 settings.json
+# flatpak manifest
+io.github.trencmivront.DontForget.json

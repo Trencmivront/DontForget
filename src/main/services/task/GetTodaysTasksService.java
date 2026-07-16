@@ -3,6 +3,7 @@ package main.services.task;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,10 +19,10 @@ public class GetTodaysTasksService {
 		try (Statement pstm = App.getConnection().createStatement()) {
 			
 			String sql = "SELECT * FROM TASK WHERE "
-					+ "FORMATDATETIME(due_date, '%Y-%m-%d') = FORMATDATETIME(NOW(), 'dd-MM-yyyy')";
+					+ "FORMATDATETIME(due_date, '%d-%M-%Y') = FORMATDATETIME(NOW(), 'dd-MM-yyyy')";
 			
 			try (ResultSet rs = pstm.executeQuery(sql)) {
-				List<Task> tasks = new ArrayList<Task>();
+				List<Task> tasks = new ArrayList<>();
 				
 				while(rs.next()) {
 					tasks.add(new Task(
@@ -44,6 +45,6 @@ public class GetTodaysTasksService {
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;	
+		return Collections.emptyList();	
 	}
 }

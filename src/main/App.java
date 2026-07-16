@@ -160,11 +160,12 @@ public class App {
             }
         } else {
             try {
-                JsonNode rootNode = mapper.readTree(settingsPath.toFile());
-                JsonNode initNode = rootNode.get(key);
-                if (initNode != null && initNode.asBoolean()) {
-                    value = true;
-                }
+//            	Get the value of the key from this file,
+//            	take it as boolean, and deault value is "false".
+                value = mapper.
+                		readTree(settingsPath.toFile()).
+                		path(key).
+                		asBoolean(false);
             } catch (IOException e) {
                 e.printStackTrace();
             }

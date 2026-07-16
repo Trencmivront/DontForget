@@ -30,6 +30,7 @@ public class ProjectInfoPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(ProjectInfoPanel.class.getName());
 	private ProjectRowPanel projectPanel;
 	private static ProjectInfoPanel projectInfoPanel;
+	private final Main main = Main.getMain();
 	{
 		projectInfoPanel = this;
 	}
@@ -67,14 +68,11 @@ public class ProjectInfoPanel extends JPanel{
 			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
 			revalidate();
 			repaint();
-			Main.getMain().refreshWindow();
+			main.refreshWindow();
 			logger.info("No task found for project.");
 			return;
 		}
 		ListIterator<Task> i = tasks.listIterator();
-				
-		JPanel info = new JPanel();
-		info.setLayout(new BorderLayout());
 		
 		JPanel tasksContainer = new JPanel();
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
@@ -86,7 +84,7 @@ public class ProjectInfoPanel extends JPanel{
 		infoScrollPane.setViewportView(tasksContainer);
 		infoScrollPane.revalidate();
 		infoScrollPane.repaint();
-		Main.getMain().refreshWindow();
+		main.refreshWindow();
 	}
 	
 	private JPanel createHeaderPanel() {

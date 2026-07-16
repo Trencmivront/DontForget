@@ -36,7 +36,7 @@ public class InboxPanel extends JPanel {
 
 		inboxItems = new GetInboxService().execute();
 
-		if (inboxItems == null || inboxItems.isEmpty()) {
+		if (inboxItems.isEmpty()) {
 			add(new EmptyPanel("Your inbox is empty."), BorderLayout.CENTER);
 		} else {
 			DefaultTableModel model = new DefaultTableModel(new Object[] { "Message", "Date", "Action" }, 0) {

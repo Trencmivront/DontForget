@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import main.App;
@@ -23,11 +24,7 @@ public class CreateTaskService {
 		int listOrder = 1;
 		String maxOrderSql = "SELECT MAX(list_order) as max_order FROM TASK WHERE project_id = ?";
 		try (PreparedStatement pstm = App.getConnection().prepareStatement(maxOrderSql)) {
-			if (projectId != null) {
-				pstm.setLong(1, projectId);
-			} else {
-				pstm.setNull(1, Types.BIGINT);
-			}
+			pstm.setObject(1, projectId);
 			try (ResultSet rs = pstm.executeQuery()) {
 				if (rs.next()) {
 					listOrder = rs.getInt("max_order") + 1;
@@ -45,13 +42,9 @@ public class CreateTaskService {
 
 				pstm.setString(1, task.task_title());
 				pstm.setString(2, task.description() == null || task.description().isEmpty() ? null : task.description());
-				pstm.setLong(3, task.status_id() != null ? task.status_id() : 1L); // 1 = ACTIVE
+				pstm.setLong(3, Objects.requireNonNullElse(task.status_id(), 1L)); // 1 = ACTIVE
 
-				if (task.priority() != null) {
-					pstm.setInt(4, task.priority());
-				} else {
-					pstm.setNull(4, Types.INTEGER);
-				}
+				pstm.setObject(4, task.priority());
 
 				if (task.due_date() != null) {
 					pstm.setDate(5, Date.valueOf(task.due_date()));

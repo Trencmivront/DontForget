@@ -5,19 +5,18 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import main.entities.Reminder;
@@ -65,25 +64,17 @@ public class ReminderPanel extends JPanel{
 		if(reminders.isEmpty()) {
 			return new HashMap<>();
 		}
-		
-		HashMap<String, List<Reminder>> monthReminderHash = new HashMap<>();
-		
-		for(Reminder reminder : reminders) {
-			
-			LocalDateTime localDateTime = reminder.remind_at().toLocalDateTime();
-			String monthName = localDateTime.getMonth().name();
-			
-			// if month has not been set yet, create a month with new list
-			if(monthReminderHash.get(monthName) == null) {
-				List<Reminder> r = new ArrayList<>();
-				r.add(reminder);
-				monthReminderHash.putIfAbsent(monthName, r);
-			}else {
-				// add reminder to existing month
-				monthReminderHash.get(monthName).add(reminder);
-			}
-		}
-		return monthReminderHash;
+//		Here we are grouping reminders by their month name, then for each key
+//		we generate a list of reminders and put these key-value sets into a new HashMap.
+//		Collectors.toList() function specifies that the values associated with a key must be inserted
+//		as list of values mapped to that key. So the output will be instance of HashMap<String, List<Reminder>>.
+//		The code line simply takes a list of items, groups them by given string, returns grouped values.
+		return reminders.stream().
+				collect(
+				Collectors.groupingBy(reminder -> reminder.remind_at().toLocalDateTime().getMonth().name(),
+				HashMap::new,
+				Collectors.toList()
+				));
 	}
 	
 	private void createTab(HashMap<String, List<Reminder>> hashMap){
@@ -102,15 +93,12 @@ public class ReminderPanel extends JPanel{
 			};
 			
 			for (Reminder reminder : reminders) {
-				LocalDateTime localDateTime = reminder.remind_at().toLocalDateTime();
-				int dayInt = localDateTime.getDayOfMonth();
+				int dayInt = reminder.remind_at().toLocalDateTime().getDayOfMonth();
 
-				JLabel dayLabel = new JLabel(Integer.toString(dayInt));
-				dayLabel.setHorizontalTextPosition(SwingConstants.CENTER);
 				Task task = taskService.execute(reminder.task_id());
 				ReminderRowPanel rowPanel = new ReminderRowPanel(reminder, task);
 				
-				model.addRow(new Object[] { dayLabel, rowPanel });
+				model.addRow(new Object[] { dayInt, rowPanel });
 			}
 			
 			JTable table = new JTable(model);
@@ -121,20 +109,8 @@ public class ReminderPanel extends JPanel{
 			table.getColumnModel().getColumn(0).setPreferredWidth(60);
 			table.getColumnModel().getColumn(1).setPreferredWidth(400);
 						
-			// Set cell renderer for Task column
-			table.getColumnModel().getColumn(1).setCellRenderer((tableRef, value, isSelected, hasFocus, row, column) -> {
-				if (value instanceof Component c) {
-					if (isSelected) {
-						c.setBackground(tableRef.getSelectionBackground());
-						c.setForeground(tableRef.getSelectionForeground());
-					} else {
-						c.setBackground(tableRef.getBackground());
-						c.setForeground(tableRef.getForeground());
-					}
-					return c;
-				}
-				return null;
-			});
+			// Set cell renderer
+			setTableCellRenderers(table);
 			
 			// Hover effect / cursor change for task title column
 			table.addMouseMotionListener(new MouseAdapter() {
@@ -151,43 +127,7 @@ public class ReminderPanel extends JPanel{
 			});
 			
 			// Forward mouse events (left click, right click, etc.) to the ReminderRowPanel in the cell
-			table.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					handleMouseEvent(e);
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-					handleMouseEvent(e);
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent e) {
-					handleMouseEvent(e);
-				}
-
-				private void handleMouseEvent(MouseEvent e) {
-					int row = table.rowAtPoint(e.getPoint());
-					int col = table.columnAtPoint(e.getPoint());
-					if (row >= 0 && col == 1) {
-						Object value = table.getValueAt(row, 1);
-						if (value instanceof JPanel panel) {
-							panel.dispatchEvent(new MouseEvent(
-								panel,
-								e.getID(),
-								e.getWhen(),
-								e.getModifiersEx(),
-								e.getX() - table.getCellRect(row, col, true).x,
-								e.getY() - table.getCellRect(row, col, true).y,
-								e.getClickCount(),
-								e.isPopupTrigger(),
-								e.getButton()
-							));
-						}
-					}
-				}
-			});
+			addTableMouseListener(table);
 			
 			JScrollPane scrollPane = new JScrollPane(table);
 			
@@ -195,5 +135,69 @@ public class ReminderPanel extends JPanel{
 			String displayName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1).toLowerCase();
 			monthTabbedPane.addTab(displayName, scrollPane);
 		}
+	}
+	
+	private void setTableCellRenderers(JTable table) {
+//		Center the text
+		table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+			@Override
+			public int getHorizontalAlignment() {
+				return SwingConstants.CENTER;
+			}
+		});
+		
+		table.getColumnModel().getColumn(1).setCellRenderer((tableRef, value, isSelected, _, _, _) -> {
+			if (value instanceof Component c) {
+				if (isSelected) {
+					c.setBackground(tableRef.getSelectionBackground());
+					c.setForeground(tableRef.getSelectionForeground());
+				} else {
+					c.setBackground(tableRef.getBackground());
+					c.setForeground(tableRef.getForeground());
+				}
+				return c;
+			}
+			return null;
+		});
+	}
+	
+	private void addTableMouseListener(JTable table) {
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			private void handleMouseEvent(MouseEvent e) {
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
+				if (row >= 0 && col == 1) {
+					Object value = table.getValueAt(row, 1);
+					if (value instanceof JPanel panel) {
+						panel.dispatchEvent(new MouseEvent(
+							panel,
+							e.getID(),
+							e.getWhen(),
+							e.getModifiersEx(),
+							e.getX() - table.getCellRect(row, col, true).x,
+							e.getY() - table.getCellRect(row, col, true).y,
+							e.getClickCount(),
+							e.isPopupTrigger(),
+							e.getButton()
+						));
+					}
+				}
+			}
+		});
 	}
 }

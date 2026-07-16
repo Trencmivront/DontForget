@@ -124,15 +124,10 @@ public class CreateUpdateProjectWindow extends JDialog {
 
 		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.setFont(new Font("Dialog", Font.PLAIN, 14));
-		cancelButton.putClientProperty("JButton.buttonType", "roundRect");
-
 		JButton okButton = new JButton("OK");
 		okButton.setFont(new Font("Dialog", Font.BOLD, 14));
 		okButton.putClientProperty("JButton.buttonType", "roundRect");
 
-		buttonPane.add(cancelButton);
 		buttonPane.add(okButton);
 		footerPanel.add(buttonPane, BorderLayout.EAST);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
@@ -141,7 +136,6 @@ public class CreateUpdateProjectWindow extends JDialog {
 		
 		listColors(colorRadioPanel);
 		addOkButtonActionListener(okButton);
-		addCancelButtonActionListener(cancelButton);
 
 		if (isUpdate && (updatedProject != null)) {
 			projectTitleTextField.setText((String)updatedProject.getClientProperty("project_title"));
@@ -154,13 +148,6 @@ public class CreateUpdateProjectWindow extends JDialog {
 		setVisible(true);
 
 		logger.info("Window is ready.");
-	}
-	
-	private void addCancelButtonActionListener(JButton button) {
-		logger.info("Running function.");
-		button.addActionListener(_ -> {
-			dispose();
-		});
 	}
 	
 	private void addOkButtonActionListener(JButton button) {
