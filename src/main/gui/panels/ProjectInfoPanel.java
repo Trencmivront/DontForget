@@ -72,14 +72,13 @@ public class ProjectInfoPanel extends JPanel{
 			logger.info("No task found for project.");
 			return;
 		}
-		ListIterator<Task> i = tasks.listIterator();
 		
 		JPanel tasksContainer = new JPanel();
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
-		while(i.hasNext()) {
-			tasksContainer.add(new TaskRowPanel(i.next()));
-		}
+		tasks.forEach(task -> {
+			tasksContainer.add(new TaskRowPanel(task));
+		});
 		
 		infoScrollPane.setViewportView(tasksContainer);
 		infoScrollPane.revalidate();
@@ -96,6 +95,7 @@ public class ProjectInfoPanel extends JPanel{
 	private void createTaskActionButton(JPanel panel) {
 		JButton button = new JButton("+");
 		
+		button.setToolTipText("Create New Task");
 		button.putClientProperty("JButton.buttonType", "roundRect");
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
@@ -109,6 +109,7 @@ public class ProjectInfoPanel extends JPanel{
 	private void createDeleteCompletedTasksButton(JPanel panel) {
 		JButton button = new JButton("DC");
 		
+		button.setToolTipText("Delete Completed Task(s)");
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 14));
 		

@@ -130,6 +130,7 @@ public class Main extends JFrame {
 		leftTopContainer.setBorder(new EmptyBorder(5, 1, 30, 1));
 		
 		JButton searchButton = new JButton(new FlatSearchIcon());
+		searchButton.setToolTipText("Search");
 		leftTopContainer.add(searchButton, BorderLayout.WEST);
 		
 		JLabel appNameLabel = new JLabel("DontForget");

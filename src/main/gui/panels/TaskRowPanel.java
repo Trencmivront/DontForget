@@ -42,6 +42,8 @@ public class TaskRowPanel extends JPanel{
 		putClientProperty("updated_at", task.updated_at());
 		putClientProperty("completed_at", task.completed_at());
 		
+		setToolTipText(String.format("Show: %s", task.task_title()));;
+		
 		JCheckBox chk = new JCheckBox();
 		JLabel title = new JLabel(task.task_title());
 //		means that task is completed
