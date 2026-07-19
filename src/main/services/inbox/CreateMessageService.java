@@ -1,28 +1,31 @@
 package main.services.inbox;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import main.App;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import main.entities.Inbox;
+import main.repos.InboxRepository;
+
+@Service
 public class CreateMessageService {
-
 
 	private static final Logger logger = Logger.getLogger(CreateMessageService.class.getName());
 
+	@Autowired
+	private InboxRepository inboxRepository;
+
 	public boolean execute(String message) {
 		logger.info("Executing CreateMessageService.");
-
-		String sql = "INSERT INTO INBOX (message) VALUES (?)";
-
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
-			pstm.setString(1, message);
-			int rowsAffected = pstm.executeUpdate();
+		try {
+			Inbox inbox = new Inbox();
+			inbox.setMessage(message);
+			inboxRepository.save(inbox);
 			logger.info("Message saved successfully.");
-			return rowsAffected > 0;
-		} catch (SQLException e) {
-			logger.severe("Database connection error: " + e.getMessage());
+			return true;
+		} catch (Exception e) {
+			logger.severe("Database error: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}

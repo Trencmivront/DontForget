@@ -48,7 +48,7 @@ import main.gui.windows.SearchWindow;
 import main.services.project.DeleteProjectService;
 import main.services.project.GetProjectsService;
 
-public class Main extends JFrame {	
+public class Main extends JFrame {
 	private static final int WINDOW_HEIGHT= 500;
 	private static final int WINDOW_WIDTH = 750;
 	private static final int WINDOW_X = 100;

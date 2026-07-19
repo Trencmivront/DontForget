@@ -1,23 +1,24 @@
 package main.services.tasktag;
 
-import java.sql.PreparedStatement;
 import java.util.logging.Logger;
 
-import main.App;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import main.repos.TaskTagRepository;
+
+@Service
 public class DeleteTaskTagService {
-
 
 	private static final Logger logger = Logger.getLogger(DeleteTaskTagService.class.getName());
 
+	@Autowired
+	private TaskTagRepository taskTagRepository;
+
 	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id: " + id);
-
-		String sql = "DELETE FROM TASK_TAG WHERE task_id = ?";
-
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
-			pstm.setLong(1, id);
-			pstm.executeUpdate();
+		try {
+			taskTagRepository.deleteByTask_id(id);
 			logger.info("Task tags deleted.");
 			return true;
 		} catch (Exception e) {

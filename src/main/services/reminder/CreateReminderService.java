@@ -1,40 +1,33 @@
 package main.services.reminder;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import main.App;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import main.entities.Reminder;
 import main.notify.NotificationManager;
+import main.repos.ReminderRepository;
 
+@Service
 public class CreateReminderService {
-
 
 	private static final Logger logger = Logger.getLogger(CreateReminderService.class.getName());
 
+	@Autowired
+	private ReminderRepository reminderRepository;
+
 	public boolean execute(Reminder reminder) {
 		logger.info("Executing CreateReminderService.");
-
-		String sql = "INSERT INTO REMINDER (task_id, remind_at, cstm_message) VALUES (?, ?, ?)";
-
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
-
-			pstm.setLong(1, reminder.task_id());
-			pstm.setTimestamp(2, reminder.remind_at());
-			pstm.setString(3, reminder.cstm_message());
-
-			pstm.executeUpdate();
-
+		try {
+			reminderRepository.save(reminder);
 			logger.info("Reminder saved successfully.");
-//			Start the reminder once it is saved
+			// Start the reminder once it is saved
 			NotificationManager nm = new NotificationManager();
 			nm.scheduleReminder(reminder);
-			
 			return true;
-
-		} catch (SQLException e) {
-			logger.severe("Database connection error: " + e.getMessage());
+		} catch (Exception e) {
+			logger.severe("Database error: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}

@@ -23,9 +23,7 @@ public class NotificationManager {
 		logger.info("Initializing NotificationManager and scheduling existing reminders...");
 		List<Reminder> reminders = new GetRemindersService().execute();
 		if (reminders != null) {
-			for (Reminder reminder : reminders) {
-				scheduleReminder(reminder);
-			}
+			reminders.forEach(this::scheduleReminder);
 		}
         logger.info("Notification manager is initialized.");
 	}
@@ -49,9 +47,9 @@ public class NotificationManager {
 		if (task == null) {
 			logger.warning("Could not find task with ID " + reminder.task_id() + " for scheduling reminder.");
 		}
+		String description = task != null && task.description() != null ? task.description() : "";
 		String title = task != null ? task.task_title() : "Reminder";
-		String message = reminder.cstm_message() != null ? reminder.cstm_message() 
-				: (task != null && task.description() != null ? task.description() : "");
+		String message = reminder.cstm_message() != null ? reminder.cstm_message() : description;
  
 		logger.info("Scheduling reminder for task ID " + reminder.task_id() + " in " + delay + " ms.");
 		ScheduledFuture<?> future = scheduler.schedule(

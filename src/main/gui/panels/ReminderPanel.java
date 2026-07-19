@@ -27,7 +27,6 @@ import main.services.task.GetTaskByIdService;
 public class ReminderPanel extends JPanel{
 	
 	private static final long serialVersionUID = 1L;
-
 	private JTabbedPane monthTabbedPane;
 	
 	private static final Logger logger = Logger.getLogger(ReminderPanel.class.getName());
@@ -60,7 +59,6 @@ public class ReminderPanel extends JPanel{
 	
 	private HashMap<String, List<Reminder>> getMonthlyReminders() {
 		List<Reminder> reminders = new GetRemindersService().execute();
-		
 		if(reminders.isEmpty()) {
 			return new HashMap<>();
 		}

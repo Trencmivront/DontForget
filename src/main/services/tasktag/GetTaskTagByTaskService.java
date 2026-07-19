@@ -1,42 +1,30 @@
 package main.services.tasktag;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import main.App;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import main.entities.TaskTag;
+import main.repos.TaskTagRepository;
 
+@Service
 public class GetTaskTagByTaskService {
-
 
 	private static final Logger logger = Logger.getLogger(GetTaskTagByTaskService.class.getName());
 
+	@Autowired
+	private TaskTagRepository taskTagRepository;
+
 	public List<TaskTag> execute(Long taskId) {
 		logger.info("Executing GetTaskTagByTaskService with taskId: " + taskId);
-
-		String sql = "SELECT * FROM TASK_TAG WHERE task_id = ?";
-		List<TaskTag> taskTags = new ArrayList<>();
-
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
-			pstm.setLong(1, taskId);
-
-			try (ResultSet rs = pstm.executeQuery()) {
-				while (rs.next()) {
-					taskTags.add(new TaskTag(
-						rs.getLong("task_id"),
-						rs.getLong("tag_id")
-					));
-				}
-			}
-		} catch (SQLException e) {
+		try {
+			return taskTagRepository.findByTask_id(taskId);
+		} catch (Exception e) {
 			logger.warning("Error fetching task tags for task ID " + taskId + ": " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		}
-
-		return taskTags;
 	}
 }

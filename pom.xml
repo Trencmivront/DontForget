@@ -2,9 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>DontForget</groupId>
   <artifactId>DontForget</artifactId>
-  <version>0.4.5-ALPHA-1</version>
+  <version>0.4.6-ALPHA-1</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>src</testSourceDirectory>
     <plugins>
     
     	<plugin>
@@ -94,6 +95,16 @@
 	    <configuration>
 	      <release>25</release>
 	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>default-compile</id>
+	        <configuration>
+	          <excludes>
+	            <exclude>test/**</exclude>
+	          </excludes>
+	        </configuration>
+	      </execution>
+	    </executions>
 	  </plugin>
     </plugins>
   </build>
@@ -121,26 +132,19 @@
     <artifactId>flatlaf</artifactId>
     <version>3.7</version>
 </dependency>
-  
-  <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-context</artifactId>
-    <version>6.1.5</version> <!-- Use the latest stable version -->
-</dependency>
 
-  
   <!-- Source: https://mvnrepository.com/artifact/com.h2database/h2 -->
 	<dependency>
 	    <groupId>com.h2database</groupId>
 	    <artifactId>h2</artifactId>
 	    <version>2.4.240</version>
+	    <scope>runtime</scope>
 	</dependency>
-
-	<!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-beans -->
+	
 	<dependency>
-	    <groupId>org.springframework</groupId>
-	    <artifactId>spring-beans</artifactId>
-	    <version>6.1.10</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-jdbc</artifactId>
+		<version>4.0.6</version>
 	</dependency>
 
 	<dependency>
@@ -148,6 +152,43 @@
 	    <artifactId>jackson-databind</artifactId>
 	    <version>2.17.2</version>
 	</dependency>
+
+<!-- Source: https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+	<version>4.0.6</version>
+</dependency>
+        
+<!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
+<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>5.23.0</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- Source: https://mvnrepository.com/artifact/junit/junit -->
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.13.2</version>
+    <scope>test</scope>
+</dependency>
+
+		<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-test</artifactId>
+		<version>4.0.6</version>
+		<scope>test</scope>
+	</dependency>
+	
+	<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+	<version>4.0.6</version>
+	<scope>test</scope>
+</dependency>
   
   </dependencies>
 </project>

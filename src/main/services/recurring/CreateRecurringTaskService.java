@@ -1,34 +1,33 @@
 package main.services.recurring;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.logging.Logger;
 
-import main.App;
-import main.dco.RecurringTaskDCO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import main.entities.RecurringTask;
+import main.repos.RecurringTaskRepository;
+
+@Service
 public class CreateRecurringTaskService {
 
 	private static final Logger logger = Logger.getLogger(CreateRecurringTaskService.class.getName());
 
+	@Autowired
+	private RecurringTaskRepository recurringTaskRepository;
 
 	public boolean execute(Long taskId, List<DayOfWeek> days) {
 		logger.info("Executing CreateRecurringTaskService for taskId: " + taskId);
-
-		String insertRecurringSql = "INSERT INTO RECURRING_TASK (task_id, week_day_id) VALUES (?, ?)";
-
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(insertRecurringSql)) {
+		try {
 			for (DayOfWeek day : days) {
-				RecurringTaskDCO dco = new RecurringTaskDCO(taskId, (long) day.getValue());
-				pstm.setLong(1, dco.task_id());
-				pstm.setLong(2, dco.week_day_id());
-				pstm.executeUpdate();
+				RecurringTask rt = new RecurringTask(taskId, (long) day.getValue());
+				recurringTaskRepository.save(rt);
 			}
 			logger.info("Recurring task created successfully for task: " + taskId);
 			return true;
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			logger.severe("Error creating recurring task: " + e.getMessage());
 			e.printStackTrace();
 			return false;

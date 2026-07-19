@@ -3,17 +3,26 @@ package main.services.task;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import main.entities.Task;
 
+@Service
 public class DeleteCompletedTasksService {
 
-
 	private static final Logger logger = Logger.getLogger(DeleteCompletedTasksService.class.getName());
+
+	@Autowired
+	private GetTasksOfProjectService getTasksOfProjectService;
+
+	@Autowired
+	private DeleteTaskService deleteTaskService;
 
 	public boolean execute(Long projectId) {
 		logger.info("Class " + logger.getName() + " is executed with project id: " + projectId);
 
-		List<Task> tasks = new GetTasksOfProjectService().execute(projectId);
+		List<Task> tasks = getTasksOfProjectService.execute(projectId);
 		if (tasks == null) {
 			return false;
 		}
@@ -21,7 +30,7 @@ public class DeleteCompletedTasksService {
 		boolean success = true;
 		for (Task task : tasks) {
 			if (task.status_id() != null && task.status_id() == 2L) { // 2 = COMPLETED
-				if (!new DeleteTaskService().execute(task.task_id())) {
+				if (!deleteTaskService.execute(task.task_id())) {
 					success = false;
 				}
 			}

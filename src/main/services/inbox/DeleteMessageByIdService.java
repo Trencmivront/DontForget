@@ -1,25 +1,30 @@
 package main.services.inbox;
 
-import java.sql.PreparedStatement;
 import java.util.logging.Logger;
 
-import main.App;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import main.repos.InboxRepository;
+
+@Service
 public class DeleteMessageByIdService {
-	
-	
+
 	private static final Logger logger = Logger.getLogger(DeleteMessageByIdService.class.getName());
+
+	@Autowired
+	private InboxRepository inboxRepository;
 
 	public boolean execute(Long id) {
 		logger.info("Class " + logger.getName() + " is executed with input id:" + id);
-		
-		String sql = "DELETE FROM INBOX WHERE inbox_id = ?";
-		
-		try (PreparedStatement pstm = App.getConnection().prepareStatement(sql)) {
-			pstm.setLong(1, id);
-			int rowsAffected = pstm.executeUpdate();
+		try {
+			if (!inboxRepository.existsById(id)) {
+				logger.warning("Message not found with ID: " + id);
+				return false;
+			}
+			inboxRepository.deleteById(id);
 			logger.info("Message deleted.");
-			return rowsAffected > 0;
+			return true;
 		} catch (Exception e) {
 			logger.warning("Error deleting inbox message with ID " + id + ": " + e.getMessage());
 			e.printStackTrace();

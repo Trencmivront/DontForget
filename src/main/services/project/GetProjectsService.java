@@ -1,45 +1,30 @@
 package main.services.project;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import main.App;
-import main.entities.Project;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import main.entities.Project;
+import main.repos.ProjectRepository;
+
+@Service
 public class GetProjectsService {
-	
-	
+
 	private static final Logger logger = Logger.getLogger(GetProjectsService.class.getName());
 
-	public List<Project> execute(){
+	@Autowired
+	private ProjectRepository projectRepository;
+
+	public List<Project> execute() {
 		logger.info("Class " + logger.getName() + " is executed.");
-		try(Statement stm = App.getConnection().createStatement()) {
-			
-			String sql = "SELECT * FROM PROJECT ORDER BY list_order";
-			
-			List<Project> projects = new ArrayList<Project>();
-			
-			ResultSet rs = stm.executeQuery(sql);
-			
-			while(rs.next()) {
-				projects.add(new Project(
-						rs.getLong("project_id"),
-						rs.getString("project_title"),
-						rs.getString("description"),
-						rs.getInt("list_order"),
-						rs.getLong("icon_color_id")
-						));
-			}
-			return projects;
-			
-		}catch (Exception e) {
+		try {
+			return projectRepository.findAllByOrderByListOrderAsc();
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
-	
+
 }
