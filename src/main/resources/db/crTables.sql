@@ -1,6 +1,6 @@
 -- Create ICON_COLOR table
 CREATE TABLE IF NOT EXISTS ICON_COLOR (
-    icon_color_id INT AUTO_INCREMENT PRIMARY KEY,
+    iconColorId INT AUTO_INCREMENT PRIMARY KEY,
     red INT NOT NULL CHECK (red BETWEEN 0 AND 256),
     green INT NOT NULL CHECK (green BETWEEN 0 AND 256),
     blue INT NOT NULL CHECK (blue BETWEEN 0 AND 256)
@@ -8,79 +8,79 @@ CREATE TABLE IF NOT EXISTS ICON_COLOR (
 
 -- Create TASK_STATUS table
 CREATE TABLE IF NOT EXISTS TASK_STATUS (
-    status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(50) NOT NULL UNIQUE CHECK (status_name IN ('ACTIVE', 'COMPLETED', 'PAST'))
+    statusId INT AUTO_INCREMENT PRIMARY KEY,
+    statusName VARCHAR(50) NOT NULL UNIQUE CHECK (statusName IN ('ACTIVE', 'COMPLETED', 'PAST'))
 );
 
 -- Create PROJECTS table
 CREATE TABLE IF NOT EXISTS PROJECT (
-    project_id INT AUTO_INCREMENT PRIMARY KEY,
-    project_title VARCHAR(50) NOT NULL UNIQUE,
+    projectId INT AUTO_INCREMENT PRIMARY KEY,
+    projectTitle VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(500),
-    list_order INT,
-    icon_color_id INT NOT NULL,
-    FOREIGN KEY (icon_color_id) REFERENCES ICON_COLOR(icon_color_id)
+    listOrder INT,
+    iconColorId INT NOT NULL,
+    FOREIGN KEY (iconColorId) REFERENCES ICON_COLOR(iconColorId)
 );
 
 -- Create TAGS table
 CREATE TABLE IF NOT EXISTS TAG (
-    tag_id INT AUTO_INCREMENT PRIMARY KEY,
-    tag_name VARCHAR(255) NOT NULL UNIQUE,
-    icon_color_id INT NOT NULL,
-    FOREIGN KEY (icon_color_id) REFERENCES ICON_COLOR(icon_color_id)
+    tagId INT AUTO_INCREMENT PRIMARY KEY,
+    tagName VARCHAR(255) NOT NULL UNIQUE,
+    iconColorId INT NOT NULL,
+    FOREIGN KEY (iconColorId) REFERENCES ICON_COLOR(iconColorId)
 );
 
 -- Create TASKS table
 CREATE TABLE IF NOT EXISTS TASK (
-    task_id INT AUTO_INCREMENT PRIMARY KEY,
-    task_title VARCHAR(100) NOT NULL UNIQUE,
+    taskId INT AUTO_INCREMENT PRIMARY KEY,
+    taskTitle VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(1000),
-    status_id INT,
+    statusId INT,
     priority INT CHECK (priority IN (1, 2, 3)),
-    due_date DATE CHECK (due_date >= CURRENT_DATE),
-    list_order INT,
-    project_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-    FOREIGN KEY (status_id) REFERENCES TASK_STATUS(status_id),
-    FOREIGN KEY (project_id) REFERENCES PROJECT(project_id)
+    dueDate DATE CHECK (dueDate >= CURRENT_DATE),
+    listOrder INT,
+    projectId INT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completedAt TIMESTAMP,
+    FOREIGN KEY (statusId) REFERENCES TASK_STATUS(statusId),
+    FOREIGN KEY (projectId) REFERENCES PROJECT(projectId)
 );
 
 CREATE TABLE IF NOT EXISTS WEEK_DAYS(
-	week_day_id INT PRIMARY KEY,
-	day_name VARCHAR(20) NOT NULL
+	weekDayId INT PRIMARY KEY,
+	dayName VARCHAR(20) NOT NULL
 );
 
 -- Create RECURRING_TASKS table (allowing multiple weekdays per task ID via composite PK)
 CREATE TABLE IF NOT EXISTS RECURRING_TASK (
-    task_id INT NOT NULL,
-    week_day_id INT NOT NULL,
-    PRIMARY KEY (task_id, week_day_id),
-    FOREIGN KEY (task_id) REFERENCES TASK(task_id),
-    CONSTRAINT fk_recurring_task_week_days FOREIGN KEY (week_day_id) REFERENCES WEEK_DAYS(week_day_id)
+    taskId INT NOT NULL,
+    weekDayId INT NOT NULL,
+    PRIMARY KEY (taskId, weekDayId),
+    FOREIGN KEY (taskId) REFERENCES TASK(taskId),
+    CONSTRAINT fk_recurring_task_week_days FOREIGN KEY (weekDayId) REFERENCES WEEK_DAYS(weekDayId)
 );
 
 -- Create REMINDERS table (1:1 relation with TASKS)
 CREATE TABLE IF NOT EXISTS REMINDER (
-    task_id INT PRIMARY KEY,
-    remind_at TIMESTAMP NOT NULL,
-    cstm_message VARCHAR(1000),
-    FOREIGN KEY (task_id) REFERENCES TASK(task_id)
+    taskId INT PRIMARY KEY,
+    remindAt TIMESTAMP NOT NULL,
+    message VARCHAR(1000),
+    FOREIGN KEY (taskId) REFERENCES TASK(taskId)
 );
 
 -- Create TASK_TAGS junction table (M:N relation between TASKS and TAGS)
 CREATE TABLE IF NOT EXISTS TASK_TAG (
-    task_id INT NOT NULL,
-    tag_id INT NOT NULL,
-    PRIMARY KEY (task_id, tag_id),
-    FOREIGN KEY (task_id) REFERENCES TASK(task_id),
-    FOREIGN KEY (tag_id) REFERENCES TAG(tag_id)
+    taskId INT NOT NULL,
+    tagId INT NOT NULL,
+    PRIMARY KEY (taskId, tagId),
+    FOREIGN KEY (taskId) REFERENCES TASK(taskId),
+    FOREIGN KEY (tagId) REFERENCES TAG(tagId)
 );
 
 -- Create INBOX table
 CREATE TABLE IF NOT EXISTS INBOX (
-    inbox_id INT AUTO_INCREMENT PRIMARY KEY,
+    inboxId INT AUTO_INCREMENT PRIMARY KEY,
     message VARCHAR(1000) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
