@@ -29,12 +29,6 @@ import main.java.notify.NotificationManager;
 public class App {
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
 	private static ServerSocket serverSocket;
-	
-	private final Main main;
-	
-	public App(Main main) {
-		this.main = main;
-	}
     
 	public static void main(String[] args) {
 	    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -75,7 +69,7 @@ public class App {
 				// Initialize the look and feel
 				
 //				show window
-				Main.getMain().setVisible(true);
+				new Main();
 //				Start background listener
 				startSingleInstanceListener();
 				

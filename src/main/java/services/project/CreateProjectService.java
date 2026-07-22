@@ -37,7 +37,7 @@ public class CreateProjectService {
 			project.seticonColorId(p.iconColorId());
 
 			Project createdProject = projectRepository.save(project);
-			return ResponseEntity.status(HttpStatus.CREATED).body(createdProject.getprojectId());
+			return ResponseEntity.status(HttpStatus.CREATED).body(createdProject.getProjectId());
 		} catch (Exception e) {
 			logger.warn("{} thrown.", e.getClass().getName());
 			e.printStackTrace();

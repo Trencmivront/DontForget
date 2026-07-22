@@ -16,7 +16,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.TaskController;
@@ -33,7 +33,6 @@ public class ProjectInfoPanel extends JPanel{
 	private ProjectRowPanel projectPanel;
 	private static ProjectInfoPanel projectInfoPanel;
 	private final Main main = Main.getMain();
-	@Autowired
 	private TaskController taskController;
 
 	{
@@ -50,6 +49,7 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public ProjectInfoPanel(ProjectRowPanel panel) {
 		projectPanel = panel;
+		this.taskController = SpringContext.getBean(TaskController.class);
 		
 		setLayout(new BorderLayout());
 		add(createHeaderPanel(), BorderLayout.NORTH);
@@ -89,7 +89,7 @@ public class ProjectInfoPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		tasks.forEach(task -> {
-			tasksContainer.add(new TaskRowPanel(task));
+			tasksContainer.add(new TaskRowPanel(task, main));
 		});
 		
 		infoScrollPane.setViewportView(tasksContainer);

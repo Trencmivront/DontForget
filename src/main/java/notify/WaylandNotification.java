@@ -10,18 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.SwingUtilities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import main.java.api.Api;
+import main.java.custom.SpringContext;
+import main.java.controllers.InboxController;
 import main.java.gui.Main;
 
 public class WaylandNotification {
-    private WaylandNotification() {
+    private final InboxController inboxController = SpringContext.getBean(InboxController.class);
+
+    public WaylandNotification() {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(WaylandNotification.class.getName());
 
-    public static void sendNotification(Long taskId, String title, String body) {
+    public void sendNotification(Long taskId, String title, String body) {
         logger.info("Preparing to send notification. Task ID: {}, Title: {}", taskId, title);
         // Run in a new thread so it doesn't block your main application
         new Thread(() -> {
@@ -52,9 +53,11 @@ public class WaylandNotification {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;
                     logger.info("Saving notification message to inbox DB: {}", body);
-                	Api api = new Api();
-                	ObjectMapper mapper = new ObjectMapper();
-                	api.post("/api/inbox/create", mapper.writeValueAsString(body));
+                    try {
+                        inboxController.createMessage(body);
+                    } catch (Exception ex) {
+                        logger.error("Failed to save notification to inbox", ex);
+                    }
                     while ((line = reader.readLine()) != null) {
                         logger.info("gdbus response: {}", line);
                         // If the user clicks the notification body, 'default' is returned

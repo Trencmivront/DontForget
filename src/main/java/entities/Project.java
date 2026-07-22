@@ -39,26 +39,21 @@ public class Project {
         this.iconColorId = iconColorId;
     }
 
-    // Record-like getters
-    public Long projectId() { return projectId; }
-    public String projectTitle() { return projectTitle; }
-    public String description() { return description; }
-    public Integer listOrder() { return listOrder; }
-    public Long iconColorId() { return iconColorId; }
+
 
     // Standard getters/setters
-    public Long getprojectId() { return projectId; }
+    public Long getProjectId() { return projectId; }
     public void setprojectId(Long projectId) { this.projectId = projectId; }
 
-    public String getprojectTitle() { return projectTitle; }
+    public String getProjectTitle() { return projectTitle; }
     public void setprojectTitle(String projectTitle) { this.projectTitle = projectTitle; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Integer getlistOrder() { return listOrder; }
+    public Integer getListOrder() { return listOrder; }
     public void setlistOrder(Integer listOrder) { this.listOrder = listOrder; }
 
-    public Long geticonColorId() { return iconColorId; }
+    public Long getIconColorId() { return iconColorId; }
     public void seticonColorId(Long iconColorId) { this.iconColorId = iconColorId; }
 }

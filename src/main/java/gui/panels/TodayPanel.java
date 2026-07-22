@@ -2,7 +2,6 @@ package main.java.gui.panels;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.awt.BorderLayout;
 import java.util.Collections;
@@ -14,14 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import main.java.api.Api;
+import main.java.custom.SpringContext;
+import main.java.controllers.TaskController;
+import org.springframework.http.ResponseEntity;
 import main.java.entities.Task;
 import main.java.gui.Main;
 
-@Component
 public class TodayPanel extends JPanel{
 
 	private static final Logger logger = LoggerFactory.getLogger(TodayPanel.class.getName());
@@ -29,11 +26,11 @@ public class TodayPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private JScrollPane scrollPane;
 	private final Main main = Main.getMain();
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+	private TaskController taskController;
 
 	public TodayPanel() {
 		logger.info("Initializing TodayPanel");
+		this.taskController = SpringContext.getBean(TaskController.class);
 		
 		setLayout(new BorderLayout());
 		
@@ -52,8 +49,8 @@ public class TodayPanel extends JPanel{
 	private void listTasks(){
 		List<Task> tasks = Collections.emptyList();
 		try {
-			String res = api.get("/api/task/today");
-			tasks = mapper.readValue(res, new TypeReference<List<Task>>() {});
+			ResponseEntity<List<Task>> res = taskController.getTodaysTasks();
+			tasks = res.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -69,7 +66,7 @@ public class TodayPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
-			tasksContainer.add(new TaskRowPanel(i.next()));
+			tasksContainer.add(new TaskRowPanel(i.next(), main));
 		}
 		
 		scrollPane.setViewportView(tasksContainer);

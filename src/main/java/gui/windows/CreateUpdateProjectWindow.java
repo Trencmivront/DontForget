@@ -13,7 +13,7 @@ import java.util.Enumeration;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
 
 import javax.swing.AbstractButton;
@@ -34,12 +34,10 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import main.java.api.Api;
 import main.java.controllers.ProjectController;
+import main.java.controllers.IconColorController;
 import main.java.dco.ProjectDCO;
 import main.java.entities.IconColor;
 import main.java.gui.panels.ProjectRowPanel;
@@ -58,15 +56,9 @@ public class CreateUpdateProjectWindow extends JDialog {
 	private static final int BODY_MAX_CHARACTER = 500;
 	private boolean isUpdate = false;
 	private ProjectRowPanel updatedProject;
-	@Autowired
-	private ProjectController projectController;
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+	private final ProjectController projectController = SpringContext.getBean(ProjectController.class);
+	private final IconColorController iconColorController = SpringContext.getBean(IconColorController.class);
 	
-	public CreateUpdateProjectWindow(ProjectController projectController) {
-		this.projectController = projectController;
-	}
-
 	/**
 	 * Create the dialog.
 	 */
@@ -195,9 +187,8 @@ public class CreateUpdateProjectWindow extends JDialog {
 			}
 			else {
 				try {
-					String body = mapper.writeValueAsString(new ProjectDCO(title, description, iconColorId));
-					int code = api.post("/api/project/create", body);
-					if (code >= 400) {
+					ResponseEntity<Long> re = projectController.createProject(new ProjectDCO(title, description, iconColorId));
+					if (re.getStatusCode().value() >= 400) {
 						new ErrorDialog("Database Error", "Error while creating project");
 					}
 				} catch (Exception e) {
@@ -215,8 +206,8 @@ public class CreateUpdateProjectWindow extends JDialog {
 
 		List<IconColor> ic = Collections.emptyList();
 		try {
-			String res = api.get("/api/icon-color/get-all");
-			ic = mapper.readValue(res, new TypeReference<List<IconColor>>() {});
+			ResponseEntity<List<IconColor>> response = iconColorController.getIconColors();
+			ic = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -263,8 +254,8 @@ public class CreateUpdateProjectWindow extends JDialog {
 			Long projectId = ((Number) projIdObj).longValue();
 			IconColor projectColor = null;
 			try {
-				String res = api.get("/api/icon-color/project/", projectId);
-				projectColor = mapper.readValue(res, IconColor.class);
+				ResponseEntity<IconColor> response = iconColorController.getIconColorOfProject(projectId);
+				projectColor = response.getBody();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

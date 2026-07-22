@@ -1,7 +1,7 @@
 package test.java.project;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +48,7 @@ class TestGetProjectsService {
 //		testing
 		assertNotNull(projects);
 		assertEquals(1, projects.size());
-		assertEquals("Hello" , projects.get(0).getprojectTitle());
+		assertEquals("Hello" , projects.get(0).getProjectTitle());
 		
 		verify(projectRepository).findAllByOrderByListOrderAsc();
 	}

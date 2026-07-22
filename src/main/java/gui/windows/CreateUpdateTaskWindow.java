@@ -18,14 +18,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -36,13 +33,21 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import main.java.api.Api;
+import main.java.controllers.IconColorController;
+import main.java.controllers.RecurringTaskController;
+import main.java.controllers.ReminderController;
+import main.java.controllers.TagController;
+import main.java.controllers.TaskController;
+import main.java.controllers.TaskTagController;
 import main.java.custom.CustomIcon;
+import main.java.custom.SpringContext;
 import main.java.dco.TaskDCO;
 import main.java.entities.IconColor;
 import main.java.entities.Reminder;
@@ -51,7 +56,6 @@ import main.java.entities.Task;
 import main.java.entities.TaskTag;
 import main.java.gui.Main;
 import main.java.gui.panels.ProjectInfoPanel;
-import main.java.gui.panels.ProjectRowPanel;
 import main.java.gui.panels.ReminderRowPanel;
 import main.java.gui.popups.ErrorDialog;
 import main.java.gui.popups.ReminderDialog;
@@ -81,9 +85,15 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private JButton reminderBtn;
 	private static final Main main = Main.getMain();
 
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
-
+	private final TaskController taskController = SpringContext.getBean(TaskController.class);
+	private final TagController tagController = SpringContext.getBean(TagController.class);
+	private final RecurringTaskController recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
+	private final ReminderController reminderController = SpringContext.getBean(ReminderController.class);
+	private final TaskTagController taskTagController = SpringContext.getBean(TaskTagController.class);
+	private final IconColorController iconColorController = SpringContext.getBean(IconColorController.class);
+	
+	private static CreateUpdateTaskWindow createUpdateTaskWindow;
+	
 	public LocalDate getSelectedDueDate() {
 		return selectedDueDate;
 	}
@@ -171,10 +181,17 @@ public class CreateUpdateTaskWindow extends JDialog {
 	public void setDueDateBtn(JButton dueDateBtn) {
 		this.dueDateBtn = dueDateBtn;
 	}
-
-	public CreateUpdateTaskWindow(JFrame source ,Long projectId, boolean isUpdate, JPanel rowPanel) {
+	
+	public CreateUpdateTaskWindow(Window source,Long projectId, boolean isUpdate, JPanel rowPanel) {
+//		only one instance of task window at a time
+		if(createUpdateTaskWindow != null) {
+			createUpdateTaskWindow.dispose();
+			createUpdateTaskWindow = null;
+		}
+		super(source, isUpdate ? "Update Task" : "Create Task");
 		logger.info("Initializing CreateUpdateTaskWindow.");
-		super(source, isUpdate ? "Update Task" : "Create Task", false);
+		createUpdateTaskWindow = this;
+
 		this.projectId = projectId;
 		this.rowPanel = rowPanel;
 		
@@ -314,8 +331,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private void setTag(Long taskId) {
 		List<Tag> tags = Collections.emptyList();
 		try {
-			String res = api.get("/api/tag/task/", taskId);
-			tags = mapper.readValue(res, new TypeReference<List<Tag>>() {});
+			ResponseEntity<List<Tag>> response = tagController.getTagsOfTask(taskId);
+			tags = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -328,8 +345,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private void setRecurringDays(Long taskId) {
 		List<DayOfWeek> recurringDays = Collections.emptyList();
 		try {
-			String res = api.get("/api/recurring-task/task/", taskId);
-			recurringDays = mapper.readValue(res, new TypeReference<List<DayOfWeek>>() {});
+			ResponseEntity<List<DayOfWeek>> response = recurringTaskController.getRecurringDaysOfTask(taskId);
+			recurringDays = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -346,8 +363,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private void setReminder(Long taskId) {
 		Reminder reminder = null;
 		try {
-			String res = api.get("/api/reminder/get/", taskId);
-			reminder = mapper.readValue(res, Reminder.class);
+			ResponseEntity<Reminder> response = reminderController.getReminderById(taskId);
+			reminder = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -418,9 +435,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 				);
 
 				try {
-					String body = mapper.writeValueAsString(task);
-					int code = api.put("/api/task/update", body, null);
-					if (code >= 400) {
+					ResponseEntity<String> response = taskController.updateTask(task);
+					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to update task. Make sure the title is unique.");
 						return;
 					}
@@ -430,28 +446,21 @@ public class CreateUpdateTaskWindow extends JDialog {
 					return;
 				}
 
-				api.delete("/api/reminder/delete/", taskId);
-				api.delete("/api/task-tag/delete/", taskId);
-				api.delete("/api/recurring-task/delete/", taskId);
+				try {
+					reminderController.deleteReminder(taskId);
+					taskTagController.deleteTaskTag(taskId);
+					recurringTaskController.deleteRecurringTask(taskId);
+				} catch (Exception e) {
+					logger.error("Failed to delete old task associations", e);
+				}
 			} else {
 				try {
-					String body = mapper.writeValueAsString(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
-					int code = api.post("/api/task/create", body);
-					if (code >= 400) {
+					ResponseEntity<Long> response = taskController.createTask(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
+					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 						return;
 					}
-					// Fetch created task to get its ID
-					String projTasksRes = api.get("/api/task/project/", projectId);
-					List<Task> projTasks = mapper.readValue(projTasksRes, new TypeReference<List<Task>>() {});
-					if (projTasks != null) {
-						for (Task t : projTasks) {
-							if (title.equals(t.taskTitle())) {
-								taskId = t.taskId();
-								break;
-							}
-						}
-					}
+					taskId = response.getBody();
 				} catch (Exception e) {
 					e.printStackTrace();
 					new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
@@ -462,8 +471,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			if (selectedReminderTime != null && taskId != null) {
 				try {
 					Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
-					String body = mapper.writeValueAsString(reminder);
-					api.post("/api/reminder/create", body);
+					reminderController.createReminder(reminder);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -472,8 +480,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			if (taskId != null && selectedTags != null) {
 				for (Tag tag : selectedTags) {
 					try {
-						String body = mapper.writeValueAsString(new TaskTag(taskId, tag.tagId()));
-						api.post("/api/task-tag/create", body);
+						taskTagController.createTaskTag(new TaskTag(taskId, tag.tagId()));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -482,26 +489,26 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 			if (taskId != null && isRecurring && selectedRecurringDays != null && !selectedRecurringDays.isEmpty()) {
 				try {
-					String body = mapper.writeValueAsString(selectedRecurringDays);
-					api.post("/api/recurring-task/create/" + taskId, body);
+					recurringTaskController.createRecurringTask(taskId, selectedRecurringDays);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-//				Refresh main ui
-				main.destroyChildWindows();
-				main.refreshWindow();
+//			Destroy dialogs
+			main.destroyChildWindows();
 				
-				if(rowPanel instanceof ReminderRowPanel) {
-					main.getRemindersButton().doClick();
-				}
-				else if(rowPanel instanceof ProjectRowPanel) {
-					
-				}
-//				Refresh propject info panel and main window
+			if(rowPanel instanceof ReminderRowPanel) {
+				main.getRemindersButton().doClick();
+			}
+//			null case
+			else{
+//				relist tasks
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
+			}
+//			refresh window
+			main.refreshWindow();
 //				Close this ui
-				dispose();
+			dispose();
 		});
 	}
 
@@ -683,8 +690,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 			List<Tag> allTags = Collections.emptyList();
 			try {
-				String res = api.get("/api/tag/get-all");
-				allTags = mapper.readValue(res, new TypeReference<List<Tag>>() {});
+				ResponseEntity<List<Tag>> response = tagController.getTags();
+				allTags = response.getBody();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -706,8 +713,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 					IconColor ic = null;
 					try {
-						String res = api.get("/api/icon-color/tag/", tag.tagId());
-						ic = mapper.readValue(res, IconColor.class);
+						ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.tagId());
+						ic = response.getBody();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

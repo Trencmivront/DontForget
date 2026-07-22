@@ -6,20 +6,21 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.BoxLayout;
+import java.awt.Window;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
+import main.java.controllers.TaskController;
+import main.java.custom.SpringContext;
 import main.java.entities.Task;
-import main.java.gui.Main;
 import main.java.gui.windows.CreateUpdateTaskWindow;
 
 public class TaskRowPanel extends JPanel{
@@ -27,12 +28,13 @@ public class TaskRowPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(TaskRowPanel.class.getName());
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+	private final TaskController taskController = SpringContext.getBean(TaskController.class);
+	private Window parentWindow;
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
-	public TaskRowPanel(Task task) {
+	public TaskRowPanel(Task task, Window parentWindow) {
+		this.parentWindow = parentWindow;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		putClientProperty("taskId", task.taskId());
@@ -68,8 +70,8 @@ public class TaskRowPanel extends JPanel{
 		}
 		
 		chk.setBorderPainted(true);
-
-		switch(task.priority()) {
+//		if it is null, we insert 0
+		switch(task.priority() == null ? 0:task.priority()) {
 		case 1: chk.setBorder(new LineBorder(Color.RED, 1, true));
 		break;
 		case 2: chk.setBorder(new LineBorder(Color.ORANGE, 1, true));
@@ -95,7 +97,7 @@ public class TaskRowPanel extends JPanel{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton() == MouseEvent.BUTTON1) {
-					new CreateUpdateTaskWindow(Main.getMain(), (Long) getClientProperty("projectId"), true, TaskRowPanel.this);
+					new CreateUpdateTaskWindow(parentWindow, (Long) getClientProperty("projectId"), true, TaskRowPanel.this);
 				}
 			}
 		});
@@ -147,9 +149,8 @@ public class TaskRowPanel extends JPanel{
 			);
 			
 			try {
-				String body = mapper.writeValueAsString(updatedTask);
-				int code = api.put("/api/task/update", body, null);
-				if (code < 400) {
+				ResponseEntity<String> response = taskController.updateTask(updatedTask);
+				if (response.getStatusCode().is2xxSuccessful()) {
 					ProjectInfoPanel.getProjectInfoPanel().listTasks();
 				}
 			} catch (Exception e) {

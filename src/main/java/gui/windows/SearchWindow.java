@@ -1,21 +1,23 @@
 package main.java.gui.windows;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.BorderLayout;
+import java.awt.Window;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import main.java.gui.Main;
 import main.java.gui.panels.EmptyPanel;
 import main.java.gui.panels.SearchedItemsPanel;
-
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JTextField;
 
 public class SearchWindow extends JDialog{
 
@@ -38,6 +40,7 @@ public class SearchWindow extends JDialog{
 		setSize(source.getWidth() / 2, source.getHeight() / 2);
 		setResizable(false);
 		setUndecorated(true);
+		setFocusable(true);
 		
 		JPanel searchPanel = new JPanel();
 		getContentPane().add(searchPanel, BorderLayout.NORTH);
@@ -50,6 +53,7 @@ public class SearchWindow extends JDialog{
 		add(emptyPanel, BorderLayout.CENTER);
 		
 		addSearchTextFieldEventListener();
+		addFocusListener();
 		
 		refresh();
 		setVisible(true);
@@ -79,6 +83,25 @@ public class SearchWindow extends JDialog{
 	private void refresh() {
 		revalidate();
 		repaint();
+	}
+	
+	private void addFocusListener() {
+		addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				return;
+			}
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				for(Window w : getOwnedWindows()) {
+					w.dispose();
+				}
+			}
+		});
+	}
+	
+	public void destroyChildWindows() {
+		requestFocus();
 	}
 	
 }

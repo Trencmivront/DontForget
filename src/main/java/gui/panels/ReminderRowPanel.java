@@ -14,9 +14,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.ReminderController;
+import main.java.controllers.TaskController;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
 import main.java.entities.Reminder;
 import main.java.entities.Task;
 import main.java.gui.Main;
@@ -24,14 +26,17 @@ import main.java.gui.windows.CreateUpdateTaskWindow;
 
 public class ReminderRowPanel extends JPanel {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = LoggerFactory.getLogger(ReminderRowPanel.class.getName());
 
-	private static final long serialVersionUID = 1L;
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+	private ReminderController reminderController;
+	private TaskController taskController;
 
 	public ReminderRowPanel(Reminder reminder, Task task) {
 		logger.info("Initializing ReminderRowPanel");
+		this.reminderController = SpringContext.getBean(ReminderController.class);
+		this.taskController = SpringContext.getBean(TaskController.class);
 		setLayout(new BorderLayout());
 		
 		putClientProperty("taskId", task.taskId());
@@ -66,10 +71,15 @@ public class ReminderRowPanel extends JPanel {
 		
 		deleteItem.addActionListener(_ -> {
 			Long taskId = (Long) getClientProperty("taskId");
-			int code = api.delete("/api/reminder/delete/", taskId);
-			if (code < 400) {
-				Main.getMain().getRemindersButton().doClick();
-			} else {
+			try {
+				ResponseEntity<String> response = reminderController.deleteReminder(taskId);
+				if (response.getStatusCode().is2xxSuccessful()) {
+					Main.getMain().getRemindersButton().doClick();
+				} else {
+					JOptionPane.showMessageDialog(this, "Failed to delete the reminder.");
+				}
+			} catch (Exception e) {
+				logger.error("Failed to delete reminder", e);
 				JOptionPane.showMessageDialog(this, "Failed to delete the reminder.");
 			}
 		});
@@ -81,10 +91,10 @@ public class ReminderRowPanel extends JPanel {
 					Long taskId = (Long) getClientProperty("taskId");
 					Task task = null;
 					try {
-						String res = api.get("/api/task/get/", taskId);
-						task = mapper.readValue(res, Task.class);
+						ResponseEntity<Task> response = taskController.getTaskById(taskId);
+						task = response.getBody();
 					} catch (Exception ex) {
-						ex.printStackTrace();
+						logger.error("Failed to get task", ex);
 					}
 					if (task != null) {
 						new CreateUpdateTaskWindow(Main.getMain(), task.projectId(), true, ReminderRowPanel.this);

@@ -9,10 +9,11 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.ReminderController;
+import main.java.controllers.TaskController;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
 import main.java.entities.Reminder;
 import main.java.entities.Task;
 
@@ -22,15 +23,15 @@ public class NotificationManager {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+	private final ReminderController reminderController = SpringContext.getBean(ReminderController.class);
+	private final TaskController taskController = SpringContext.getBean(TaskController.class);
 
 	public void initialize() {
 		logger.info("Initializing NotificationManager and scheduling existing reminders...");
 		List<Reminder> reminders = null;
 		try {
-			String res = api.get("/api/reminder/get-all");
-			reminders = mapper.readValue(res, new TypeReference<List<Reminder>>() {});
+			ResponseEntity<List<Reminder>> response = reminderController.getReminders();
+			reminders = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -58,8 +59,8 @@ public class NotificationManager {
 
 		Task task = null;
 		try {
-			String res = api.get("/api/task/get/", reminder.taskId());
-			task = mapper.readValue(res, Task.class);
+			ResponseEntity<Task> response = taskController.getTaskById(reminder.taskId());
+			task = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -16,9 +16,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.IconColorController;
+import main.java.controllers.TagController;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
 import main.java.custom.CustomIcon;
 import main.java.entities.IconColor;
 import main.java.entities.Tag;
@@ -29,8 +31,9 @@ public class TagRowPanel extends JPanel {
 	private static final Logger logger = LoggerFactory.getLogger(TagRowPanel.class.getName());
 
 	private static final long serialVersionUID = 1L;
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+
+	private IconColorController iconColorController;
+	private TagController tagController;
 
 	public TagRowPanel(Tag tag) {
 		logger.info("Initializing TagRowPanel");
@@ -38,6 +41,8 @@ public class TagRowPanel extends JPanel {
 	}
 	
 	public TagRowPanel(JCheckBox ck, Tag tag) {
+		this.iconColorController = SpringContext.getBean(IconColorController.class);
+		this.tagController = SpringContext.getBean(TagController.class);
 		putClientProperty("tagId", tag.tagId());
 		putClientProperty("tagName", tag.tagName());
 		putClientProperty("iconColorId", tag.iconColorId());
@@ -50,10 +55,10 @@ public class TagRowPanel extends JPanel {
 
 		IconColor ic = null;
 		try {
-			String res = api.get("/api/icon-color/tag/", tag.tagId());
-			ic = mapper.readValue(res, IconColor.class);
+			ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.tagId());
+			ic = response.getBody();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to fetch icon color for tag " + tag.tagId(), e);
 		}
 		// if color not found, make it gray
 		Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
@@ -93,7 +98,13 @@ public class TagRowPanel extends JPanel {
 	private void addDeleteActionListener(JMenuItem deleteItem) {
 		deleteItem.addActionListener(_ -> {
 				Long tagId = (Long) getClientProperty("tagId");
-				int code = api.delete("/api/tag/delete/", tagId);
+				int code = 500;
+				try {
+					ResponseEntity<String> response = tagController.deleteTag(tagId);
+					code = response.getStatusCode().value();
+				} catch (Exception e) {
+					logger.error("Failed to delete tag " + tagId, e);
+				}
 				if (code < 400) {
 					refreshTagsList();
 				} else {

@@ -3,6 +3,7 @@ package main.java.gui.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -19,11 +20,12 @@ import javax.swing.table.TableRowSorter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import main.java.api.Api;
+import main.java.controllers.ProjectController;
+import main.java.controllers.TagController;
+import main.java.controllers.TaskController;
+import main.java.custom.SpringContext;
 import main.java.entities.Project;
 import main.java.entities.Tag;
 import main.java.entities.Task;
@@ -33,14 +35,23 @@ public class SearchedItemsPanel extends JPanel{
 
 	private static final Logger logger = LoggerFactory.getLogger(SearchedItemsPanel.class.getName());
 
+	private ProjectController projectController;
+	private TaskController taskController;
+	private TagController tagController;
+	
 	private static final long serialVersionUID = 1L;
 	private final JTable itemsTable = new JTable();
 	private DefaultTableModel model;
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+
+	private Window source;
 	
-	public SearchedItemsPanel(SearchWindow window) {
+	public SearchedItemsPanel(SearchWindow source) {
+		this.source = source;
 		logger.info("Initializing SearchedItemsPanel");
+		this.projectController = SpringContext.getBean(ProjectController.class);
+		this.taskController = SpringContext.getBean(TaskController.class);
+		this.tagController = SpringContext.getBean(TagController.class);
+		
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane(itemsTable);
@@ -49,7 +60,6 @@ public class SearchedItemsPanel extends JPanel{
 		listItems();
 		addRowMouseListener();
 	}
-
 	
 	public void filterRows(String key) {
 		if (model != null) {
@@ -131,8 +141,8 @@ public class SearchedItemsPanel extends JPanel{
 	
 	private void listProjects() {
 		try {
-			String jsonString = api.get("/api/project/get-all");
-			List<Project> projects = mapper.readValue(jsonString, new TypeReference<List<Project>>() {});
+			ResponseEntity<List<Project>> response = projectController.getProjects();
+			List<Project> projects = response.getBody();
 			
 			if (projects != null && !projects.isEmpty()) {
 				model.addRow(new Object[] { createHeader("Projects") });
@@ -147,50 +157,48 @@ public class SearchedItemsPanel extends JPanel{
 	}
 
 	private void listTasks() {
-		List<Task> tasks = null;
 		try {
-			String res = api.get("/api/task/get-all");
-			tasks = mapper.readValue(res, new TypeReference<List<Task>>() {});
+			ResponseEntity<List<Task>> response = taskController.getTasks();
+			List<Task> tasks = response.getBody();
+			if (tasks != null && !tasks.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Tasks") });
+				for (Task task : tasks) {
+					TaskRowPanel row = new TaskRowPanel(task, source);
+					List<Tag> tags = null;
+					try {
+						ResponseEntity<List<Tag>> tagsResponse = tagController.getTagsOfTask(task.taskId());
+						tags = tagsResponse.getBody();
+					} catch (Exception ex) {
+						logger.error("Failed to load tags for task", ex);
+					}
+					if (tags != null && !tags.isEmpty()) {
+						StringBuilder tagsBuilder = new StringBuilder();
+						for (Tag tag : tags) {
+							tagsBuilder.append(" ").append(tag.tagName());
+						}
+						row.setToolTipText(tagsBuilder.toString());
+					}
+					model.addRow(new Object[] { row });
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		if (tasks != null && !tasks.isEmpty()) {
-			model.addRow(new Object[] { createHeader("Tasks") });
-			for (Task task : tasks) {
-				TaskRowPanel row = new TaskRowPanel(task);
-				List<Tag> tags = null;
-				try {
-					String res = api.get("/api/tag/task/", task.taskId());
-					tags = mapper.readValue(res, new TypeReference<List<Tag>>() {});
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				if (tags != null && !tags.isEmpty()) {
-					StringBuilder tagsBuilder = new StringBuilder();
-					for (Tag tag : tags) {
-						tagsBuilder.append(" ").append(tag.tagName());
-					}
-					row.setToolTipText(tagsBuilder.toString());
-				}
-				model.addRow(new Object[] { row });
-			}
 		}
 	}
 
 	private void listTags() {
-		List<Tag> tags = null;
 		try {
-			String res = api.get("/api/tag/get-all");
-			tags = mapper.readValue(res, new TypeReference<List<Tag>>() {});
+			ResponseEntity<List<Tag>> response = tagController.getTags();
+			List<Tag> tags = response.getBody();
+			if (tags != null && !tags.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Tags") });
+				for (Tag tag : tags) {
+					TagRowPanel row = new TagRowPanel(tag);
+					model.addRow(new Object[] { row });
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		if (tags != null && !tags.isEmpty()) {
-			model.addRow(new Object[] { createHeader("Tags") });
-			for (Tag tag : tags) {
-				TagRowPanel row = new TagRowPanel(tag);
-				model.addRow(new Object[] { row });
-			}
 		}
 	}
 	

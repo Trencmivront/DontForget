@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,25 +20,28 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.ReminderController;
+import main.java.controllers.TaskController;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
 import main.java.entities.Reminder;
 import main.java.entities.Task;
 
-@org.springframework.stereotype.Component
 public class ReminderPanel extends JPanel{
 	
 	private static final long serialVersionUID = 1L;
 	private JTabbedPane monthTabbedPane;
+	private ReminderController reminderController;
+	private TaskController taskController;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReminderPanel.class.getName());
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
 
 	public ReminderPanel() {
 		logger.info("Drawing the Reminder panel.");
+		this.reminderController = SpringContext.getBean(ReminderController.class);
+		this.taskController = SpringContext.getBean(TaskController.class);
+		
 		setLayout(new BorderLayout());
 		
 		monthTabbedPane = new JTabbedPane(SwingConstants.LEFT);
@@ -65,12 +67,12 @@ public class ReminderPanel extends JPanel{
 	}
 	
 	private HashMap<String, List<Reminder>> getMonthlyReminders() {
-		List<Reminder> reminders = Collections.emptyList();
+		List<Reminder> reminders = null;
 		try {
-			String res = api.get("/api/reminder/get-all");
-			reminders = mapper.readValue(res, new TypeReference<List<Reminder>>() {});
+			ResponseEntity<List<Reminder>> response = reminderController.getReminders();
+			reminders = response.getBody();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to load reminders", e);
 		}
 
 		if(reminders == null || reminders.isEmpty()) {
@@ -104,13 +106,12 @@ public class ReminderPanel extends JPanel{
 			
 			for (Reminder reminder : reminders) {
 				int dayInt = reminder.remindAt().toLocalDateTime().getDayOfMonth();
-
 				Task task = null;
 				try {
-					String res = api.get("/api/task/get/", reminder.taskId());
-					task = mapper.readValue(res, Task.class);
+					ResponseEntity<Task> response = taskController.getTaskById(reminder.taskId());
+					task = response.getBody();
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Failed to load task for reminder", e);
 				}
 				ReminderRowPanel rowPanel = new ReminderRowPanel(reminder, task);
 				

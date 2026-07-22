@@ -36,14 +36,12 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.ProjectController;
+import org.springframework.http.ResponseEntity;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
-
-import main.java.api.Api;
 import main.java.entities.Project;
 import main.java.gui.panels.InboxPanel;
 import main.java.gui.panels.ProjectRowPanel;
@@ -53,7 +51,6 @@ import main.java.gui.panels.TodayPanel;
 import main.java.gui.windows.CreateUpdateProjectWindow;
 import main.java.gui.windows.SearchWindow;
 
-@Component
 public class Main extends JFrame {
 	private static final int WINDOW_HEIGHT= 500;
 	private static final int WINDOW_WIDTH = 750;
@@ -76,13 +73,7 @@ public class Main extends JFrame {
 	private JButton todayButton;
 	private JButton remindersButton;
 	
-	private final TagsPanel tagsPanel;
-	private final ReminderPanel reminderPanel;
-	private final InboxPanel inboxPanel;
-	private final TodayPanel todayPanel;
-	
-	private Api api = new Api();
-	private ObjectMapper mapper = new ObjectMapper();
+	private final ProjectController projectController = SpringContext.getBean(ProjectController.class);
 	
 	{
 		main = this;
@@ -119,12 +110,8 @@ public class Main extends JFrame {
 		return remindersButton;
 	}
 	
-	public Main(ReminderPanel reminderPanel, TodayPanel todayPanel,
-			TagsPanel tagsPanel, InboxPanel inboxPanel) {
-		this.reminderPanel = reminderPanel;
-		this.todayPanel = todayPanel;
-		this.tagsPanel = tagsPanel;
-		this.inboxPanel = inboxPanel;
+	public Main() {
+		
 		logger.info("Drawing Main window.");
 //		setting the global toucher for main, freaky
 		
@@ -210,10 +197,10 @@ public class Main extends JFrame {
 		showInfoPanel.setLayout(new BorderLayout(0, 0));
 		
 //		add action listeners for buttons
-		addNavigationButtonActionListener(remindersButton, reminderPanel);
-		addNavigationButtonActionListener(inboxButton, inboxPanel);
-		addNavigationButtonActionListener(tagsButton, tagsPanel);
-		addNavigationButtonActionListener(todayButton, todayPanel);
+		addNavigationButtonActionListener(remindersButton, ReminderPanel.class);
+		addNavigationButtonActionListener(inboxButton, InboxPanel.class);
+		addNavigationButtonActionListener(tagsButton, TagsPanel.class);
+		addNavigationButtonActionListener(todayButton, TodayPanel.class);
 		addSearchButtonActionListener(searchButton);
 		setSplitDivider();
 		addWindowFocusListener();
@@ -235,7 +222,7 @@ public class Main extends JFrame {
 		toolBar.add(menuBar);
 
 		refreshWindow();
-		
+		setVisible(true);
 		logger.info("Main window is ready.");
 	}
 	
@@ -244,8 +231,8 @@ public class Main extends JFrame {
 		List<Project> projects = Collections.emptyList();
 		
 		try {
-			String response = api.get("/api/project/get-all");
-			projects = mapper.readValue(response, new TypeReference<List<Project>>() {});
+			ResponseEntity<List<Project>> response = projectController.getProjects();
+			projects = response.getBody();
 		}catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -324,7 +311,11 @@ public class Main extends JFrame {
 				for (JPanel panel : selectedProjects) {
 					Long projectId = (Long) panel.getClientProperty("projectId");
 					if (projectId != null) {
-						api.delete("/api/project/delete/", projectId);
+						try {
+							projectController.deleteProject(projectId);
+						} catch (Exception e) {
+							logger.error("Failed to delete project " + projectId, e);
+						}
 					}
 				}
 				selectedProjects.clear();
@@ -351,12 +342,12 @@ public class Main extends JFrame {
 		});
 	}
 	
-	private void addNavigationButtonActionListener(JButton button, JPanel panel) {
+	private <T> void addNavigationButtonActionListener(JButton button, Class<T> panelClass) {
 		button.addActionListener(_ ->{
 			setProjectBackgroundColorOfProject(null);
 			showInfoPanel.removeAll();
 			try {
-				showInfoPanel.add(panel);
+				showInfoPanel.add((JPanel)panelClass.getConstructor().newInstance());
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -396,7 +387,6 @@ public class Main extends JFrame {
 				for(Window w : getOwnedWindows()) {
 					w.dispose();
 				}
-				
 			}
 		});
 	}

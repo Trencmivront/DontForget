@@ -45,14 +45,14 @@ public class NotificationWorker implements Runnable{
 				logger.info("Playing notification sound...");
 				clip.start();
 				
-				WaylandNotification.sendNotification(id, title, message);
+				new WaylandNotification().sendNotification(id, title, message);
 				
 				long playDurationMs = clip.getMicrosecondLength() / 1000;
 				logger.info("Sleeping {} ms for audio playback.", playDurationMs);
 				Thread.sleep(playDurationMs);
 			} else {
 				logger.warn("Notification sound file not found at {}. Sending notification without sound.", audioFile.getAbsolutePath());
-				WaylandNotification.sendNotification(id, title, message);
+				new WaylandNotification().sendNotification(id, title, message);
 			}
 		} catch (Exception e) {
 			logger.error("Exception occurred in NotificationWorker run: {}", e.getMessage());

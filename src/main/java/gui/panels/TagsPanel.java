@@ -12,24 +12,22 @@ import javax.swing.JViewport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-
 import main.java.controllers.TagController;
 import main.java.entities.Tag;
 
-@Component
 public class TagsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(TagsPanel.class.getName());
 	private JScrollPane scrollPane;
-
-	private final TagController tagController;
 	
-	public TagsPanel(TagController tagController) {
-		this.tagController = tagController;
+	private final TagController tagController = SpringContext.getBean(TagController.class);
+	
+	public TagsPanel() {
 		
 		logger.info("Drawing TagsPanel.");
+		
 		setLayout(new BorderLayout());
 		
 		add(new HeaderPanel("Tags"), BorderLayout.NORTH);
@@ -44,8 +42,6 @@ public class TagsPanel extends JPanel {
 	}
 	
 	private void listTags() {
-		scrollPane.removeAll();
-
 		ResponseEntity<List<Tag>> tagResponseEntity = tagController.getTags();
 		List<Tag> tags = tagResponseEntity.getBody();
 		

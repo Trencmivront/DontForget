@@ -18,9 +18,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.border.EmptyBorder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import main.java.custom.SpringContext;
+import main.java.controllers.IconColorController;
+import main.java.controllers.ProjectController;
+import org.springframework.http.ResponseEntity;
 
-import main.java.api.Api;
 import main.java.custom.CustomIcon;
 import main.java.entities.IconColor;
 import main.java.entities.Project;
@@ -34,8 +36,9 @@ public class ProjectRowPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Main main = Main.getMain();
-	private final Api api = new Api();
-	private final ObjectMapper mapper = new ObjectMapper();
+
+	private IconColorController iconColorController;
+	private ProjectController projectController;
 
 	public ProjectRowPanel(Project project) {
 		logger.info("Initializing ProjectRowPanel");
@@ -43,16 +46,18 @@ public class ProjectRowPanel extends JPanel {
 	}
 	
 	public ProjectRowPanel(JCheckBox ck, Project project) {
+		this.iconColorController = SpringContext.getBean(IconColorController.class);
+		this.projectController = SpringContext.getBean(ProjectController.class);
 		
-		JLabel label = new JLabel(project.projectTitle());
+		JLabel label = new JLabel(project.getProjectTitle());
 		
-		Long projectId = project.projectId();
+		Long projectId = project.getProjectId();
 		
-		putClientProperty("projectTitle", project.projectTitle());
-		putClientProperty("description", project.description());
+		putClientProperty("projectTitle", project.getProjectTitle());
+		putClientProperty("description", project.getDescription());
 		putClientProperty("projectId", projectId);
-		putClientProperty("listOrder", project.listOrder());
-		putClientProperty("iconColorId", project.iconColorId());
+		putClientProperty("listOrder", project.getListOrder());
+		putClientProperty("iconColorId", project.getIconColorId());
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
@@ -61,10 +66,10 @@ public class ProjectRowPanel extends JPanel {
 		
 		IconColor ic = null;
 		try {
-			String res = api.get("/api/icon-color/project/", projectId);
-			ic = mapper.readValue(res, IconColor.class);
+			ResponseEntity<IconColor> response = iconColorController.getIconColorOfProject(projectId);
+			ic = response.getBody();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to fetch icon color for project " + projectId, e);
 		}
 
 		if(ic != null) {
@@ -137,7 +142,13 @@ public class ProjectRowPanel extends JPanel {
 			);
 			if (confirm == JOptionPane.YES_OPTION) {
 				Long projectId = (Long) getClientProperty("projectId");
-				int code = api.delete("/api/project/delete/", projectId);
+				int code = 500;
+				try {
+					ResponseEntity<String> response = projectController.deleteProject(projectId);
+					code = response.getStatusCode().value();
+				} catch (Exception e) {
+					logger.error("Failed to delete project " + projectId, e);
+				}
 				if (code < 400) {
 					main.listProjects(main.getProjectsContainer());
 				} else {
