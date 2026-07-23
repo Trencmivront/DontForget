@@ -22,14 +22,20 @@ public class TaskStatus {
         this.statusName = statusName;
     }
 
-    // Record-like getters
-    public Long statusId() { return statusId; }
-    public String statusName() { return statusName; }
+	public Long getStatusId() {
+		return statusId;
+	}
 
-    // Standard getters/setters
-    public Long getstatusId() { return statusId; }
-    public void setstatusId(Long statusId) { this.statusId = statusId; }
+	public void setStatusId(Long statusId) {
+		this.statusId = statusId;
+	}
 
-    public String getstatusName() { return statusName; }
-    public void setstatusName(String statusName) { this.statusName = statusName; }
+	public String getStatusName() {
+		return statusName;
+	}
+
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
+	}
+
 }

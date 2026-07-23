@@ -31,7 +31,7 @@ public class GetRecurringDaysOfTaskService {
 		try {
 			List<RecurringTask> records = recurringTaskRepository.findBytaskId(taskId);
 			for (RecurringTask rt : records) {
-				days.add(DayOfWeek.of(rt.weekDayId().intValue()));
+				days.add(DayOfWeek.of(rt.getWeekDayId().intValue()));
 			}
 			return ResponseEntity.ok(days);
 		} catch (Exception e) {

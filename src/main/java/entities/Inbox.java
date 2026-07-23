@@ -2,6 +2,7 @@ package main.java.entities;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "INBOX")
@@ -14,8 +15,8 @@ public class Inbox {
     @Column(nullable = false, length = 1000)
     private String message;
 
-    @Column(insertable = false, updatable = false)
-    private Timestamp createdAt;
+    @Column(updatable = false, nullable = false)
+    private Timestamp createdAt = Timestamp.valueOf(LocalDateTime.now());
 
     // No-arg constructor
     public Inbox() {}
@@ -27,18 +28,24 @@ public class Inbox {
         this.createdAt = createdAt;
     }
 
-    // Record-like getters
-    public Long inboxId() { return inboxId; }
-    public String message() { return message; }
-    public Timestamp createdAt() { return createdAt; }
+	public Long getInboxId() {
+		return inboxId;
+	}
 
-    // Standard getters/setters
-    public Long getinboxId() { return inboxId; }
-    public void setinboxId(Long inboxId) { this.inboxId = inboxId; }
+	public void setInboxId(Long inboxId) {
+		this.inboxId = inboxId;
+	}
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+	public String getMessage() {
+		return message;
+	}
 
-    public Timestamp getcreatedAt() { return createdAt; }
-    public void setcreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
 }

@@ -73,7 +73,7 @@ public class ProjectRowPanel extends JPanel {
 		}
 
 		if(ic != null) {
-			Color color = new Color(ic.red(), ic.green(), ic.blue());
+			Color color = new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
 			label.setIcon(new CustomIcon(color, 12, 12));
 		}
 		

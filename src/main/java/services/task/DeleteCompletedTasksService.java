@@ -37,8 +37,8 @@ public class DeleteCompletedTasksService {
 
 		boolean success = true;
 		for (Task task : tasks) {
-			if (task.statusId() != null && task.statusId() == 2L) { // 2 = COMPLETED
-				ResponseEntity<String> res = deleteTaskService.execute(task.taskId());
+			if (task.getStatusId() != null && task.getStatusId() == 2L) { // 2 = COMPLETED
+				ResponseEntity<String> res = deleteTaskService.execute(task.getTaskId());
 				if (res.getStatusCode().isError()) {
 					success = false;
 				}

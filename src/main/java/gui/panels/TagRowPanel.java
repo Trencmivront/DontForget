@@ -43,25 +43,25 @@ public class TagRowPanel extends JPanel {
 	public TagRowPanel(JCheckBox ck, Tag tag) {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.tagController = SpringContext.getBean(TagController.class);
-		putClientProperty("tagId", tag.tagId());
-		putClientProperty("tagName", tag.tagName());
-		putClientProperty("iconColorId", tag.iconColorId());
+		putClientProperty("tagId", tag.getTagId());
+		putClientProperty("tagName", tag.getTagName());
+		putClientProperty("iconColorId", tag.getIconColorId());
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
 
-		JLabel label = new JLabel(tag.tagName());
+		JLabel label = new JLabel(tag.getTagName());
 		label.setFont(new Font("Dialog", Font.PLAIN, 20));
 
 		IconColor ic = null;
 		try {
-			ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.tagId());
+			ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.getTagId());
 			ic = response.getBody();
 		} catch (Exception e) {
-			logger.error("Failed to fetch icon color for tag " + tag.tagId(), e);
+			logger.error("Failed to fetch icon color for tag " + tag.getTagId(), e);
 		}
 		// if color not found, make it gray
-		Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
+		Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
 
 		label.setIcon(new CustomIcon(color, 12, 12));
 

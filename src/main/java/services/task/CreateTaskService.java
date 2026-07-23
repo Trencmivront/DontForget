@@ -35,17 +35,17 @@ public class CreateTaskService {
 			int listOrder = taskRepository.findMaxListOrderByProjectId(projectId) + 1;
 
 			Task t = new Task();
-			t.settaskTitle(task.taskTitle());
+			t.setTaskTitle(task.taskTitle());
 			t.setDescription(task.description() == null || task.description().isEmpty() ? null : task.description());
-			t.setstatusId(Objects.requireNonNullElse(task.statusId(), 1L)); // 1 = ACTIVE
+			t.setStatusId(Objects.requireNonNullElse(task.statusId(), 1L)); // 1 = ACTIVE
 			t.setPriority(task.priority());
-			t.setdueDate(task.dueDate() != null ? Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
-			t.setlistOrder(listOrder);
-			t.setprojectId(projectId);
+			t.setDueDate(task.dueDate() != null ? Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
+			t.setListOrder(listOrder);
+			t.setProjectId(projectId);
 
 			Task saved = taskRepository.save(t);
 			logger.info("Task saved successfully.");
-			return ResponseEntity.status(HttpStatus.CREATED).body(saved.taskId());
+			return ResponseEntity.status(HttpStatus.CREATED).body(saved.getTaskId());
 		} catch (Exception e) {
 			logger.error("Database error: {}", e.getMessage());
 			e.printStackTrace();

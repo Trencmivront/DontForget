@@ -34,10 +34,6 @@ public class ProjectInfoPanel extends JPanel{
 	private static ProjectInfoPanel projectInfoPanel;
 	private final Main main = Main.getMain();
 	private TaskController taskController;
-
-	{
-		projectInfoPanel = this;
-	}
 	
 	public static ProjectInfoPanel getProjectInfoPanel() {
 		return projectInfoPanel;
@@ -48,6 +44,11 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	public ProjectInfoPanel(ProjectRowPanel panel) {
+		if(projectInfoPanel != null) {
+			projectInfoPanel = null;
+		}
+		projectInfoPanel = this;
+		
 		projectPanel = panel;
 		this.taskController = SpringContext.getBean(TaskController.class);
 		

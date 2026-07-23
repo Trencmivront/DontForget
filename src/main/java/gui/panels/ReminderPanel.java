@@ -85,7 +85,7 @@ public class ReminderPanel extends JPanel{
 //		The code line simply takes a list of items, groups them by given string, returns grouped values.
 		return reminders.stream().
 				collect(
-				Collectors.groupingBy(reminder -> reminder.remindAt().toLocalDateTime().getMonth().name(),
+				Collectors.groupingBy(reminder -> reminder.getRemindAt().toLocalDateTime().getMonth().name(),
 				HashMap::new,
 				Collectors.toList()
 				));
@@ -105,10 +105,10 @@ public class ReminderPanel extends JPanel{
 			};
 			
 			for (Reminder reminder : reminders) {
-				int dayInt = reminder.remindAt().toLocalDateTime().getDayOfMonth();
+				int dayInt = reminder.getRemindAt().toLocalDateTime().getDayOfMonth();
 				Task task = null;
 				try {
-					ResponseEntity<Task> response = taskController.getTaskById(reminder.taskId());
+					ResponseEntity<Task> response = taskController.getTaskById(reminder.getTaskId());
 					task = response.getBody();
 				} catch (Exception e) {
 					logger.error("Failed to load task for reminder", e);

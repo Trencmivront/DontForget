@@ -27,33 +27,33 @@ public class UpdateTaskService {
 	public ResponseEntity<String> execute(Task task) {
 		logger.info("Executing {} for task: {}", this.getClass(), task);
 
-		if (task == null || task.taskId() == null) {
+		if (task == null || task.getTaskId() == null) {
 			logger.warn("Task or Task ID is null. Aborting update.");
 			return ResponseEntity.badRequest().body("INVALID TASK DATA");
 		}
 
 		try {
-			Task existing = taskRepository.findById(task.taskId()).orElse(null);
+			Task existing = taskRepository.findById(task.getTaskId()).orElse(null);
 			if (existing == null) {
-				logger.warn("Task not found with ID: {}", task.taskId());
+				logger.warn("Task not found with ID: {}", task.getTaskId());
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("TASK NOT FOUND");
 			}
 
-			existing.settaskTitle(task.taskTitle());
-			existing.setDescription(task.description() == null || task.description().isEmpty() ? null : task.description());
-			existing.setstatusId(task.statusId() != null ? task.statusId() : 1L);
-			existing.setPriority(task.priority() != 0 ? task.priority() : null);
-			existing.setdueDate(task.dueDate());
-			existing.setlistOrder(task.listOrder() != 0 ? task.listOrder() : null);
-			existing.setprojectId(task.projectId() != null && task.projectId() != 0L ? task.projectId() : null);
+			existing.setTaskTitle(task.getTaskTitle());
+			existing.setDescription(task.getDescription());
+			existing.setStatusId(task.getStatusId() != null ? task.getStatusId() : 1L);
+			existing.setPriority(task.getPriority());
+			existing.setDueDate(task.getDueDate());
+			existing.setListOrder(task.getListOrder() != 0 ? task.getListOrder() : null);
+			existing.setProjectId(task.getProjectId() != null && task.getProjectId() != 0L ? task.getProjectId() : null);
 
 			// Handle completedAt timestamp:
 			// If status is COMPLETED (2), set completedAt (either provided or current time).
 			// Otherwise (ACTIVE or other), reset completedAt to null.
-			if (task.statusId() != null && task.statusId() == 2L) {
-				existing.setcompletedAt(task.completedAt() != null ? task.completedAt() : new Timestamp(System.currentTimeMillis()));
+			if (task.getStatusId() != null && task.getStatusId() == 2L) {
+				existing.setCompletedAt(task.getCompletedAt() != null ? task.getCompletedAt() : new Timestamp(System.currentTimeMillis()));
 			} else {
-				existing.setcompletedAt(null);
+				existing.setCompletedAt(null);
 			}
 
 			taskRepository.save(existing);

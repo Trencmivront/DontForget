@@ -36,9 +36,9 @@ class TestGetTodaysTasksService {
 	@BeforeEach
 	void setUp() {
 		sampleTask = new Task();
-		sampleTask.settaskId(1L);
-		sampleTask.settaskTitle("Today's Task");
-		sampleTask.setdueDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+		sampleTask.setTaskId(1L);
+		sampleTask.setTaskTitle("Today's Task");
+		sampleTask.setDueDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
 	}
 
 	@Test
@@ -51,12 +51,12 @@ class TestGetTodaysTasksService {
 
 		assertNotNull(actualTasks);
 		assertEquals(1, actualTasks.size());
-		assertEquals("Today's Task", actualTasks.get(0).taskTitle());
+		assertEquals("Today's Task", actualTasks.get(0).getTaskTitle());
 		verify(taskRepository).findTodaysTasks();
 	}
 
 	@Test
-	public void testExecuteReturnsEmptyListOnException() {
+	void testExecuteReturnsEmptyListOnException() {
 		when(taskRepository.findTodaysTasks()).thenThrow(new RuntimeException("Database error"));
 
 		ResponseEntity<List<Task>> response = getTodaysTasksService.execute();

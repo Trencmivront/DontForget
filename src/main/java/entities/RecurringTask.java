@@ -26,18 +26,23 @@ public class RecurringTask {
         this.weekDayId = weekDayId;
     }
 
-    // Record-like getters
-    public Long taskId() { return taskId; }
-    public Long weekDayId() { return weekDayId; }
+    public Long getTaskId() {
+		return taskId;
+	}
 
-    // Standard getters/setters
-    public Long gettaskId() { return taskId; }
-    public void settaskId(Long taskId) { this.taskId = taskId; }
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
 
-    public Long getweekDayId() { return weekDayId; }
-    public void setweekDayId(Long weekDayId) { this.weekDayId = weekDayId; }
+	public Long getWeekDayId() {
+		return weekDayId;
+	}
 
-    public static class RecurringTaskId implements Serializable {
+	public void setWeekDayId(Long weekDayId) {
+		this.weekDayId = weekDayId;
+	}
+
+	public static class RecurringTaskId implements Serializable {
         private static final long serialVersionUID = 1L;
 		private Long taskId;
         private Long weekDayId;

@@ -123,7 +123,7 @@ public class SearchedItemsPanel extends JPanel{
 		itemsTable.setRowHeight(35);
 		itemsTable.setFillsViewportHeight(true);
 		
-		itemsTable.getColumnModel().getColumn(0).setCellRenderer((table, value, isSelected, hasFocus, row, column) -> {
+		itemsTable.getColumnModel().getColumn(0).setCellRenderer((table, value, _, hasFocus, _, _) -> {
 			if (value instanceof Component c) {
 				if(hasFocus) {
 					c.setBackground(table.getSelectionBackground());
@@ -166,7 +166,7 @@ public class SearchedItemsPanel extends JPanel{
 					TaskRowPanel row = new TaskRowPanel(task, source);
 					List<Tag> tags = null;
 					try {
-						ResponseEntity<List<Tag>> tagsResponse = tagController.getTagsOfTask(task.taskId());
+						ResponseEntity<List<Tag>> tagsResponse = tagController.getTagsOfTask(task.getTaskId());
 						tags = tagsResponse.getBody();
 					} catch (Exception ex) {
 						logger.error("Failed to load tags for task", ex);
@@ -174,7 +174,7 @@ public class SearchedItemsPanel extends JPanel{
 					if (tags != null && !tags.isEmpty()) {
 						StringBuilder tagsBuilder = new StringBuilder();
 						for (Tag tag : tags) {
-							tagsBuilder.append(" ").append(tag.tagName());
+							tagsBuilder.append(" ").append(tag.getTagName());
 						}
 						row.setToolTipText(tagsBuilder.toString());
 					}

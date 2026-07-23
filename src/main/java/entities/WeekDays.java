@@ -21,14 +21,20 @@ public class WeekDays {
         this.dayName = dayName;
     }
 
-    // Record-like getters
-    public Long weekDayId() { return weekDayId; }
-    public String dayName() { return dayName; }
+	public Long getWeekDayId() {
+		return weekDayId;
+	}
 
-    // Standard getters/setters
-    public Long getweekDayId() { return weekDayId; }
-    public void setweekDayId(Long weekDayId) { this.weekDayId = weekDayId; }
+	public void setWeekDayId(Long weekDayId) {
+		this.weekDayId = weekDayId;
+	}
 
-    public String getdayName() { return dayName; }
-    public void setdayName(String dayName) { this.dayName = dayName; }
+	public String getDayName() {
+		return dayName;
+	}
+
+	public void setDayName(String dayName) {
+		this.dayName = dayName;
+	}
+
 }

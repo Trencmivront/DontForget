@@ -26,18 +26,28 @@ public class Tag {
         this.iconColorId = iconColorId;
     }
 
-    // Record-like getters
-    public Long tagId() { return tagId; }
-    public String tagName() { return tagName; }
-    public Long iconColorId() { return iconColorId; }
+	public Long getTagId() {
+		return tagId;
+	}
 
-    // Standard getters/setters
-    public Long gettagId() { return tagId; }
-    public void settagId(Long tagId) { this.tagId = tagId; }
+	public void setTagId(Long tagId) {
+		this.tagId = tagId;
+	}
 
-    public String gettagName() { return tagName; }
-    public void settagName(String tagName) { this.tagName = tagName; }
+	public String getTagName() {
+		return tagName;
+	}
 
-    public Long geticonColorId() { return iconColorId; }
-    public void seticonColorId(Long iconColorId) { this.iconColorId = iconColorId; }
+	public void setTagName(String tagName) {
+		this.tagName = tagName;
+	}
+
+	public Long getIconColorId() {
+		return iconColorId;
+	}
+
+	public void setIconColorId(Long iconColorId) {
+		this.iconColorId = iconColorId;
+	}
+
 }

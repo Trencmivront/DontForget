@@ -26,18 +26,28 @@ public class Reminder {
         this.message = message;
     }
 
-    // Record-like getters
-    public Long taskId() { return taskId; }
-    public Timestamp remindAt() { return remindAt; }
-    public String message() { return message; }
+	public Long getTaskId() {
+		return taskId;
+	}
 
-    // Standard getters/setters
-    public Long gettaskId() { return taskId; }
-    public void settaskId(Long taskId) { this.taskId = taskId; }
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
 
-    public Timestamp getremindAt() { return remindAt; }
-    public void setremindAt(Timestamp remindAt) { this.remindAt = remindAt; }
+	public Timestamp getRemindAt() {
+		return remindAt;
+	}
 
-    public String getmessage() { return message; }
-    public void setmessage(String message) { this.message = message; }
+	public void setRemindAt(Timestamp remindAt) {
+		this.remindAt = remindAt;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 }

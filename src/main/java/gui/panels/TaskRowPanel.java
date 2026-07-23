@@ -37,31 +37,31 @@ public class TaskRowPanel extends JPanel{
 		this.parentWindow = parentWindow;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		putClientProperty("taskId", task.taskId());
-		putClientProperty("taskTitle", task.taskTitle());
-		putClientProperty("description", task.description());
-		putClientProperty("statusId", task.statusId());
-		putClientProperty("priority", task.priority());
-		putClientProperty("dueDate", task.dueDate());
-		putClientProperty("listOrder", task.listOrder());
-		putClientProperty("projectId", task.projectId());
-		putClientProperty("createdAt", task.createdAt());
-		putClientProperty("updatedAt", task.updatedAt());
-		putClientProperty("completedAt", task.completedAt());
+		putClientProperty("taskId", task.getTaskId());
+		putClientProperty("taskTitle", task.getTaskTitle());
+		putClientProperty("description", task.getDescription());
+		putClientProperty("statusId", task.getStatusId());
+		putClientProperty("priority", task.getPriority());
+		putClientProperty("dueDate", task.getDueDate());
+		putClientProperty("listOrder", task.getListOrder());
+		putClientProperty("projectId", task.getProjectId());
+		putClientProperty("createdAt", task.getCreatedAt());
+		putClientProperty("updatedAt", task.getUpdatedAt());
+		putClientProperty("completedAt", task.getCompletedAt());
 		
-		setToolTipText(String.format("Show: %s", task.taskTitle()));;
+		setToolTipText(String.format("Show: %s", task.getTaskTitle()));
 		
 		JCheckBox chk = new JCheckBox();
-		JLabel title = new JLabel(task.taskTitle());
+		JLabel title = new JLabel(task.getTaskTitle());
 //		means that task is completed
 		
-		switch (task.statusId() != null ? task.statusId().intValue() : 1) {
+		switch (task.getStatusId() != null ? task.getStatusId().intValue() : 1) {
 		case 1, 0:
 		break;
-		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.taskTitle() + "</i></s></html>");
+		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.getTaskTitle() + "</i></s></html>");
 		chk.setSelected(true);}
 			break;
-		case 3: {title.setText("<html><i style='color: rgb(94, 75, 39);'>" + task.taskTitle() + "</i></html>");
+		case 3: {title.setText("<html><i style='color: rgb(94, 75, 39);'>" + task.getTaskTitle() + "</i></html>");
 		chk.setEnabled(false);}
 			break;
 		default:
@@ -71,7 +71,7 @@ public class TaskRowPanel extends JPanel{
 		
 		chk.setBorderPainted(true);
 //		if it is null, we insert 0
-		switch(task.priority() == null ? 0:task.priority()) {
+		switch(task.getPriority() == null ? 0:task.getPriority()) {
 		case 1: chk.setBorder(new LineBorder(Color.RED, 1, true));
 		break;
 		case 2: chk.setBorder(new LineBorder(Color.ORANGE, 1, true));

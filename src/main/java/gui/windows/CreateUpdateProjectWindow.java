@@ -217,9 +217,9 @@ public class CreateUpdateProjectWindow extends JDialog {
 		if (ic != null) {
 			for(IconColor color : ic) {
 				JRadioButton rb = new JRadioButton();
-				rb.setActionCommand(Long.toString(color.iconColorId()));
-				rb.setBackground(new Color(color.red(), color.green(), color.blue()));
-				rb.putClientProperty("iconColorId", color.iconColorId());
+				rb.setActionCommand(Long.toString(color.getIconColorId()));
+				rb.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue()));
+				rb.putClientProperty("iconColorId", color.getIconColorId());
 				bg.add(rb);
 				container.add(rb);
 			}
@@ -266,7 +266,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 						Object rbColorIdObj = rb.getClientProperty("iconColorId");
 						if (rbColorIdObj instanceof Number) {
 							Long rbColorId = ((Number) rbColorIdObj).longValue();
-							if (rbColorId.equals(projectColor.iconColorId())) {
+							if (rbColorId.equals(projectColor.getIconColorId())) {
 								rb.setSelected(true);
 								bg.setSelected(rb.getModel(), true);
 								break;

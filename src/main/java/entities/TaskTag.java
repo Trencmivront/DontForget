@@ -26,18 +26,23 @@ public class TaskTag {
         this.tagId = tagId;
     }
 
-    // Record-like getters
-    public Long taskId() { return taskId; }
-    public Long tagId() { return tagId; }
+    public Long getTaskId() {
+		return taskId;
+	}
 
-    // Standard getters/setters
-    public Long gettaskId() { return taskId; }
-    public void settaskId(Long taskId) { this.taskId = taskId; }
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
 
-    public Long gettagId() { return tagId; }
-    public void settagId(Long tagId) { this.tagId = tagId; }
+	public Long getTagId() {
+		return tagId;
+	}
 
-    public static class TaskTagId implements Serializable {
+	public void setTagId(Long tagId) {
+		this.tagId = tagId;
+	}
+
+	public static class TaskTagId implements Serializable {
         private static final long serialVersionUID = 1L;
 		private Long taskId;
         private Long tagId;

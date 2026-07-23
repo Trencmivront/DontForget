@@ -71,50 +71,91 @@ public class Task {
         this.completedAt = completedAt;
     }
 
-    // Record-like getters
-    public Long taskId() { return taskId; }
-    public String taskTitle() { return taskTitle; }
-    public String description() { return description; }
-    public Long statusId() { return statusId; }
-    public Integer priority() { return priority; }
-    public Timestamp dueDate() { return dueDate; }
-    public Integer listOrder() { return listOrder; }
-    public Long projectId() { return projectId; }
-    public Timestamp createdAt() { return createdAt; }
-    public Timestamp updatedAt() { return updatedAt; }
-    public Timestamp completedAt() { return completedAt; }
+	public Long getTaskId() {
+		return taskId;
+	}
 
-    // Standard getters/setters
-    public Long gettaskId() { return taskId; }
-    public void settaskId(Long taskId) { this.taskId = taskId; }
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
 
-    public String gettaskTitle() { return taskTitle; }
-    public void settaskTitle(String taskTitle) { this.taskTitle = taskTitle; }
+	public String getTaskTitle() {
+		return taskTitle;
+	}
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+	public void setTaskTitle(String taskTitle) {
+		this.taskTitle = taskTitle;
+	}
 
-    public Long getstatusId() { return statusId; }
-    public void setstatusId(Long statusId) { this.statusId = statusId; }
+	public String getDescription() {
+		return description;
+	}
 
-    public Integer getPriority() { return priority; }
-    public void setPriority(Integer priority) { this.priority = priority; }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public Timestamp getdueDate() { return dueDate; }
-    public void setdueDate(Timestamp dueDate) { this.dueDate = dueDate; }
+	public Long getStatusId() {
+		return statusId;
+	}
 
-    public Integer getlistOrder() { return listOrder; }
-    public void setlistOrder(Integer listOrder) { this.listOrder = listOrder; }
+	public void setStatusId(Long statusId) {
+		this.statusId = statusId;
+	}
 
-    public Long getprojectId() { return projectId; }
-    public void setprojectId(Long projectId) { this.projectId = projectId; }
+	public Integer getPriority() {
+		return priority;
+	}
 
-    public Timestamp getcreatedAt() { return createdAt; }
-    public void setcreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+	public void setPriority(Integer priority) {
+		this.priority = priority;
+	}
 
-    public Timestamp getupdatedAt() { return updatedAt; }
-    public void setupdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+	public Timestamp getDueDate() {
+		return dueDate;
+	}
 
-    public Timestamp getcompletedAt() { return completedAt; }
-    public void setcompletedAt(Timestamp completedAt) { this.completedAt = completedAt; }
+	public void setDueDate(Timestamp dueDate) {
+		this.dueDate = dueDate;
+	}
+
+	public Integer getListOrder() {
+		return listOrder;
+	}
+
+	public void setListOrder(Integer listOrder) {
+		this.listOrder = listOrder;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Timestamp createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Timestamp getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Timestamp updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public Timestamp getCompletedAt() {
+		return completedAt;
+	}
+
+	public void setCompletedAt(Timestamp completedAt) {
+		this.completedAt = completedAt;
+	}
 }

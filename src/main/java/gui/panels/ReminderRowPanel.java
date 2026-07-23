@@ -39,26 +39,26 @@ public class ReminderRowPanel extends JPanel {
 		this.taskController = SpringContext.getBean(TaskController.class);
 		setLayout(new BorderLayout());
 		
-		putClientProperty("taskId", task.taskId());
-		putClientProperty("taskTitle", task.taskTitle());
-		putClientProperty("description", task.description());
-		putClientProperty("statusId", task.statusId());
-		putClientProperty("priority", task.priority());
-		putClientProperty("dueDate", task.dueDate());
-		putClientProperty("listOrder", task.listOrder());
-		putClientProperty("projectId", task.projectId());
-		putClientProperty("createdAt", task.createdAt());
-		putClientProperty("updatedAt", task.updatedAt());
-		putClientProperty("completedAt", task.completedAt());
+		putClientProperty("taskId", task.getTaskId());
+		putClientProperty("taskTitle", task.getTaskTitle());
+		putClientProperty("description", task.getDescription());
+		putClientProperty("statusId", task.getStatusId());
+		putClientProperty("priority", task.getPriority());
+		putClientProperty("dueDate", task.getDueDate());
+		putClientProperty("listOrder", task.getListOrder());
+		putClientProperty("projectId", task.getProjectId());
+		putClientProperty("createdAt", task.getCreatedAt());
+		putClientProperty("updatedAt", task.getUpdatedAt());
+		putClientProperty("completedAt", task.getCompletedAt());
 		
-		putClientProperty("remindAt", reminder.remindAt());
-		putClientProperty("message", reminder.message());
+		putClientProperty("remindAt", reminder.getRemindAt());
+		putClientProperty("message", reminder.getMessage());
 
-		JLabel title = new JLabel(task.taskTitle());
+		JLabel title = new JLabel(task.getTaskTitle());
 		title.setHorizontalTextPosition(SwingConstants.CENTER);
 		add(title, BorderLayout.CENTER);
 
-		LocalDateTime localDateTime = reminder.remindAt().toLocalDateTime();
+		LocalDateTime localDateTime = reminder.getRemindAt().toLocalDateTime();
 		setToolTipText(localDateTime.getDayOfMonth() + " " + localDateTime.getMonth().name() + " " + localDateTime.getYear());
 
 		addMouseListeners();
@@ -97,7 +97,7 @@ public class ReminderRowPanel extends JPanel {
 						logger.error("Failed to get task", ex);
 					}
 					if (task != null) {
-						new CreateUpdateTaskWindow(Main.getMain(), task.projectId(), true, ReminderRowPanel.this);
+						new CreateUpdateTaskWindow(Main.getMain(), task.getProjectId(), true, ReminderRowPanel.this);
 					}
 				} else if (e.getButton() == MouseEvent.BUTTON3) { // Right click
 					popupMenu.show(e.getComponent(), e.getX(), e.getY());

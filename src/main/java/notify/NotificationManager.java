@@ -49,37 +49,37 @@ public class NotificationManager {
 		}
 		
 		// If already scheduled, cancel the existing one first
-		cancelReminder(reminder.taskId());
+		cancelReminder(reminder.getTaskId());
 
-		long delay = reminder.remindAt().getTime() - System.currentTimeMillis();
+		long delay = reminder.getRemindAt().getTime() - System.currentTimeMillis();
 		if (delay <= 0) {
-			logger.info("Reminder for task ID {} is in the past, skipping scheduling.", reminder.taskId());
+			logger.info("Reminder for task ID {} is in the past, skipping scheduling.", reminder.getTaskId());
 			return;
 		}
 
 		Task task = null;
 		try {
-			ResponseEntity<Task> response = taskController.getTaskById(reminder.taskId());
+			ResponseEntity<Task> response = taskController.getTaskById(reminder.getTaskId());
 			task = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		if (task == null) {
-			logger.warn("Could not find task with ID {} for scheduling reminder.", reminder.taskId());
+			logger.warn("Could not find task with ID {} for scheduling reminder.", reminder.getTaskId());
 		}
-		String description = task != null && task.description() != null ? task.description() : "";
-		String title = task != null ? task.taskTitle() : "Reminder";
-		String message = reminder.message() != null ? reminder.message() : description;
+		String description = task != null && task.getDescription() != null ? task.getDescription() : "";
+		String title = task != null ? task.getTaskTitle() : "Reminder";
+		String message = reminder.getMessage() != null ? reminder.getMessage() : description;
  
-		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.taskId(), delay);
+		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.getTaskId(), delay);
 		ScheduledFuture<?> future = scheduler.schedule(
-			new NotificationWorker(reminder.taskId(), title, message),
+			new NotificationWorker(reminder.getTaskId(), title, message),
 			delay,
 			TimeUnit.MILLISECONDS
 		);
-		scheduledTasks.put(reminder.taskId(), future);
-		logger.info("Reminder successfully scheduled and tracked for task ID {}", reminder.taskId());
+		scheduledTasks.put(reminder.getTaskId(), future);
+		logger.info("Reminder successfully scheduled and tracked for task ID {}", reminder.getTaskId());
 	}
 
 	public void cancelReminder(long taskId) {

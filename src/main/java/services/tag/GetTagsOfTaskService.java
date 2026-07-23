@@ -38,7 +38,7 @@ public class GetTagsOfTaskService {
 
 		if (taskTags != null) {
 			for (TaskTag tt : taskTags) {
-				ResponseEntity<Tag> tagResponse = getTagService.execute(tt.tagId());
+				ResponseEntity<Tag> tagResponse = getTagService.execute(tt.getTagId());
 				Tag tag = tagResponse.getBody();
 				if (tag != null) {
 					tags.add(tag);

@@ -28,6 +28,7 @@ public class CreateMessageService {
 		try {
 			Inbox inbox = new Inbox();
 			inbox.setMessage(message);
+			System.out.println(inbox.getCreatedAt());
 			inboxRepository.save(inbox);
 			logger.info("Message saved successfully.");
 			return ResponseEntity.status(HttpStatus.CREATED).body("MESSAGE CREATED");

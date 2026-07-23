@@ -34,9 +34,9 @@ class TestGetTagsService {
 	@BeforeEach
 	void init() {
 		sampleTag = new Tag();
-		sampleTag.settagId(1L);
-		sampleTag.settagName("Urgent");
-		sampleTag.seticonColorId(2L);
+		sampleTag.setTagId(1L);
+		sampleTag.setTagName("Urgent");
+		sampleTag.setIconColorId(2L);
 	}
 	
 	@Test
@@ -51,8 +51,8 @@ class TestGetTagsService {
 		// Assertions
 		assertNotNull(tags);
 		assertEquals(1, tags.size());
-		assertEquals("Urgent", tags.get(0).gettagName());
-		assertEquals(Long.valueOf(2L), tags.get(0).geticonColorId());
+		assertEquals("Urgent", tags.get(0).getTagName());
+		assertEquals(Long.valueOf(2L), tags.get(0).getIconColorId());
 		
 		// Verify interactions
 		verify(tagRepository).findAll();

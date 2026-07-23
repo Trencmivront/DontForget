@@ -42,9 +42,9 @@ public class DeleteProjectService {
 
 		// 2. Delete each task using DeleteTaskService
 		for (Task task : tasks) {
-			ResponseEntity<String> res = deleteTaskService.execute(task.taskId());
+			ResponseEntity<String> res = deleteTaskService.execute(task.getTaskId());
 			if (res.getStatusCode().isError()) {
-				logger.warn("Failed to delete task with ID: {}", task.taskId());
+				logger.warn("Failed to delete task with ID: {}", task.getTaskId());
 			}
 		}
 

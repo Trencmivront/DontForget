@@ -22,7 +22,7 @@ public class IconColor {
     // No-arg constructor for Hibernate
     public IconColor() {}
 
-    // All-args constructor for record compatibility
+    // All-args constructor
     public IconColor(Long iconColorId, Integer red, Integer green, Integer blue) {
         this.iconColorId = iconColorId;
         this.red = red;
@@ -30,22 +30,36 @@ public class IconColor {
         this.blue = blue;
     }
 
-    // Record-like getters
-    public Long iconColorId() { return iconColorId; }
-    public Integer red() { return red; }
-    public Integer green() { return green; }
-    public Integer blue() { return blue; }
+	public Long getIconColorId() {
+		return iconColorId;
+	}
 
-    // Standard getters/setters
-    public Long geticonColorId() { return iconColorId; }
-    public void seticonColorId(Long iconColorId) { this.iconColorId = iconColorId; }
+	public void setIconColorId(Long iconColorId) {
+		this.iconColorId = iconColorId;
+	}
 
-    public Integer getRed() { return red; }
-    public void setRed(Integer red) { this.red = red; }
+	public Integer getRed() {
+		return red;
+	}
 
-    public Integer getGreen() { return green; }
-    public void setGreen(Integer green) { this.green = green; }
+	public void setRed(Integer red) {
+		this.red = red;
+	}
 
-    public Integer getBlue() { return blue; }
-    public void setBlue(Integer blue) { this.blue = blue; }
+	public Integer getGreen() {
+		return green;
+	}
+
+	public void setGreen(Integer green) {
+		this.green = green;
+	}
+
+	public Integer getBlue() {
+		return blue;
+	}
+
+	public void setBlue(Integer blue) {
+		this.blue = blue;
+	}
+    
 }

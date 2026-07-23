@@ -18,7 +18,6 @@ import javax.swing.table.TableCellRenderer;
 
 import main.java.custom.SpringContext;
 import main.java.controllers.InboxController;
-import java.util.ArrayList;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.java.entities.Inbox;
@@ -45,15 +44,7 @@ public class InboxPanel extends JPanel {
 	}
 	
 	private void listMessages() {
-		List<Inbox> inboxItems = new ArrayList<>();
-		try {
-			List<Inbox> fetched = inboxController.getInbox().getBody();
-			if (fetched != null) {
-				inboxItems.addAll(fetched);
-			}
-		} catch (Exception e) {
-			logger.error("Failed to load inbox items", e);
-		}
+		List<Inbox> inboxItems = inboxController.getInbox().getBody();
 
 		if (inboxItems == null || inboxItems.isEmpty()) {
 			scrollPane.setViewportView(new EmptyPanel("Your inbox is empty."));
@@ -72,9 +63,8 @@ public class InboxPanel extends JPanel {
 				}
 			};
 			
-
 			for (Inbox item : inboxItems) {
-				model.addRow(new Object[] { item.message(), item.createdAt().toString(), "" });
+				model.addRow(new Object[] { item.getMessage(), item.getCreatedAt().toString(), "" });
 			}			
 			scrollPane.setViewportView(createTable(model, inboxItems));
 		}
@@ -134,7 +124,7 @@ public class InboxPanel extends JPanel {
 					int modelRow = table.convertRowIndexToModel(row);
 					Inbox item = inboxItems.get(modelRow);
 					try {
-						inboxController.deleteMessageById(item.inboxId());
+						inboxController.deleteMessageById(item.getInboxId());
 					} catch (Exception e) {
 						logger.error("Failed to delete inbox item", e);
 					}

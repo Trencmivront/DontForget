@@ -369,8 +369,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 			e.printStackTrace();
 		}
 		if (reminder != null) {
-			selectedReminderTime = reminder.remindAt();
-			selectedReminderMsg = reminder.message();
+			selectedReminderTime = reminder.getRemindAt();
+			selectedReminderMsg = reminder.getMessage();
 			if (selectedReminderTime != null) {
 				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
 				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -393,7 +393,6 @@ public class CreateUpdateTaskWindow extends JDialog {
 				priorityBtn.setForeground(new Color(16, 185, 129));
 			}
 		}
-		
 	}
 
 	private void addCreateButtonActionListener(JButton button, boolean isUpdate, JPanel taskPanel) {
@@ -461,7 +460,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 						return;
 					}
 					taskId = response.getBody();
-				} catch (Exception e) {
+				} catch (Exception e){
 					e.printStackTrace();
 					new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 					return;
@@ -480,7 +479,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			if (taskId != null && selectedTags != null) {
 				for (Tag tag : selectedTags) {
 					try {
-						taskTagController.createTaskTag(new TaskTag(taskId, tag.tagId()));
+						taskTagController.createTaskTag(new TaskTag(taskId, tag.getTagId()));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -501,9 +500,11 @@ public class CreateUpdateTaskWindow extends JDialog {
 				main.getRemindersButton().doClick();
 			}
 //			null case
-			else{
+			else if(rowPanel == null){
 //				relist tasks
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
+				ProjectInfoPanel.getProjectInfoPanel().revalidate();
+				ProjectInfoPanel.getProjectInfoPanel().repaint();
 			}
 //			refresh window
 			main.refreshWindow();
@@ -708,18 +709,18 @@ public class CreateUpdateTaskWindow extends JDialog {
 					if (selectedTags.contains(tag)) {
 						cb.setSelected(true);
 					}
-					JLabel label = new JLabel(tag.tagName());
+					JLabel label = new JLabel(tag.getTagName());
 					label.setFont(new Font("Dialog", Font.PLAIN, 14));
 
 					IconColor ic = null;
 					try {
-						ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.tagId());
+						ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.getTagId());
 						ic = response.getBody();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
+					Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
 					label.setIcon(new CustomIcon(color, 12, 12));
 
 					tagRow.add(cb);
@@ -770,7 +771,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			button.setText("Tags");
 			button.setForeground(null);
 		} else if (selectedTags.size() == 1) {
-			button.setText(selectedTags.get(0).tagName());
+			button.setText(selectedTags.get(0).getTagName());
 			button.setForeground(new Color(59, 130, 246));
 		} else {
 			button.setText(selectedTags.size() + " Tags Selected");
