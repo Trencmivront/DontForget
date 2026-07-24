@@ -42,7 +42,7 @@ import main.java.controllers.ProjectController;
 import org.springframework.http.ResponseEntity;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
-import main.java.entities.Project;
+import main.java.dto.ProjectDTO;
 import main.java.gui.panels.InboxPanel;
 import main.java.gui.panels.ProjectRowPanel;
 import main.java.gui.panels.ReminderPanel;
@@ -228,10 +228,10 @@ public class Main extends JFrame {
 	
 	public void listProjects(JScrollPane container) {
 		container.removeAll();
-		List<Project> projects = Collections.emptyList();
+		List<ProjectDTO> projects = Collections.emptyList();
 		
 		try {
-			ResponseEntity<List<Project>> response = projectController.getProjects();
+			ResponseEntity<List<ProjectDTO>> response = projectController.getProjects();
 			projects = response.getBody();
 		}catch (Exception e) {
 			e.printStackTrace();

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import main.java.dto.ReminderDTO;
 import main.java.entities.Reminder;
 import main.java.notify.NotificationManager;
 import main.java.repos.ReminderRepository;
@@ -24,10 +26,15 @@ public class CreateReminderService {
 		this.reminderRepository = reminderRepository;
 	}
 
-	public ResponseEntity<String> execute(Reminder reminder) {
+	public ResponseEntity<String> execute(ReminderDTO reminder) {
 		logger.info("Executing {} for reminder: {}", this.getClass(), reminder);
 		try {
-			reminderRepository.save(reminder);
+			Reminder entity = new Reminder(
+				reminder.taskId(),
+				reminder.remindAt() != null ? Timestamp.valueOf(reminder.remindAt()) : null,
+				reminder.message()
+			);
+			reminderRepository.save(entity);
 			logger.info("Reminder saved successfully.");
 			// Start the reminder once it is saved
 			NotificationManager nm = new NotificationManager();

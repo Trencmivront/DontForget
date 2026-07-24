@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import main.java.dto.TagDTO;
 import main.java.entities.Tag;
 import main.java.repos.TagRepository;
 import main.java.services.tag.GetTagsService;
@@ -45,14 +46,14 @@ class TestGetTagsService {
 		when(tagRepository.findAll()).thenReturn(List.of(sampleTag));
 		
 		// Call service method
-		ResponseEntity<List<Tag>> response = getTagsService.execute();
-		List<Tag> tags = response.getBody();
+		ResponseEntity<List<TagDTO>> response = getTagsService.execute();
+		List<TagDTO> tags = response.getBody();
 		
 		// Assertions
 		assertNotNull(tags);
 		assertEquals(1, tags.size());
-		assertEquals("Urgent", tags.get(0).getTagName());
-		assertEquals(Long.valueOf(2L), tags.get(0).getIconColorId());
+		assertEquals("Urgent", tags.get(0).tagName());
+		assertEquals(Long.valueOf(2L), tags.get(0).iconColorId());
 		
 		// Verify interactions
 		verify(tagRepository).findAll();
@@ -64,7 +65,7 @@ class TestGetTagsService {
 		when(tagRepository.findAll()).thenThrow(new RuntimeException("DB error"));
 		
 		// Call service method
-		ResponseEntity<List<Tag>> response = getTagsService.execute();
+		ResponseEntity<List<TagDTO>> response = getTagsService.execute();
 		
 		// Assertions
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

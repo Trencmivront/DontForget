@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDateTime;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -19,8 +18,8 @@ import main.java.controllers.ReminderController;
 import main.java.controllers.TaskController;
 import org.springframework.http.ResponseEntity;
 
-import main.java.entities.Reminder;
-import main.java.entities.Task;
+import main.java.dto.ReminderDTO;
+import main.java.dto.TaskDTO;
 import main.java.gui.Main;
 import main.java.gui.windows.CreateUpdateTaskWindow;
 
@@ -33,33 +32,35 @@ public class ReminderRowPanel extends JPanel {
 	private ReminderController reminderController;
 	private TaskController taskController;
 
-	public ReminderRowPanel(Reminder reminder, Task task) {
+	public ReminderRowPanel(ReminderDTO reminder, TaskDTO task) {
 		logger.info("Initializing ReminderRowPanel");
 		this.reminderController = SpringContext.getBean(ReminderController.class);
 		this.taskController = SpringContext.getBean(TaskController.class);
 		setLayout(new BorderLayout());
 		
-		putClientProperty("taskId", task.getTaskId());
-		putClientProperty("taskTitle", task.getTaskTitle());
-		putClientProperty("description", task.getDescription());
-		putClientProperty("statusId", task.getStatusId());
-		putClientProperty("priority", task.getPriority());
-		putClientProperty("dueDate", task.getDueDate());
-		putClientProperty("listOrder", task.getListOrder());
-		putClientProperty("projectId", task.getProjectId());
-		putClientProperty("createdAt", task.getCreatedAt());
-		putClientProperty("updatedAt", task.getUpdatedAt());
-		putClientProperty("completedAt", task.getCompletedAt());
+		putClientProperty("taskId", task.taskId());
+		putClientProperty("taskTitle", task.taskTitle());
+		putClientProperty("description", task.description());
+		putClientProperty("statusId", task.statusId());
+		putClientProperty("priority", task.priority());
+		putClientProperty("dueDate", task.dueDate() != null ? java.sql.Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
+		putClientProperty("listOrder", null);
+		putClientProperty("projectId", task.projectId());
+		putClientProperty("createdAt", null);
+		putClientProperty("updatedAt", null);
+		putClientProperty("completedAt", null);
 		
-		putClientProperty("remindAt", reminder.getRemindAt());
-		putClientProperty("message", reminder.getMessage());
+		putClientProperty("remindAt", reminder.remindAt() != null ? java.sql.Timestamp.valueOf(reminder.remindAt()) : null);
+		putClientProperty("message", reminder.message());
 
-		JLabel title = new JLabel(task.getTaskTitle());
+		JLabel title = new JLabel(task.taskTitle());
 		title.setHorizontalTextPosition(SwingConstants.CENTER);
 		add(title, BorderLayout.CENTER);
 
-		LocalDateTime localDateTime = reminder.getRemindAt().toLocalDateTime();
-		setToolTipText(localDateTime.getDayOfMonth() + " " + localDateTime.getMonth().name() + " " + localDateTime.getYear());
+		java.time.LocalDateTime localDateTime = reminder.remindAt();
+		if (localDateTime != null) {
+			setToolTipText(localDateTime.getDayOfMonth() + " " + localDateTime.getMonth().name() + " " + localDateTime.getYear());
+		}
 
 		addMouseListeners();
 	}
@@ -89,15 +90,15 @@ public class ReminderRowPanel extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) { // Left click
 					Long taskId = (Long) getClientProperty("taskId");
-					Task task = null;
+					TaskDTO task = null;
 					try {
-						ResponseEntity<Task> response = taskController.getTaskById(taskId);
+						ResponseEntity<TaskDTO> response = taskController.getTaskById(taskId);
 						task = response.getBody();
 					} catch (Exception ex) {
 						logger.error("Failed to get task", ex);
 					}
 					if (task != null) {
-						new CreateUpdateTaskWindow(Main.getMain(), task.getProjectId(), true, ReminderRowPanel.this);
+						new CreateUpdateTaskWindow(Main.getMain(), task.projectId(), true, ReminderRowPanel.this);
 					}
 				} else if (e.getButton() == MouseEvent.BUTTON3) { // Right click
 					popupMenu.show(e.getComponent(), e.getX(), e.getY());

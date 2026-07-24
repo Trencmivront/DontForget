@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.entities.Reminder;
+import main.java.dto.ReminderDTO;
 import main.java.services.reminder.CreateReminderService;
 import main.java.services.reminder.DeleteReminderService;
 import main.java.services.reminder.GetReminderByIdService;
@@ -43,7 +43,7 @@ public class ReminderController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<String> createReminder(@RequestBody Reminder reminder) {
+	public ResponseEntity<String> createReminder(@RequestBody ReminderDTO reminder) {
 		logger.info("Executing {} for reminder: {}", this.getClass(), reminder);
 		return createReminderService.execute(reminder);
 	}
@@ -55,13 +55,13 @@ public class ReminderController {
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<Reminder> getReminderById(@PathVariable Long id) {
+	public ResponseEntity<ReminderDTO> getReminderById(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return getReminderByIdService.execute(id);
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Reminder>> getReminders() {
+	public ResponseEntity<List<ReminderDTO>> getReminders() {
 		logger.info("Executing {}", this.getClass());
 		return getRemindersService.execute();
 	}

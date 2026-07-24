@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TagDTO;
 import main.java.entities.Tag;
 import main.java.repos.TagRepository;
 
@@ -22,14 +23,15 @@ public class GetTagService {
 		this.tagRepository = tagRepository;
 	}
 
-	public ResponseEntity<Tag> execute(Long tagId) {
+	public ResponseEntity<TagDTO> execute(Long tagId) {
 		logger.info("Executing {} for tagId: {}", this.getClass(), tagId);
 		try {
 			Tag tag = tagRepository.findById(tagId).orElse(null);
 			if (tag == null) {
 				return ResponseEntity.notFound().build();
 			}
-			return ResponseEntity.ok(tag);
+			TagDTO dto = new TagDTO(tag.getTagId(), tag.getTagName(), tag.getIconColorId() != null ? tag.getIconColorId().intValue() : null);
+			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("Error fetching tag with ID {}: {}", tagId, e.getMessage());
 			e.printStackTrace();

@@ -26,9 +26,9 @@ import main.java.controllers.ProjectController;
 import main.java.controllers.TagController;
 import main.java.controllers.TaskController;
 import main.java.custom.SpringContext;
-import main.java.entities.Project;
-import main.java.entities.Tag;
-import main.java.entities.Task;
+import main.java.dto.ProjectDTO;
+import main.java.dto.TagDTO;
+import main.java.dto.TaskDTO;
 import main.java.gui.windows.SearchWindow;
 
 public class SearchedItemsPanel extends JPanel{
@@ -141,12 +141,12 @@ public class SearchedItemsPanel extends JPanel{
 	
 	private void listProjects() {
 		try {
-			ResponseEntity<List<Project>> response = projectController.getProjects();
-			List<Project> projects = response.getBody();
+			ResponseEntity<List<ProjectDTO>> response = projectController.getProjects();
+			List<ProjectDTO> projects = response.getBody();
 			
 			if (projects != null && !projects.isEmpty()) {
 				model.addRow(new Object[] { createHeader("Projects") });
-				for (Project project : projects) {
+				for (ProjectDTO project : projects) {
 					ProjectRowPanel row = new ProjectRowPanel(project);
 					model.addRow(new Object[] { row });
 				}
@@ -158,23 +158,23 @@ public class SearchedItemsPanel extends JPanel{
 
 	private void listTasks() {
 		try {
-			ResponseEntity<List<Task>> response = taskController.getTasks();
-			List<Task> tasks = response.getBody();
+			ResponseEntity<List<TaskDTO>> response = taskController.getTasks();
+			List<TaskDTO> tasks = response.getBody();
 			if (tasks != null && !tasks.isEmpty()) {
 				model.addRow(new Object[] { createHeader("Tasks") });
-				for (Task task : tasks) {
+				for (TaskDTO task : tasks) {
 					TaskRowPanel row = new TaskRowPanel(task, source);
-					List<Tag> tags = null;
+					List<TagDTO> tags = null;
 					try {
-						ResponseEntity<List<Tag>> tagsResponse = tagController.getTagsOfTask(task.getTaskId());
+						ResponseEntity<List<TagDTO>> tagsResponse = tagController.getTagsOfTask(task.taskId());
 						tags = tagsResponse.getBody();
 					} catch (Exception ex) {
 						logger.error("Failed to load tags for task", ex);
 					}
 					if (tags != null && !tags.isEmpty()) {
 						StringBuilder tagsBuilder = new StringBuilder();
-						for (Tag tag : tags) {
-							tagsBuilder.append(" ").append(tag.getTagName());
+						for (TagDTO tag : tags) {
+							tagsBuilder.append(" ").append(tag.tagName());
 						}
 						row.setToolTipText(tagsBuilder.toString());
 					}
@@ -188,11 +188,11 @@ public class SearchedItemsPanel extends JPanel{
 
 	private void listTags() {
 		try {
-			ResponseEntity<List<Tag>> response = tagController.getTags();
-			List<Tag> tags = response.getBody();
+			ResponseEntity<List<TagDTO>> response = tagController.getTags();
+			List<TagDTO> tags = response.getBody();
 			if (tags != null && !tags.isEmpty()) {
 				model.addRow(new Object[] { createHeader("Tags") });
-				for (Tag tag : tags) {
+				for (TagDTO tag : tags) {
 					TagRowPanel row = new TagRowPanel(tag);
 					model.addRow(new Object[] { row });
 				}

@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import main.java.dto.TaskDTO;
 import main.java.entities.Task;
 import main.java.repos.TaskRepository;
 import main.java.services.task.GetTodaysTasksService;
@@ -31,23 +32,23 @@ class TestGetTodaysTasksService {
 	@InjectMocks
 	private GetTodaysTasksService getTodaysTasksService;
 
-	private Task sampleTask;
+	private TaskDTO sampleTask;
 
 	@BeforeEach
 	void setUp() {
-		sampleTask = new Task();
-		sampleTask.setTaskId(1L);
+		sampleTask = new TaskDTO();
+		sampleTask.setTas(1L);
 		sampleTask.setTaskTitle("Today's Task");
 		sampleTask.setDueDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
 	}
 
 	@Test
 	void testServiceReturnsTrueValue() {
-		List<Task> expectedTasks = List.of(sampleTask);
+		List<TaskDTO> expectedTasks = List.of(sampleTask);
 		when(taskRepository.findTodaysTasks()).thenReturn(expectedTasks);
 
-		ResponseEntity<List<Task>> response = getTodaysTasksService.execute();
-		List<Task> actualTasks = response.getBody();
+		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute();
+		List<TaskDTO> actualTasks = response.getBody();
 
 		assertNotNull(actualTasks);
 		assertEquals(1, actualTasks.size());

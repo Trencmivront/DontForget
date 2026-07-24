@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.dco.TaskDCO;
-import main.java.entities.Task;
+import main.java.dto.TaskDTO;
 import main.java.services.task.CreateTaskService;
 import main.java.services.task.DeleteCompletedTasksService;
 import main.java.services.task.DeleteTaskService;
@@ -58,7 +57,7 @@ public class TaskController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<Long> createTask(@RequestBody TaskDCO task) {
+	public ResponseEntity<Long> createTask(@RequestBody TaskDTO task) {
 		logger.info("Executing {} for task: {}", this.getClass(), task);
 		return createTaskService.execute(task);
 	}
@@ -76,32 +75,32 @@ public class TaskController {
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+	public ResponseEntity<TaskDTO> getTaskById(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return getTaskByIdService.execute(id);
 	}
 
 	@GetMapping("/project/{id}")
-	public ResponseEntity<List<Task>> getTasksOfProject(@PathVariable Long id) {
+	public ResponseEntity<List<TaskDTO>> getTasksOfProject(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return getTasksOfProjectService.execute(id);
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Task>> getTasks() {
+	public ResponseEntity<List<TaskDTO>> getTasks() {
 		logger.info("Executing {}", this.getClass());
 		return getTasksService.execute();
 	}
 
 	@GetMapping("/today")
-	public ResponseEntity<List<Task>> getTodaysTasks() {
+	public ResponseEntity<List<TaskDTO>> getTodaysTasks() {
 		logger.info("Executing {}", this.getClass());
 		return getTodaysTasksService.execute();
 	}
 
-	@PutMapping("/update")
-	public ResponseEntity<String> updateTask(@RequestBody Task task) {
-		logger.info("Executing {} for task: {}", this.getClass(), task);
-		return updateTaskService.execute(task);
+	@PutMapping("/update/{id}")
+	public ResponseEntity<String> updateTask(@RequestBody TaskDTO task, @PathVariable Long id) {
+		logger.info("Executing {} for task: {}, id: {}", this.getClass(), task, id);
+		return updateTaskService.execute(task, id);
 	}
 }

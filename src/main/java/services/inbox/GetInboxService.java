@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.InboxDTO;
 import main.java.entities.Inbox;
 import main.java.repos.InboxRepository;
 
@@ -24,11 +25,14 @@ public class GetInboxService {
 		this.inboxRepository = inboxRepository;
 	}
 
-	public ResponseEntity<List<Inbox>> execute() {
+	public ResponseEntity<List<InboxDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Inbox> inboxList = inboxRepository.findAll(Sort.by(Sort.Direction.DESC, "inboxId"));
-			return ResponseEntity.ok(inboxList);
+			List<InboxDTO> dtos = inboxList.stream()
+				.map(item -> new InboxDTO(item.getInboxId(), item.getMessage(), item.getCreatedAt()))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			logger.warn("Error getting inbox records: {}", e.getMessage());
 			e.printStackTrace();

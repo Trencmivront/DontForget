@@ -16,7 +16,7 @@ import javax.swing.ScrollPaneConstants;
 import main.java.custom.SpringContext;
 import main.java.controllers.TaskController;
 import org.springframework.http.ResponseEntity;
-import main.java.entities.Task;
+import main.java.dto.TaskDTO;
 import main.java.gui.Main;
 
 public class TodayPanel extends JPanel{
@@ -47,9 +47,9 @@ public class TodayPanel extends JPanel{
 	}
 	
 	private void listTasks(){
-		List<Task> tasks = Collections.emptyList();
+		List<TaskDTO> tasks = Collections.emptyList();
 		try {
-			ResponseEntity<List<Task>> res = taskController.getTodaysTasks();
+			ResponseEntity<List<TaskDTO>> res = taskController.getTodaysTasks();
 			tasks = res.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,7 +60,7 @@ public class TodayPanel extends JPanel{
 			return;
 		}
 				
-		ListIterator<Task> i = tasks.listIterator();
+		ListIterator<TaskDTO> i = tasks.listIterator();
 		
 		JPanel tasksContainer = new JPanel();
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		

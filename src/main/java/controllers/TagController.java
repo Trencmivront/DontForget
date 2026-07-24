@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.entities.Tag;
+import main.java.dto.TagDTO;
 import main.java.services.tag.DeleteTagService;
 import main.java.services.tag.GetTagService;
 import main.java.services.tag.GetTagsOfTaskService;
@@ -47,19 +47,19 @@ public class TagController {
 	}
 
 	@GetMapping("/get/{tagId}")
-	public ResponseEntity<Tag> getTag(@PathVariable Long tagId) {
+	public ResponseEntity<TagDTO> getTag(@PathVariable Long tagId) {
 		logger.info("Executing {} for tagId: {}", this.getClass(), tagId);
 		return getTagService.execute(tagId);
 	}
 
 	@GetMapping("/task/{taskId}")
-	public ResponseEntity<List<Tag>> getTagsOfTask(@PathVariable Long taskId) {
+	public ResponseEntity<List<TagDTO>> getTagsOfTask(@PathVariable Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		return getTagsOfTaskService.execute(taskId);
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Tag>> getTags() {
+	public ResponseEntity<List<TagDTO>> getTags() {
 		logger.info("Executing {}", this.getClass());
 		return getTagsService.execute();
 	}

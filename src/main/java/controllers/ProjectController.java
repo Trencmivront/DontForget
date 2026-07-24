@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.dco.ProjectDCO;
-import main.java.entities.Project;
+import main.java.dto.ProjectDTO;
 import main.java.services.project.CreateProjectService;
 import main.java.services.project.DeleteProjectService;
 import main.java.services.project.GetProjectOfTaskService;
@@ -49,7 +48,7 @@ public class ProjectController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<Long> createProject(@RequestBody ProjectDCO p) {
+	public ResponseEntity<Long> createProject(@RequestBody ProjectDTO p) {
 		logger.info("Executing {} for project: {}", this.getClass(), p);
 		return createProjectService.execute(p);
 	}
@@ -61,19 +60,19 @@ public class ProjectController {
 	}
 
 	@GetMapping("/task/{taskId}")
-	public ResponseEntity<Project> getProjectOfTask(@PathVariable Long taskId) {
+	public ResponseEntity<ProjectDTO> getProjectOfTask(@PathVariable Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		return getProjectOfTaskService.execute(taskId);
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Project>> getProjects() {
+	public ResponseEntity<List<ProjectDTO>> getProjects() {
 		logger.info("Executing {}", this.getClass());
 		return getProjectsService.execute();
 	}
 
 	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateProject(@RequestBody ProjectDCO p, @PathVariable Long id) {
+	public ResponseEntity<String> updateProject(@RequestBody ProjectDTO p, @PathVariable Long id) {
 		logger.info("Executing {} for p: {}, id: {}", this.getClass(), p, id);
 		return updateProjectService.execute(p, id);
 	}

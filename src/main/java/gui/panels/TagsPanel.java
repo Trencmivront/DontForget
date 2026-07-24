@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
 import main.java.controllers.TagController;
-import main.java.entities.Tag;
+import main.java.dto.TagDTO;
 
 public class TagsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -42,8 +42,8 @@ public class TagsPanel extends JPanel {
 	}
 	
 	private void listTags() {
-		ResponseEntity<List<Tag>> tagResponseEntity = tagController.getTags();
-		List<Tag> tags = tagResponseEntity.getBody();
+		ResponseEntity<List<TagDTO>> tagResponseEntity = tagController.getTags();
+		List<TagDTO> tags = tagResponseEntity.getBody();
 		
 		if (tags == null || tags.isEmpty()) {
 			scrollPane.setViewportView(new EmptyPanel("No tag found."));
@@ -53,7 +53,7 @@ public class TagsPanel extends JPanel {
 		JPanel tagContainer = new JPanel();
 		tagContainer.setLayout(new BoxLayout(tagContainer, BoxLayout.Y_AXIS));
 		
-		for (Tag tag : tags) {
+		for (TagDTO tag : tags) {
 			JCheckBox ck = new JCheckBox();
 			JPanel tagRow = new TagRowPanel(ck, tag);
 			tagContainer.add(tagRow);

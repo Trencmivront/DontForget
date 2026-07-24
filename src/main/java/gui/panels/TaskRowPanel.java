@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.TaskController;
 import main.java.custom.SpringContext;
-import main.java.entities.Task;
+import main.java.dto.TaskDTO;
 import main.java.gui.windows.CreateUpdateTaskWindow;
 
 public class TaskRowPanel extends JPanel{
@@ -33,35 +33,35 @@ public class TaskRowPanel extends JPanel{
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
-	public TaskRowPanel(Task task, Window parentWindow) {
+	public TaskRowPanel(TaskDTO task, Window parentWindow) {
 		this.parentWindow = parentWindow;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		putClientProperty("taskId", task.getTaskId());
-		putClientProperty("taskTitle", task.getTaskTitle());
-		putClientProperty("description", task.getDescription());
-		putClientProperty("statusId", task.getStatusId());
-		putClientProperty("priority", task.getPriority());
-		putClientProperty("dueDate", task.getDueDate());
-		putClientProperty("listOrder", task.getListOrder());
-		putClientProperty("projectId", task.getProjectId());
-		putClientProperty("createdAt", task.getCreatedAt());
-		putClientProperty("updatedAt", task.getUpdatedAt());
-		putClientProperty("completedAt", task.getCompletedAt());
+		putClientProperty("taskId", task.taskId());
+		putClientProperty("taskTitle", task.taskTitle());
+		putClientProperty("description", task.description());
+		putClientProperty("statusId", task.statusId());
+		putClientProperty("priority", task.priority());
+		putClientProperty("dueDate", task.dueDate() != null ? Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
+		putClientProperty("listOrder", null);
+		putClientProperty("projectId", task.projectId());
+		putClientProperty("createdAt", null);
+		putClientProperty("updatedAt", null);
+		putClientProperty("completedAt", null);
 		
-		setToolTipText(String.format("Show: %s", task.getTaskTitle()));
+		setToolTipText(String.format("Show: %s", task.taskTitle()));
 		
 		JCheckBox chk = new JCheckBox();
-		JLabel title = new JLabel(task.getTaskTitle());
+		JLabel title = new JLabel(task.taskTitle());
 //		means that task is completed
 		
-		switch (task.getStatusId() != null ? task.getStatusId().intValue() : 1) {
+		switch (task.statusId() != null ? task.statusId().intValue() : 1) {
 		case 1, 0:
 		break;
-		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.getTaskTitle() + "</i></s></html>");
+		case 2:	{title.setText("<html><i style='color: gray;'><s>" + task.taskTitle() + "</i></s></html>");
 		chk.setSelected(true);}
 			break;
-		case 3: {title.setText("<html><i style='color: rgb(94, 75, 39);'>" + task.getTaskTitle() + "</i></html>");
+		case 3: {title.setText("<html><i style='color: rgb(94, 75, 39);'>" + task.taskTitle() + "</i></html>");
 		chk.setEnabled(false);}
 			break;
 		default:
@@ -71,7 +71,7 @@ public class TaskRowPanel extends JPanel{
 		
 		chk.setBorderPainted(true);
 //		if it is null, we insert 0
-		switch(task.getPriority() == null ? 0:task.getPriority()) {
+		switch(task.priority() == null ? 0:task.priority()) {
 		case 1: chk.setBorder(new LineBorder(Color.RED, 1, true));
 		break;
 		case 2: chk.setBorder(new LineBorder(Color.ORANGE, 1, true));
@@ -116,15 +116,11 @@ public class TaskRowPanel extends JPanel{
 			String description = (String) parentContainer.getClientProperty("description");
 			Integer priority = (Integer) parentContainer.getClientProperty("priority");
 			Timestamp dueDate = (Timestamp) parentContainer.getClientProperty("dueDate");
-			Integer listOrder = (Integer) parentContainer.getClientProperty("listOrder");
 			Long projectId = (Long) parentContainer.getClientProperty("projectId");
-			Timestamp createdAt = (Timestamp) parentContainer.getClientProperty("createdAt");
 
 			Long newStatusId = 1L;
-			Timestamp completedAt = null;
 			if (chk.isSelected()) {
 				newStatusId = 2L; // COMPLETED
-				completedAt = new Timestamp(System.currentTimeMillis());
 				dueDate = null;
 			} else {
 				if (dueDate != null && dueDate.toLocalDateTime().toLocalDate().isBefore(LocalDate.now())) {
@@ -134,22 +130,18 @@ public class TaskRowPanel extends JPanel{
 				}
 			}
 
-			Task updatedTask = new Task(
+			TaskDTO updatedTask = new TaskDTO(
 				taskId,
 				taskTitle,
 				description,
 				newStatusId,
 				priority,
-				dueDate,
-				listOrder,
-				projectId,
-				createdAt,
-				new Timestamp(System.currentTimeMillis()),
-				completedAt
+				dueDate != null ? dueDate.toLocalDateTime().toLocalDate() : null,
+				projectId
 			);
 			
 			try {
-				ResponseEntity<String> response = taskController.updateTask(updatedTask);
+				ResponseEntity<String> response = taskController.updateTask(updatedTask, taskId);
 				if (response.getStatusCode().is2xxSuccessful()) {
 					ProjectInfoPanel.getProjectInfoPanel().listTasks();
 				}

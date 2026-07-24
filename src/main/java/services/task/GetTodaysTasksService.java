@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TaskDTO;
 import main.java.entities.Task;
 import main.java.repos.TaskRepository;
 
@@ -23,11 +24,22 @@ public class GetTodaysTasksService {
 		this.taskRepository = taskRepository;
 	}
 
-	public ResponseEntity<List<Task>> execute() {
+	public ResponseEntity<List<TaskDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Task> tasks = taskRepository.findTodaysTasks();
-			return ResponseEntity.ok(tasks);
+			List<TaskDTO> dtos = tasks.stream()
+				.map(task -> new TaskDTO(
+					task.getTaskId(),
+					task.getTaskTitle(),
+					task.getDescription(),
+					task.getStatusId(),
+					task.getPriority(),
+					task.getDueDate() != null ? task.getDueDate().toLocalDateTime().toLocalDate() : null,
+					task.getProjectId()
+				))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.internalServerError().body(Collections.emptyList());

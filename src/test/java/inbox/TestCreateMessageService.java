@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,16 +35,13 @@ class TestCreateMessageService {
 		savedInbox.setInboxId(1L);
 		savedInbox.setMessage(message);
 
-		when(inboxRepository.findById(any(Long.class))).thenReturn(Optional.of(savedInbox));
+		when(inboxRepository.save(any(Inbox.class))).thenReturn(savedInbox);
 
 		// Act
 		ResponseEntity<String> response = createMessageService.execute(message);
-		
-		Inbox inbox = inboxRepository.findById(1L).orElse(null);
-		
+				
 		// Assertions
 		assertNotNull(response);
-		assertEquals(savedInbox, inbox);
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MESSAGE CREATED", response.getBody());
 

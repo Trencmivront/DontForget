@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.entities.TaskTag;
+import main.java.dto.TaskTagDTO;
 import main.java.services.tasktag.CreateTaskTagService;
 import main.java.services.tasktag.DeleteTaskTagService;
 import main.java.services.tasktag.GetTaskTagByTaskService;
@@ -39,7 +39,7 @@ public class TaskTagController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<String> createTaskTag(@RequestBody TaskTag taskTag) {
+	public ResponseEntity<String> createTaskTag(@RequestBody TaskTagDTO taskTag) {
 		logger.info("Executing {} for taskTag: {}", this.getClass(), taskTag);
 		return createTaskTagService.execute(taskTag);
 	}
@@ -51,7 +51,7 @@ public class TaskTagController {
 	}
 
 	@GetMapping("/task/{taskId}")
-	public ResponseEntity<List<TaskTag>> getTaskTagByTask(@PathVariable Long taskId) {
+	public ResponseEntity<List<TaskTagDTO>> getTaskTagByTask(@PathVariable Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		return getTaskTagByTaskService.execute(taskId);
 	}

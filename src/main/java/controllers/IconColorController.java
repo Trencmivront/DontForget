@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.entities.IconColor;
+import main.java.dto.IconColorDTO;
 import main.java.services.icon.GetIconColorOfProjectService;
 import main.java.services.icon.GetIconColorOfTagService;
 import main.java.services.icon.GetIconColorsService;
@@ -36,19 +36,19 @@ public class IconColorController {
 	}
 
 	@GetMapping("/project/{id}")
-	public ResponseEntity<IconColor> getIconColorOfProject(@PathVariable Long id) {
+	public ResponseEntity<IconColorDTO> getIconColorOfProject(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return getIconColorOfProjectService.execute(id);
 	}
 
 	@GetMapping("/tag/{id}")
-	public ResponseEntity<IconColor> getIconColorOfTag(@PathVariable Long id) {
+	public ResponseEntity<IconColorDTO> getIconColorOfTag(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return getIconColorOfTagService.execute(id);
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<IconColor>> getIconColors() {
+	public ResponseEntity<List<IconColorDTO>> getIconColors() {
 		logger.info("Executing {}", this.getClass());
 		return getIconColorsService.execute();
 	}

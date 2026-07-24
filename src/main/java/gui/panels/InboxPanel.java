@@ -17,10 +17,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import main.java.custom.SpringContext;
+import main.java.dto.InboxDTO;
 import main.java.controllers.InboxController;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
-
-import main.java.entities.Inbox;
 
 public class InboxPanel extends JPanel {
 
@@ -44,7 +43,7 @@ public class InboxPanel extends JPanel {
 	}
 	
 	private void listMessages() {
-		List<Inbox> inboxItems = inboxController.getInbox().getBody();
+		List<InboxDTO> inboxItems = inboxController.getInbox().getBody();
 
 		if (inboxItems == null || inboxItems.isEmpty()) {
 			scrollPane.setViewportView(new EmptyPanel("Your inbox is empty."));
@@ -63,14 +62,14 @@ public class InboxPanel extends JPanel {
 				}
 			};
 			
-			for (Inbox item : inboxItems) {
-				model.addRow(new Object[] { item.getMessage(), item.getCreatedAt().toString(), "" });
+			for (InboxDTO item : inboxItems) {
+				model.addRow(new Object[] { item.message(), item.createdAt().toString(), "" });
 			}			
 			scrollPane.setViewportView(createTable(model, inboxItems));
 		}
 	}
 	
-	private JTable createTable(DefaultTableModel model, List<Inbox> inboxItems){
+	private JTable createTable(DefaultTableModel model, List<InboxDTO> inboxItems){
 		JTable table = new JTable(model);
 		table.setRowHeight(35);
 		table.setFillsViewportHeight(true);
@@ -116,15 +115,15 @@ public class InboxPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private final ActionPanel panel = new ActionPanel();
 
-		public ActionCellEditor(JTable table, DefaultTableModel model, List<Inbox> inboxItems, InboxController inboxController) {
+		public ActionCellEditor(JTable table, DefaultTableModel model, List<InboxDTO> inboxItems, InboxController inboxController) {
 			panel.deleteButton.addActionListener(_ -> {
 				int row = table.getEditingRow();
 				fireEditingStopped();
 				if (row != -1) {
 					int modelRow = table.convertRowIndexToModel(row);
-					Inbox item = inboxItems.get(modelRow);
+					InboxDTO item = inboxItems.get(modelRow);
 					try {
-						inboxController.deleteMessageById(item.getInboxId());
+						inboxController.deleteMessageById(item.inboxId());
 					} catch (Exception e) {
 						logger.error("Failed to delete inbox item", e);
 					}

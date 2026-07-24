@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
 import main.java.repos.ProjectRepository;
 
@@ -23,11 +24,14 @@ public class GetProjectsService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<List<Project>> execute() {
+	public ResponseEntity<List<ProjectDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Project> projects = projectRepository.findAllByOrderByListOrderAsc();
-			return ResponseEntity.ok(projects);
+			List<ProjectDTO> dtos = projects.stream()
+				.map(project -> new ProjectDTO(project.getProjectId(), project.getProjectTitle(), project.getDescription(), project.getIconColorId()))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			logger.error("An exception occurred: {}", e.getMessage());
 			e.printStackTrace();

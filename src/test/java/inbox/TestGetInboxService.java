@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import main.java.dto.InboxDTO;
 import main.java.entities.Inbox;
 import main.java.repos.InboxRepository;
 import main.java.services.inbox.GetInboxService;
@@ -41,14 +42,16 @@ class TestGetInboxService {
 		when(inboxRepository.findAll(any(Sort.class))).thenReturn(expectedList);
 
 		// Act
-		ResponseEntity<List<Inbox>> response = getInboxService.execute();
+		ResponseEntity<List<InboxDTO>> response = getInboxService.execute();
 
 		// Assertions
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertNotNull(response.getBody());
+//		check if date-time is null
+		assertNotNull(response.getBody().get(0).createdAt());
 		assertEquals(2, response.getBody().size());
-		assertEquals("Second Message", response.getBody().get(0).getMessage());
+		assertEquals("Second Message", response.getBody().get(0).message());
 
 		// Verification
 		verify(inboxRepository).findAll(any(Sort.class));
@@ -60,7 +63,7 @@ class TestGetInboxService {
 		when(inboxRepository.findAll(any(Sort.class))).thenThrow(new RuntimeException("DB error"));
 
 		// Act
-		ResponseEntity<List<Inbox>> response = getInboxService.execute();
+		ResponseEntity<List<InboxDTO>> response = getInboxService.execute();
 
 		// Assertions
 		assertNotNull(response);

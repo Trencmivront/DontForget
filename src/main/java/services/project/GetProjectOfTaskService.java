@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
 import main.java.repos.ProjectRepository;
 
@@ -22,14 +23,15 @@ public class GetProjectOfTaskService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<Project> execute(Long taskId) {
+	public ResponseEntity<ProjectDTO> execute(Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		try {
 			Project project = projectRepository.findByTaskId(taskId);
 			if (project == null) {
 				return ResponseEntity.notFound().build();
 			}
-			return ResponseEntity.ok(project);
+			ProjectDTO dto = new ProjectDTO(project.getProjectId(), project.getProjectTitle(), project.getDescription(), project.getIconColorId());
+			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.error("An exception occurred: {}", e.getMessage());
 			e.printStackTrace();

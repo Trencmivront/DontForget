@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TagDTO;
 import main.java.entities.Tag;
 import main.java.repos.TagRepository;
 
@@ -24,11 +25,14 @@ public class GetTagsService {
 		this.tagRepository = tagRepository;
 	}
 
-	public ResponseEntity<List<Tag>> execute() {
+	public ResponseEntity<List<TagDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Tag> tags = tagRepository.findAll();
-			return ResponseEntity.ok(tags);
+			List<TagDTO> dtos = tags.stream()
+				.map(tag -> new TagDTO(tag.getTagId(), tag.getTagName(), tag.getIconColorId() != null ? tag.getIconColorId().intValue() : null))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			logger.error("Error fetching tags: {}", e.getMessage());
 			e.printStackTrace();

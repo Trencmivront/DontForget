@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import main.java.entities.Tag;
-import main.java.entities.TaskTag;
+import main.java.dto.TagDTO;
+import main.java.dto.TaskTagDTO;
 import main.java.services.tasktag.GetTaskTagByTaskService;
 
 @Service
@@ -29,17 +29,17 @@ public class GetTagsOfTaskService {
 		this.getTagService = getTagService;
 	}
 
-	public ResponseEntity<List<Tag>> execute(Long taskId) {
+	public ResponseEntity<List<TagDTO>> execute(Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 
-		List<Tag> tags = new ArrayList<>();
-		ResponseEntity<List<TaskTag>> taskTagsResponse = getTaskTagByTaskService.execute(taskId);
-		List<TaskTag> taskTags = taskTagsResponse.getBody();
+		List<TagDTO> tags = new ArrayList<>();
+		ResponseEntity<List<TaskTagDTO>> taskTagsResponse = getTaskTagByTaskService.execute(taskId);
+		List<TaskTagDTO> taskTags = taskTagsResponse.getBody();
 
 		if (taskTags != null) {
-			for (TaskTag tt : taskTags) {
-				ResponseEntity<Tag> tagResponse = getTagService.execute(tt.getTagId());
-				Tag tag = tagResponse.getBody();
+			for (TaskTagDTO tt : taskTags) {
+				ResponseEntity<TagDTO> tagResponse = getTagService.execute(tt.tagId());
+				TagDTO tag = tagResponse.getBody();
 				if (tag != null) {
 					tags.add(tag);
 				}

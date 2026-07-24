@@ -48,12 +48,11 @@ import main.java.controllers.TaskController;
 import main.java.controllers.TaskTagController;
 import main.java.custom.CustomIcon;
 import main.java.custom.SpringContext;
-import main.java.dco.TaskDCO;
-import main.java.entities.IconColor;
-import main.java.entities.Reminder;
-import main.java.entities.Tag;
-import main.java.entities.Task;
-import main.java.entities.TaskTag;
+import main.java.dto.TaskDTO;
+import main.java.dto.IconColorDTO;
+import main.java.dto.ReminderDTO;
+import main.java.dto.TagDTO;
+import main.java.dto.TaskTagDTO;
 import main.java.gui.Main;
 import main.java.gui.panels.ProjectInfoPanel;
 import main.java.gui.panels.ReminderRowPanel;
@@ -72,7 +71,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private JPanel rowPanel;
 	private JTextField titleField;
 	private JTextArea descArea;
-	private List<Tag> selectedTags = new ArrayList<>();
+	private List<TagDTO> selectedTags = new ArrayList<>();
 
 	private Timestamp selectedReminderTime = null;
 	private String selectedReminderMsg = null;
@@ -134,11 +133,11 @@ public class CreateUpdateTaskWindow extends JDialog {
 		this.descArea = descArea;
 	}
 
-	public List<Tag> getSelectedTags() {
+	public List<TagDTO> getSelectedTags() {
 		return selectedTags;
 	}
 
-	public void setSelectedTags(List<Tag> selectedTags) {
+	public void setSelectedTags(List<TagDTO> selectedTags) {
 		this.selectedTags = selectedTags;
 	}
 
@@ -329,9 +328,9 @@ public class CreateUpdateTaskWindow extends JDialog {
 	}
 
 	private void setTag(Long taskId) {
-		List<Tag> tags = Collections.emptyList();
+		List<TagDTO> tags = Collections.emptyList();
 		try {
-			ResponseEntity<List<Tag>> response = tagController.getTagsOfTask(taskId);
+			ResponseEntity<List<TagDTO>> response = tagController.getTagsOfTask(taskId);
 			tags = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -361,16 +360,16 @@ public class CreateUpdateTaskWindow extends JDialog {
 	}
 
 	private void setReminder(Long taskId) {
-		Reminder reminder = null;
+		ReminderDTO reminder = null;
 		try {
-			ResponseEntity<Reminder> response = reminderController.getReminderById(taskId);
+			ResponseEntity<ReminderDTO> response = reminderController.getReminderById(taskId);
 			reminder = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		if (reminder != null) {
-			selectedReminderTime = reminder.getRemindAt();
-			selectedReminderMsg = reminder.getMessage();
+			selectedReminderTime = reminder.remindAt() != null ? Timestamp.valueOf(reminder.remindAt()) : null;
+			selectedReminderMsg = reminder.message();
 			if (selectedReminderTime != null) {
 				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
 				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -417,24 +416,18 @@ public class CreateUpdateTaskWindow extends JDialog {
 				if (listOrder == null) listOrder = 1;
 				if (createdAt == null) createdAt = new Timestamp(System.currentTimeMillis());
 
-				Timestamp dueDateTimestamp = selectedDueDate != null ? Timestamp.valueOf(selectedDueDate.atStartOfDay()) : null;
-
-				Task task = new Task(
+				TaskDTO task = new TaskDTO(
 					taskId,
 					title,
 					description,
 					statusId,
 					selectedPriority,
-					dueDateTimestamp,
-					listOrder,
-					projectId,
-					createdAt,
-					new Timestamp(System.currentTimeMillis()),
-					completedAt
+					selectedDueDate,
+					projectId
 				);
 
 				try {
-					ResponseEntity<String> response = taskController.updateTask(task);
+					ResponseEntity<String> response = taskController.updateTask(task, taskId);
 					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to update task. Make sure the title is unique.");
 						return;
@@ -454,7 +447,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 				}
 			} else {
 				try {
-					ResponseEntity<Long> response = taskController.createTask(new TaskDCO(title, description, 1L, selectedPriority, selectedDueDate, projectId));
+					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority, selectedDueDate, projectId));
 					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 						return;
@@ -469,7 +462,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 			if (selectedReminderTime != null && taskId != null) {
 				try {
-					Reminder reminder = new Reminder(taskId, selectedReminderTime, selectedReminderMsg);
+					ReminderDTO reminder = new ReminderDTO(taskId, selectedReminderTime.toLocalDateTime(), selectedReminderMsg);
 					reminderController.createReminder(reminder);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -477,9 +470,9 @@ public class CreateUpdateTaskWindow extends JDialog {
 			}
 
 			if (taskId != null && selectedTags != null) {
-				for (Tag tag : selectedTags) {
+				for (TagDTO tag : selectedTags) {
 					try {
-						taskTagController.createTaskTag(new TaskTag(taskId, tag.getTagId()));
+						taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.tagId()));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -689,38 +682,38 @@ public class CreateUpdateTaskWindow extends JDialog {
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-			List<Tag> allTags = Collections.emptyList();
+			List<TagDTO> allTags = Collections.emptyList();
 			try {
-				ResponseEntity<List<Tag>> response = tagController.getTags();
+				ResponseEntity<List<TagDTO>> response = tagController.getTags();
 				allTags = response.getBody();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			List<JCheckBox> checkBoxes = new ArrayList<>();
-			List<Tag> tagsList = new ArrayList<>();
+			List<TagDTO> tagsList = new ArrayList<>();
 
 			if (allTags == null || allTags.isEmpty()) {
 				mainPanel.add(new JLabel("No tags found."));
 			} else {
-				for (Tag tag : allTags) {
+				for (TagDTO tag : allTags) {
 					JPanel tagRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 					JCheckBox cb = new JCheckBox();
 					if (selectedTags.contains(tag)) {
 						cb.setSelected(true);
 					}
-					JLabel label = new JLabel(tag.getTagName());
+					JLabel label = new JLabel(tag.tagName());
 					label.setFont(new Font("Dialog", Font.PLAIN, 14));
 
-					IconColor ic = null;
+					IconColorDTO ic = null;
 					try {
-						ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.getTagId());
+						ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.tagId());
 						ic = response.getBody();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-					Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
+					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
 					label.setIcon(new CustomIcon(color, 12, 12));
 
 					tagRow.add(cb);
@@ -771,7 +764,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			button.setText("Tags");
 			button.setForeground(null);
 		} else if (selectedTags.size() == 1) {
-			button.setText(selectedTags.get(0).getTagName());
+			button.setText(selectedTags.get(0).tagName());
 			button.setForeground(new Color(59, 130, 246));
 		} else {
 			button.setText(selectedTags.size() + " Tags Selected");

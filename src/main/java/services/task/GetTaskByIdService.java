@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TaskDTO;
 import main.java.entities.Task;
 import main.java.repos.TaskRepository;
 
@@ -22,14 +23,23 @@ public class GetTaskByIdService {
 		this.taskRepository = taskRepository;
 	}
 
-	public ResponseEntity<Task> execute(Long id) {
+	public ResponseEntity<TaskDTO> execute(Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		try {
 			Task task = taskRepository.findById(id).orElse(null);
 			if (task == null) {
 				return ResponseEntity.notFound().build();
 			}
-			return ResponseEntity.ok(task);
+			TaskDTO dto = new TaskDTO(
+				task.getTaskId(),
+				task.getTaskTitle(),
+				task.getDescription(),
+				task.getStatusId(),
+				task.getPriority(),
+				task.getDueDate() != null ? task.getDueDate().toLocalDateTime().toLocalDate() : null,
+				task.getProjectId()
+			);
+			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("An exception occurred: {}", e.getMessage());
 			e.printStackTrace();

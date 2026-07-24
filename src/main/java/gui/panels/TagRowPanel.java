@@ -22,8 +22,8 @@ import main.java.controllers.TagController;
 import org.springframework.http.ResponseEntity;
 
 import main.java.custom.CustomIcon;
-import main.java.entities.IconColor;
-import main.java.entities.Tag;
+import main.java.dto.IconColorDTO;
+import main.java.dto.TagDTO;
 import main.java.gui.Main;
 
 public class TagRowPanel extends JPanel {
@@ -35,33 +35,33 @@ public class TagRowPanel extends JPanel {
 	private IconColorController iconColorController;
 	private TagController tagController;
 
-	public TagRowPanel(Tag tag) {
+	public TagRowPanel(TagDTO tag) {
 		logger.info("Initializing TagRowPanel");
 		this(null, tag);
 	}
 	
-	public TagRowPanel(JCheckBox ck, Tag tag) {
+	public TagRowPanel(JCheckBox ck, TagDTO tag) {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.tagController = SpringContext.getBean(TagController.class);
-		putClientProperty("tagId", tag.getTagId());
-		putClientProperty("tagName", tag.getTagName());
-		putClientProperty("iconColorId", tag.getIconColorId());
+		putClientProperty("tagId", tag.tagId());
+		putClientProperty("tagName", tag.tagName());
+		putClientProperty("iconColorId", tag.iconColorId());
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
 
-		JLabel label = new JLabel(tag.getTagName());
+		JLabel label = new JLabel(tag.tagName());
 		label.setFont(new Font("Dialog", Font.PLAIN, 20));
 
-		IconColor ic = null;
+		IconColorDTO ic = null;
 		try {
-			ResponseEntity<IconColor> response = iconColorController.getIconColorOfTag(tag.getTagId());
+			ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.tagId());
 			ic = response.getBody();
 		} catch (Exception e) {
-			logger.error("Failed to fetch icon color for tag " + tag.getTagId(), e);
+			logger.error("Failed to fetch icon color for tag " + tag.tagId(), e);
 		}
 		// if color not found, make it gray
-		Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
+		Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
 
 		label.setIcon(new CustomIcon(color, 12, 12));
 

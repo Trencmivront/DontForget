@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import main.java.dco.ProjectDCO;
+import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
 import main.java.repos.ProjectRepository;
 
@@ -24,7 +24,7 @@ public class CreateProjectService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<Long> execute(ProjectDCO p) {
+	public ResponseEntity<Long> execute(ProjectDTO p) {
 		logger.info("Executing {} for p: {}", this.getClass(), p);
 		try {
 			// Compute listOrder as MAX + 1

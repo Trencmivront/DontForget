@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import main.java.dco.TaskDCO;
+import main.java.dto.TaskDTO;
 import main.java.entities.Task;
 import main.java.repos.TaskRepository;
 
@@ -26,7 +26,7 @@ public class CreateTaskService {
 		this.taskRepository = taskRepository;
 	}
 
-	public ResponseEntity<Long> execute(TaskDCO task) {
+	public ResponseEntity<Long> execute(TaskDTO task) {
 		logger.info("Executing {} for task: {}", this.getClass(), task);
 		try {
 			Long projectId = task.projectId();

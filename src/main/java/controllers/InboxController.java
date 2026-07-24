@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.entities.Inbox;
+import main.java.dto.InboxDTO;
 import main.java.services.inbox.CreateMessageService;
 import main.java.services.inbox.DeleteMessageByIdService;
 import main.java.services.inbox.GetInboxService;
@@ -51,7 +51,7 @@ public class InboxController {
 	}
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Inbox>> getInbox() {
+	public ResponseEntity<List<InboxDTO>> getInbox() {
 		logger.info("Executing {}", this.getClass());
 		return getInboxService.execute();
 	}

@@ -25,8 +25,8 @@ import main.java.controllers.ReminderController;
 import main.java.controllers.TaskController;
 import org.springframework.http.ResponseEntity;
 
-import main.java.entities.Reminder;
-import main.java.entities.Task;
+import main.java.dto.ReminderDTO;
+import main.java.dto.TaskDTO;
 
 public class ReminderPanel extends JPanel{
 	
@@ -56,7 +56,7 @@ public class ReminderPanel extends JPanel{
 		
 	private void addTabs(){
 		
-		HashMap<String, List<Reminder>> monthlyReminders = getMonthlyReminders();
+		HashMap<String, List<ReminderDTO>> monthlyReminders = getMonthlyReminders();
 		
 		if(monthlyReminders.isEmpty()) {
 			monthTabbedPane.addTab("Empty", new EmptyPanel("You don't have any reminder."));
@@ -66,10 +66,10 @@ public class ReminderPanel extends JPanel{
 		createTab(monthlyReminders);
 	}
 	
-	private HashMap<String, List<Reminder>> getMonthlyReminders() {
-		List<Reminder> reminders = null;
+	private HashMap<String, List<ReminderDTO>> getMonthlyReminders() {
+		List<ReminderDTO> reminders = null;
 		try {
-			ResponseEntity<List<Reminder>> response = reminderController.getReminders();
+			ResponseEntity<List<ReminderDTO>> response = reminderController.getReminders();
 			reminders = response.getBody();
 		} catch (Exception e) {
 			logger.error("Failed to load reminders", e);
@@ -78,23 +78,18 @@ public class ReminderPanel extends JPanel{
 		if(reminders == null || reminders.isEmpty()) {
 			return new HashMap<>();
 		}
-//		Here we are grouping reminders by their month name, then for each key
-//		we generate a list of reminders and put these key-value sets into a new HashMap.
-//		Collectors.toList() function specifies that the values associated with a key must be inserted
-//		as list of values mapped to that key. So the output will be instance of HashMap<String, List<Reminder>>.
-//		The code line simply takes a list of items, groups them by given string, returns grouped values.
 		return reminders.stream().
 				collect(
-				Collectors.groupingBy(reminder -> reminder.getRemindAt().toLocalDateTime().getMonth().name(),
+				Collectors.groupingBy(reminder -> reminder.remindAt().getMonth().name(),
 				HashMap::new,
 				Collectors.toList()
 				));
 	}
 	
-	private void createTab(HashMap<String, List<Reminder>> hashMap){
-		for (Map.Entry<String, List<Reminder>> entry : hashMap.entrySet()) {
+	private void createTab(HashMap<String, List<ReminderDTO>> hashMap){
+		for (Map.Entry<String, List<ReminderDTO>> entry : hashMap.entrySet()) {
 			String monthName = entry.getKey();
-			List<Reminder> reminders = hashMap.get(monthName);
+			List<ReminderDTO> reminders = hashMap.get(monthName);
 			
 			DefaultTableModel model = new DefaultTableModel(new Object[] { "Day", "Task" }, 0) {
 				private static final long serialVersionUID = 1L;
@@ -104,11 +99,11 @@ public class ReminderPanel extends JPanel{
 				}
 			};
 			
-			for (Reminder reminder : reminders) {
-				int dayInt = reminder.getRemindAt().toLocalDateTime().getDayOfMonth();
-				Task task = null;
+			for (ReminderDTO reminder : reminders) {
+				int dayInt = reminder.remindAt() != null ? reminder.remindAt().getDayOfMonth() : 0;
+				TaskDTO task = null;
 				try {
-					ResponseEntity<Task> response = taskController.getTaskById(reminder.getTaskId());
+					ResponseEntity<TaskDTO> response = taskController.getTaskById(reminder.taskId());
 					task = response.getBody();
 				} catch (Exception e) {
 					logger.error("Failed to load task for reminder", e);

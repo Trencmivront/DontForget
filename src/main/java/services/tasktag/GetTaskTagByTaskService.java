@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TaskTagDTO;
 import main.java.entities.TaskTag;
 import main.java.repos.TaskTagRepository;
 
@@ -23,11 +24,14 @@ public class GetTaskTagByTaskService {
 		this.taskTagRepository = taskTagRepository;
 	}
 
-	public ResponseEntity<List<TaskTag>> execute(Long taskId) {
+	public ResponseEntity<List<TaskTagDTO>> execute(Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		try {
 			List<TaskTag> taskTags = taskTagRepository.findBytaskId(taskId);
-			return ResponseEntity.ok(taskTags);
+			List<TaskTagDTO> dtos = taskTags.stream()
+				.map(tt -> new TaskTagDTO(tt.getTaskId(), tt.getTagId()))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			logger.warn("Error fetching task tags for task ID {}: {}", taskId, e.getMessage());
 			e.printStackTrace();

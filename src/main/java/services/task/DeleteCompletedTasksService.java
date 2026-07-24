@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import main.java.entities.Task;
+import main.java.dto.TaskDTO;
 
 @Service
 public class DeleteCompletedTasksService {
@@ -29,16 +29,16 @@ public class DeleteCompletedTasksService {
 	public ResponseEntity<String> execute(Long projectId) {
 		logger.info("Executing {} for projectId: {}", this.getClass(), projectId);
 
-		ResponseEntity<List<Task>> tasksResponse = getTasksOfProjectService.execute(projectId);
-		List<Task> tasks = tasksResponse.getBody();
+		ResponseEntity<List<TaskDTO>> tasksResponse = getTasksOfProjectService.execute(projectId);
+		List<TaskDTO> tasks = tasksResponse.getBody();
 		if (tasks == null) {
 			return ResponseEntity.notFound().build();
 		}
 
 		boolean success = true;
-		for (Task task : tasks) {
-			if (task.getStatusId() != null && task.getStatusId() == 2L) { // 2 = COMPLETED
-				ResponseEntity<String> res = deleteTaskService.execute(task.getTaskId());
+		for (TaskDTO task : tasks) {
+			if (task.statusId() != null && task.statusId() == 2L) { // 2 = COMPLETED
+				ResponseEntity<String> res = deleteTaskService.execute(task.taskId());
 				if (res.getStatusCode().isError()) {
 					success = false;
 				}

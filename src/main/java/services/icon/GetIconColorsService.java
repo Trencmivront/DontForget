@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+import main.java.dto.IconColorDTO;
 import main.java.entities.IconColor;
 import main.java.repos.IconColorRepository;
 
@@ -24,12 +26,15 @@ public class GetIconColorsService {
 		this.iconColorRepository = iconColorRepository;
 	}
 
-	public ResponseEntity<List<IconColor>> execute() {
+	public ResponseEntity<List<IconColorDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			logger.info("Class {} executed", this.getClass());
 			List<IconColor> colors = iconColorRepository.findAll();
-			return ResponseEntity.ok(colors);
+			List<IconColorDTO> dtos = colors.stream()
+				.map(color -> new IconColorDTO(color.getIconColorId(), color.getRed(), color.getGreen(), color.getBlue()))
+				.collect(Collectors.toList());
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.internalServerError().body(Collections.emptyList());

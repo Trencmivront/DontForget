@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import main.java.dco.ProjectDCO;
+import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
 import main.java.repos.ProjectRepository;
 
@@ -24,7 +24,7 @@ public class UpdateProjectService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<String> execute(ProjectDCO p, Long id) {
+	public ResponseEntity<String> execute(ProjectDTO p, Long id) {
 		logger.info("Executing {} for p: {}, id: {}", this.getClass(), p, id);
 
 		if (p == null) {

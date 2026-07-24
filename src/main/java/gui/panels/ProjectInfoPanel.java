@@ -20,7 +20,7 @@ import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.TaskController;
-import main.java.entities.Task;
+import main.java.dto.TaskDTO;
 import main.java.gui.Main;
 import main.java.gui.windows.CreateUpdateTaskWindow;
 
@@ -72,9 +72,9 @@ public class ProjectInfoPanel extends JPanel{
 	public void listTasks() {
 		Long id = (Long)projectPanel.getClientProperty("projectId");
 		
-		ResponseEntity<List<Task>> tasksResponseEntity = taskController.getTasksOfProject(id);
+		ResponseEntity<List<TaskDTO>> tasksResponseEntity = taskController.getTasksOfProject(id);
 		
-		List<Task> tasks = tasksResponseEntity.getBody();
+		List<TaskDTO> tasks = tasksResponseEntity.getBody();
 		
 		if(tasks == null || tasks.isEmpty()) {
 			infoScrollPane.removeAll();

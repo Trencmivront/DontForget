@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.ReminderDTO;
 import main.java.entities.Reminder;
 import main.java.repos.ReminderRepository;
 
@@ -23,11 +24,18 @@ public class GetRemindersService {
 		this.reminderRepository = reminderRepository;
 	}
 
-	public ResponseEntity<List<Reminder>> execute() {
+	public ResponseEntity<List<ReminderDTO>> execute() {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Reminder> reminders = reminderRepository.findAllOrderByRemindAtAsc();
-			return ResponseEntity.ok(reminders);
+			List<ReminderDTO> dtos = reminders.stream()
+				.map(r -> new ReminderDTO(
+					r.getTaskId(),
+					r.getRemindAt() != null ? r.getRemindAt().toLocalDateTime() : null,
+					r.getMessage()
+				))
+				.toList();
+			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			logger.warn("Error getting reminder records: {}", e.getMessage());
 			e.printStackTrace();

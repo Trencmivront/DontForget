@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.ReminderDTO;
 import main.java.entities.Reminder;
 import main.java.repos.ReminderRepository;
 
@@ -22,14 +23,19 @@ public class GetReminderByIdService {
 		this.reminderRepository = reminderRepository;
 	}
 
-	public ResponseEntity<Reminder> execute(Long id) {
+	public ResponseEntity<ReminderDTO> execute(Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		try {
 			Reminder reminder = reminderRepository.findById(id).orElse(null);
 			if (reminder == null) {
 				return ResponseEntity.notFound().build();
 			}
-			return ResponseEntity.ok(reminder);
+			ReminderDTO dto = new ReminderDTO(
+				reminder.getTaskId(),
+				reminder.getRemindAt() != null ? reminder.getRemindAt().toLocalDateTime() : null,
+				reminder.getMessage()
+			);
+			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("Error getting reminder for ID {}: {}", id, e.getMessage());
 			e.printStackTrace();

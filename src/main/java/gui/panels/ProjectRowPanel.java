@@ -24,8 +24,8 @@ import main.java.controllers.ProjectController;
 import org.springframework.http.ResponseEntity;
 
 import main.java.custom.CustomIcon;
-import main.java.entities.IconColor;
-import main.java.entities.Project;
+import main.java.dto.IconColorDTO;
+import main.java.dto.ProjectDTO;
 import main.java.gui.Main;
 import main.java.gui.windows.CreateUpdateProjectWindow;
 
@@ -40,40 +40,40 @@ public class ProjectRowPanel extends JPanel {
 	private IconColorController iconColorController;
 	private ProjectController projectController;
 
-	public ProjectRowPanel(Project project) {
+	public ProjectRowPanel(ProjectDTO project) {
 		logger.info("Initializing ProjectRowPanel");
 		this(null, project);
 	}
 	
-	public ProjectRowPanel(JCheckBox ck, Project project) {
+	public ProjectRowPanel(JCheckBox ck, ProjectDTO project) {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.projectController = SpringContext.getBean(ProjectController.class);
 		
-		JLabel label = new JLabel(project.getProjectTitle());
+		JLabel label = new JLabel(project.projectTitle());
 		
-		Long projectId = project.getProjectId();
+		Long projectId = project.ProjectId();
 		
-		putClientProperty("projectTitle", project.getProjectTitle());
-		putClientProperty("description", project.getDescription());
+		putClientProperty("projectTitle", project.projectTitle());
+		putClientProperty("description", project.description());
 		putClientProperty("projectId", projectId);
-		putClientProperty("listOrder", project.getListOrder());
-		putClientProperty("iconColorId", project.getIconColorId());
+		putClientProperty("listOrder", null);
+		putClientProperty("iconColorId", project.iconColorId());
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
 		setBorder(new EmptyBorder(3, 2, 3, 2));
 		setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getFont().getSize() + 5));
 		
-		IconColor ic = null;
+		IconColorDTO ic = null;
 		try {
-			ResponseEntity<IconColor> response = iconColorController.getIconColorOfProject(projectId);
+			ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfProject(projectId);
 			ic = response.getBody();
 		} catch (Exception e) {
 			logger.error("Failed to fetch icon color for project " + projectId, e);
 		}
 
 		if(ic != null) {
-			Color color = new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
+			Color color = new Color(ic.red(), ic.green(), ic.blue());
 			label.setIcon(new CustomIcon(color, 12, 12));
 		}
 		

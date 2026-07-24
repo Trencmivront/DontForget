@@ -1,8 +1,9 @@
-package main.java.dco;
+package main.java.dto;
 
 import java.time.LocalDate;
 
-public record TaskDCO(
+public record TaskDTO(
+	Long taskId,
 	String taskTitle,
 	String description,
 	Long statusId,

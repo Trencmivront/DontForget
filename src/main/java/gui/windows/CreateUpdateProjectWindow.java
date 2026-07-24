@@ -14,6 +14,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import main.java.custom.SpringContext;
+import main.java.dto.ProjectDTO;
+
 import org.springframework.http.ResponseEntity;
 
 import javax.swing.AbstractButton;
@@ -38,8 +40,7 @@ import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.java.controllers.ProjectController;
 import main.java.controllers.IconColorController;
-import main.java.dco.ProjectDCO;
-import main.java.entities.IconColor;
+import main.java.dto.IconColorDTO;
 import main.java.gui.panels.ProjectRowPanel;
 import main.java.gui.popups.ErrorDialog;
 
@@ -176,7 +177,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 			if(isUpdate) {
 				Long id = (Long)updatedProject.getClientProperty("projectId");
 				try {
-					ResponseEntity<String> re = projectController.updateProject(new ProjectDCO(title, description, iconColorId), id);
+					ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId), id);
 					if (re.getStatusCode().value() >= 400) {
 						new ErrorDialog("Database Error", "Error while updating project");
 					}
@@ -187,7 +188,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 			}
 			else {
 				try {
-					ResponseEntity<Long> re = projectController.createProject(new ProjectDCO(title, description, iconColorId));
+					ResponseEntity<Long> re = projectController.createProject(new ProjectDTO(null, title, description, iconColorId));
 					if (re.getStatusCode().value() >= 400) {
 						new ErrorDialog("Database Error", "Error while creating project");
 					}
@@ -204,9 +205,9 @@ public class CreateUpdateProjectWindow extends JDialog {
 	private void listColors(Container container) {
 		logger.info("Running function.");
 
-		List<IconColor> ic = Collections.emptyList();
+		List<IconColorDTO> ic = Collections.emptyList();
 		try {
-			ResponseEntity<List<IconColor>> response = iconColorController.getIconColors();
+			ResponseEntity<List<IconColorDTO>> response = iconColorController.getIconColors();
 			ic = response.getBody();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -215,11 +216,11 @@ public class CreateUpdateProjectWindow extends JDialog {
 		bg = new ButtonGroup();
 		
 		if (ic != null) {
-			for(IconColor color : ic) {
+			for(IconColorDTO color : ic) {
 				JRadioButton rb = new JRadioButton();
-				rb.setActionCommand(Long.toString(color.getIconColorId()));
-				rb.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue()));
-				rb.putClientProperty("iconColorId", color.getIconColorId());
+				rb.setActionCommand(Long.toString(color.iconColorId()));
+				rb.setBackground(new Color(color.red(), color.green(), color.blue()));
+				rb.putClientProperty("iconColorId", color.iconColorId());
 				bg.add(rb);
 				container.add(rb);
 			}
@@ -252,9 +253,9 @@ public class CreateUpdateProjectWindow extends JDialog {
 		Object projIdObj = updatedProject.getClientProperty("projectId");
 		if (projIdObj instanceof Number) {
 			Long projectId = ((Number) projIdObj).longValue();
-			IconColor projectColor = null;
+			IconColorDTO projectColor = null;
 			try {
-				ResponseEntity<IconColor> response = iconColorController.getIconColorOfProject(projectId);
+				ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfProject(projectId);
 				projectColor = response.getBody();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -266,7 +267,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 						Object rbColorIdObj = rb.getClientProperty("iconColorId");
 						if (rbColorIdObj instanceof Number) {
 							Long rbColorId = ((Number) rbColorIdObj).longValue();
-							if (rbColorId.equals(projectColor.getIconColorId())) {
+							if (rbColorId.equals(projectColor.iconColorId())) {
 								rb.setSelected(true);
 								bg.setSelected(rb.getModel(), true);
 								break;

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.dto.TaskTagDTO;
 import main.java.entities.TaskTag;
 import main.java.repos.TaskTagRepository;
 
@@ -23,10 +24,11 @@ public class CreateTaskTagService {
 		this.taskTagRepository = taskTagRepository;
 	}
 
-	public ResponseEntity<String> execute(TaskTag taskTag) {
+	public ResponseEntity<String> execute(TaskTagDTO taskTag) {
 		logger.info("Executing {} for taskTag: {}", this.getClass(), taskTag);
 		try {
-			taskTagRepository.save(taskTag);
+			TaskTag entity = new TaskTag(taskTag.taskId(), taskTag.tagId());
+			taskTagRepository.save(entity);
 			logger.info("TaskTag saved successfully.");
 			return ResponseEntity.status(HttpStatus.CREATED).body("TASK TAG CREATED");
 		} catch (Exception e) {
