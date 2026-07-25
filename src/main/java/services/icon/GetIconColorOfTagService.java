@@ -30,7 +30,7 @@ public class GetIconColorOfTagService {
 			if (color == null) {
 				return ResponseEntity.notFound().build();
 			}
-			IconColorDTO dto = new IconColorDTO(color.getIconColorId(), color.getRed(), color.getGreen(), color.getBlue());
+			IconColorDTO dto = new IconColorDTO(color);
 			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.error("An exception occurred: {}", e.getMessage());

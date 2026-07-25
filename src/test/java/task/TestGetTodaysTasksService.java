@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,19 +30,19 @@ class TestGetTodaysTasksService {
 	@InjectMocks
 	private GetTodaysTasksService getTodaysTasksService;
 
-	private TaskDTO sampleTask;
+	private Task
+	sampleTask;
 
 	@BeforeEach
 	void setUp() {
-		sampleTask = new TaskDTO();
-		sampleTask.setTas(1L);
+		sampleTask = new Task();
+		sampleTask.setTaskId(1L);
 		sampleTask.setTaskTitle("Today's Task");
-		sampleTask.setDueDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
 	}
 
 	@Test
 	void testServiceReturnsTrueValue() {
-		List<TaskDTO> expectedTasks = List.of(sampleTask);
+		List<Task> expectedTasks = List.of(sampleTask);
 		when(taskRepository.findTodaysTasks()).thenReturn(expectedTasks);
 
 		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute();
@@ -60,8 +58,8 @@ class TestGetTodaysTasksService {
 	void testExecuteReturnsEmptyListOnException() {
 		when(taskRepository.findTodaysTasks()).thenThrow(new RuntimeException("Database error"));
 
-		ResponseEntity<List<Task>> response = getTodaysTasksService.execute();
-		List<Task> actualTasks = response.getBody();
+		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute();
+		List<TaskDTO> actualTasks = response.getBody();
 
 		assertNotNull(actualTasks);
 		assertTrue(actualTasks.isEmpty());

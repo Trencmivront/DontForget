@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.SwingUtilities;
 
 import main.java.custom.SpringContext;
+import main.java.dto.InboxDTO;
 import main.java.controllers.InboxController;
 import main.java.gui.Main;
 
@@ -53,7 +54,7 @@ public class WaylandNotification {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;
                     logger.info("Saving notification message to inbox DB: {}", body);
-                    inboxController.createMessage(body);
+                    inboxController.createMessage((new InboxDTO(body)));
 
                     while ((line = reader.readLine()) != null) {
                         logger.info("gdbus response: {}", line);

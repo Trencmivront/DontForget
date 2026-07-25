@@ -39,9 +39,9 @@ public class UpdateProjectService {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PROJECT NOT FOUND");
 			}
 
-			project.setprojectTitle(p.projectTitle());
-			project.setDescription(p.description() == null || p.description().isEmpty() ? null : p.description());
-			project.seticonColorId(p.iconColorId());
+			project.setprojectTitle(p.getProjectTitle());
+			project.setDescription(p.getDescription() == null || p.getDescription().isEmpty() ? null : p.getDescription());
+			project.seticonColorId(p.getIconColorId());
 
 			projectRepository.save(project);
 			logger.info("Project update complete.");

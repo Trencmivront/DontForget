@@ -29,7 +29,7 @@ public class GetProjectsService {
 		try {
 			List<Project> projects = projectRepository.findAllByOrderByListOrderAsc();
 			List<ProjectDTO> dtos = projects.stream()
-				.map(project -> new ProjectDTO(project.getProjectId(), project.getProjectTitle(), project.getDescription(), project.getIconColorId()))
+				.map(project -> new ProjectDTO(project))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

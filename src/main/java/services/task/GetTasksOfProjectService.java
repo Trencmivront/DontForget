@@ -32,15 +32,7 @@ public class GetTasksOfProjectService {
 		try {
 			List<Task> tasks = taskRepository.findByprojectId(id);
 			List<TaskDTO> dtos = tasks.stream()
-				.map(task -> new TaskDTO(
-					task.getTaskId(),
-					task.getTaskTitle(),
-					task.getDescription(),
-					task.getStatusId(),
-					task.getPriority(),
-					task.getDueDate() != null ? task.getDueDate().toLocalDateTime().toLocalDate() : null,
-					task.getProjectId()
-				))
+				.map(task -> new TaskDTO(task))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

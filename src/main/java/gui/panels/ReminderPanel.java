@@ -80,7 +80,7 @@ public class ReminderPanel extends JPanel{
 		}
 		return reminders.stream().
 				collect(
-				Collectors.groupingBy(reminder -> reminder.remindAt().getMonth().name(),
+				Collectors.groupingBy(reminder -> reminder.getRemindAt().getMonth().name(),
 				HashMap::new,
 				Collectors.toList()
 				));
@@ -100,10 +100,10 @@ public class ReminderPanel extends JPanel{
 			};
 			
 			for (ReminderDTO reminder : reminders) {
-				int dayInt = reminder.remindAt() != null ? reminder.remindAt().getDayOfMonth() : 0;
+				int dayInt = reminder.getRemindAt() != null ? reminder.getRemindAt().getDayOfMonth() : 0;
 				TaskDTO task = null;
 				try {
-					ResponseEntity<TaskDTO> response = taskController.getTaskById(reminder.taskId());
+					ResponseEntity<TaskDTO> response = taskController.getTaskById(reminder.getTaskId());
 					task = response.getBody();
 				} catch (Exception e) {
 					logger.error("Failed to load task for reminder", e);

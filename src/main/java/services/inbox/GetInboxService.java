@@ -30,7 +30,7 @@ public class GetInboxService {
 		try {
 			List<Inbox> inboxList = inboxRepository.findAll(Sort.by(Sort.Direction.DESC, "inboxId"));
 			List<InboxDTO> dtos = inboxList.stream()
-				.map(item -> new InboxDTO(item.getInboxId(), item.getMessage(), item.getCreatedAt()))
+				.map(item -> new InboxDTO(item))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

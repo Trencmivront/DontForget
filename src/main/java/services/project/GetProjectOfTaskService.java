@@ -30,7 +30,7 @@ public class GetProjectOfTaskService {
 			if (project == null) {
 				return ResponseEntity.notFound().build();
 			}
-			ProjectDTO dto = new ProjectDTO(project.getProjectId(), project.getProjectTitle(), project.getDescription(), project.getIconColorId());
+			ProjectDTO dto = new ProjectDTO(project);
 			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.error("An exception occurred: {}", e.getMessage());

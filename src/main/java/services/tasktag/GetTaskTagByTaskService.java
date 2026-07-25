@@ -29,7 +29,7 @@ public class GetTaskTagByTaskService {
 		try {
 			List<TaskTag> taskTags = taskTagRepository.findBytaskId(taskId);
 			List<TaskTagDTO> dtos = taskTags.stream()
-				.map(tt -> new TaskTagDTO(tt.getTaskId(), tt.getTagId()))
+				.map(tt -> new TaskTagDTO(tt))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

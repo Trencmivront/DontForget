@@ -30,15 +30,7 @@ public class GetTaskByIdService {
 			if (task == null) {
 				return ResponseEntity.notFound().build();
 			}
-			TaskDTO dto = new TaskDTO(
-				task.getTaskId(),
-				task.getTaskTitle(),
-				task.getDescription(),
-				task.getStatusId(),
-				task.getPriority(),
-				task.getDueDate() != null ? task.getDueDate().toLocalDateTime().toLocalDate() : null,
-				task.getProjectId()
-			);
+			TaskDTO dto = new TaskDTO(task);
 			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("An exception occurred: {}", e.getMessage());

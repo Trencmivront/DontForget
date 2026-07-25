@@ -40,17 +40,17 @@ public class UpdateTaskService {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("TASK NOT FOUND");
 			}
 
-			existing.setTaskTitle(task.taskTitle());
-			existing.setDescription(task.description());
-			existing.setStatusId(task.statusId() != null ? task.statusId() : 1L);
-			existing.setPriority(task.priority());
-			existing.setDueDate(task.dueDate() != null ? Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
-			existing.setProjectId(task.projectId() != null && task.projectId() != 0L ? task.projectId() : null);
+			existing.setTaskTitle(task.getTaskTitle());
+			existing.setDescription(task.getDescription());
+			existing.setStatusId(task.getStatusId() != null ? task.getStatusId() : 1L);
+			existing.setPriority(task.getPriority());
+			existing.setDueDate(task.getDueDate() != null ? Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
+			existing.setProjectId(task.getProjectId() != null && task.getProjectId() != 0L ? task.getProjectId() : null);
 
 			// Handle completedAt timestamp:
 			// If status is COMPLETED (2), set completedAt if not already set.
 			// Otherwise (ACTIVE or other), reset completedAt to null.
-			if (task.statusId() != null && task.statusId() == 2L) {
+			if (task.getStatusId() != null && task.getStatusId() == 2L) {
 				if (existing.getCompletedAt() == null) {
 					existing.setCompletedAt(new Timestamp(System.currentTimeMillis()));
 				}

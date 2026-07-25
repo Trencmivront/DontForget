@@ -31,10 +31,10 @@ public class CreateProjectService {
 			int listOrder = projectRepository.findMaxListOrder() + 1;
 
 			Project project = new Project();
-			project.setprojectTitle(p.projectTitle());
-			project.setDescription(p.description());
+			project.setprojectTitle(p.getProjectTitle());
+			project.setDescription(p.getDescription());
 			project.setlistOrder(listOrder);
-			project.seticonColorId(p.iconColorId());
+			project.seticonColorId(p.getIconColorId());
 
 			Project createdProject = projectRepository.save(project);
 			return ResponseEntity.status(HttpStatus.CREATED).body(createdProject.getProjectId());

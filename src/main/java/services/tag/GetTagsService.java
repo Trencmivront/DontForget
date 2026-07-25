@@ -30,7 +30,7 @@ public class GetTagsService {
 		try {
 			List<Tag> tags = tagRepository.findAll();
 			List<TagDTO> dtos = tags.stream()
-				.map(tag -> new TagDTO(tag.getTagId(), tag.getTagName(), tag.getIconColorId() != null ? tag.getIconColorId().intValue() : null))
+				.map(tag -> new TagDTO(tag))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

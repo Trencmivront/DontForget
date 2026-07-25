@@ -49,15 +49,15 @@ public class ProjectRowPanel extends JPanel {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.projectController = SpringContext.getBean(ProjectController.class);
 		
-		JLabel label = new JLabel(project.projectTitle());
+		JLabel label = new JLabel(project.getProjectTitle());
 		
-		Long projectId = project.ProjectId();
+		Long projectId = project.getProjectId();
 		
-		putClientProperty("projectTitle", project.projectTitle());
-		putClientProperty("description", project.description());
+		putClientProperty("projectTitle", project.getProjectTitle());
+		putClientProperty("description", project.getDescription());
 		putClientProperty("projectId", projectId);
 		putClientProperty("listOrder", null);
-		putClientProperty("iconColorId", project.iconColorId());
+		putClientProperty("iconColorId", project.getIconColorId());
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
@@ -73,7 +73,7 @@ public class ProjectRowPanel extends JPanel {
 		}
 
 		if(ic != null) {
-			Color color = new Color(ic.red(), ic.green(), ic.blue());
+			Color color = new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
 			label.setIcon(new CustomIcon(color, 12, 12));
 		}
 		

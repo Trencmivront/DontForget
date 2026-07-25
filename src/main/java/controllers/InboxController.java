@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import main.java.dto.InboxDTO;
@@ -39,9 +41,9 @@ public class InboxController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<String> createMessage(@RequestBody String message) {
-		logger.info("Executing {} for message: {}", this.getClass(), message);
-		return createMessageService.execute(message);
+	public ResponseEntity<String> createMessage(@RequestBody InboxDTO inboxDTO) {
+		logger.info("Executing {} for message: {}", this.getClass(), inboxDTO.getMessage());
+		return createMessageService.execute(inboxDTO.getMessage());
 	}
 
 	@DeleteMapping("/delete/{id}")

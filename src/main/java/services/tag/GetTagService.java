@@ -30,7 +30,7 @@ public class GetTagService {
 			if (tag == null) {
 				return ResponseEntity.notFound().build();
 			}
-			TagDTO dto = new TagDTO(tag.getTagId(), tag.getTagName(), tag.getIconColorId() != null ? tag.getIconColorId().intValue() : null);
+			TagDTO dto = new TagDTO(tag);
 			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("Error fetching tag with ID {}: {}", tagId, e.getMessage());

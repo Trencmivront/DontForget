@@ -368,8 +368,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 			e.printStackTrace();
 		}
 		if (reminder != null) {
-			selectedReminderTime = reminder.remindAt() != null ? Timestamp.valueOf(reminder.remindAt()) : null;
-			selectedReminderMsg = reminder.message();
+			selectedReminderTime = reminder.getRemindAt() != null ? Timestamp.valueOf(reminder.getRemindAt()) : null;
+			selectedReminderMsg = reminder.getMessage();
 			if (selectedReminderTime != null) {
 				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
 				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -403,7 +403,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 				JOptionPane.showMessageDialog(CreateUpdateTaskWindow.this, "Task title cannot be empty.", "Validation Error",
 						JOptionPane.WARNING_MESSAGE);
 				return;
-			};
+			}
 
 			Long taskId = null;
 			if (isUpdate) {
@@ -411,7 +411,6 @@ public class CreateUpdateTaskWindow extends JDialog {
 				Long statusId = (Long) taskPanel.getClientProperty("statusId");
 				Integer listOrder = (Integer) taskPanel.getClientProperty("listOrder");
 				Timestamp createdAt = (Timestamp) taskPanel.getClientProperty("createdAt");
-				Timestamp completedAt = (Timestamp) taskPanel.getClientProperty("completedAt");
 				if (statusId == null) statusId = 1L;
 				if (listOrder == null) listOrder = 1;
 				if (createdAt == null) createdAt = new Timestamp(System.currentTimeMillis());
@@ -472,7 +471,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			if (taskId != null && selectedTags != null) {
 				for (TagDTO tag : selectedTags) {
 					try {
-						taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.tagId()));
+						taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.getTagId()));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -702,18 +701,18 @@ public class CreateUpdateTaskWindow extends JDialog {
 					if (selectedTags.contains(tag)) {
 						cb.setSelected(true);
 					}
-					JLabel label = new JLabel(tag.tagName());
+					JLabel label = new JLabel(tag.getTagName());
 					label.setFont(new Font("Dialog", Font.PLAIN, 14));
 
 					IconColorDTO ic = null;
 					try {
-						ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.tagId());
+						ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.getTagId());
 						ic = response.getBody();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-					Color color = (ic == null) ? Color.GRAY : new Color(ic.red(), ic.green(), ic.blue());
+					Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
 					label.setIcon(new CustomIcon(color, 12, 12));
 
 					tagRow.add(cb);
@@ -764,7 +763,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			button.setText("Tags");
 			button.setForeground(null);
 		} else if (selectedTags.size() == 1) {
-			button.setText(selectedTags.get(0).tagName());
+			button.setText(selectedTags.get(0).getTagName());
 			button.setForeground(new Color(59, 130, 246));
 		} else {
 			button.setText(selectedTags.size() + " Tags Selected");

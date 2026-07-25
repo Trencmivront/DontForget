@@ -30,9 +30,9 @@ public class CreateReminderService {
 		logger.info("Executing {} for reminder: {}", this.getClass(), reminder);
 		try {
 			Reminder entity = new Reminder(
-				reminder.taskId(),
-				reminder.remindAt() != null ? Timestamp.valueOf(reminder.remindAt()) : null,
-				reminder.message()
+				reminder.getTaskId(),
+				reminder.getRemindAt() != null ? Timestamp.valueOf(reminder.getRemindAt()) : null,
+				reminder.getMessage()
 			);
 			reminderRepository.save(entity);
 			logger.info("Reminder saved successfully.");

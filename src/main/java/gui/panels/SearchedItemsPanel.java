@@ -166,7 +166,7 @@ public class SearchedItemsPanel extends JPanel{
 					TaskRowPanel row = new TaskRowPanel(task, source);
 					List<TagDTO> tags = null;
 					try {
-						ResponseEntity<List<TagDTO>> tagsResponse = tagController.getTagsOfTask(task.taskId());
+						ResponseEntity<List<TagDTO>> tagsResponse = tagController.getTagsOfTask(task.getTaskId());
 						tags = tagsResponse.getBody();
 					} catch (Exception ex) {
 						logger.error("Failed to load tags for task", ex);
@@ -174,7 +174,7 @@ public class SearchedItemsPanel extends JPanel{
 					if (tags != null && !tags.isEmpty()) {
 						StringBuilder tagsBuilder = new StringBuilder();
 						for (TagDTO tag : tags) {
-							tagsBuilder.append(" ").append(tag.tagName());
+							tagsBuilder.append(" ").append(tag.getTagName());
 						}
 						row.setToolTipText(tagsBuilder.toString());
 					}

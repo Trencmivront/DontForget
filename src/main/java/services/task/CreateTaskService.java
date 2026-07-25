@@ -29,17 +29,17 @@ public class CreateTaskService {
 	public ResponseEntity<Long> execute(TaskDTO task) {
 		logger.info("Executing {} for task: {}", this.getClass(), task);
 		try {
-			Long projectId = task.projectId();
+			Long projectId = task.getProjectId();
 
 			// Compute listOrder as MAX + 1 for this project
 			int listOrder = taskRepository.findMaxListOrderByProjectId(projectId) + 1;
 
 			Task t = new Task();
-			t.setTaskTitle(task.taskTitle());
-			t.setDescription(task.description() == null || task.description().isEmpty() ? null : task.description());
-			t.setStatusId(Objects.requireNonNullElse(task.statusId(), 1L)); // 1 = ACTIVE
-			t.setPriority(task.priority());
-			t.setDueDate(task.dueDate() != null ? Timestamp.valueOf(task.dueDate().atStartOfDay()) : null);
+			t.setTaskTitle(task.getTaskTitle());
+			t.setDescription(task.getDescription() == null || task.getDescription().isEmpty() ? null : task.getDescription());
+			t.setStatusId(Objects.requireNonNullElse(task.getStatusId(), 1L)); // 1 = ACTIVE
+			t.setPriority(task.getPriority());
+			t.setDueDate(task.getDueDate() != null ? Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
 			t.setListOrder(listOrder);
 			t.setProjectId(projectId);
 

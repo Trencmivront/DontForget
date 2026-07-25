@@ -63,7 +63,7 @@ public class InboxPanel extends JPanel {
 			};
 			
 			for (InboxDTO item : inboxItems) {
-				model.addRow(new Object[] { item.message(), item.createdAt().toString(), "" });
+				model.addRow(new Object[] { item.getMessage(), item.getCreatedAt().toString(), "" });
 			}			
 			scrollPane.setViewportView(createTable(model, inboxItems));
 		}
@@ -123,7 +123,7 @@ public class InboxPanel extends JPanel {
 					int modelRow = table.convertRowIndexToModel(row);
 					InboxDTO item = inboxItems.get(modelRow);
 					try {
-						inboxController.deleteMessageById(item.inboxId());
+						inboxController.deleteMessageById(item.getInboxId());
 					} catch (Exception e) {
 						logger.error("Failed to delete inbox item", e);
 					}

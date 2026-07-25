@@ -49,9 +49,9 @@ class TestGetInboxService {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertNotNull(response.getBody());
 //		check if date-time is null
-		assertNotNull(response.getBody().get(0).createdAt());
+		assertNotNull(response.getBody().get(0).getCreatedAt());
 		assertEquals(2, response.getBody().size());
-		assertEquals("Second Message", response.getBody().get(0).message());
+		assertEquals("Second Message", response.getBody().get(0).getMessage());
 
 		// Verification
 		verify(inboxRepository).findAll(any(Sort.class));

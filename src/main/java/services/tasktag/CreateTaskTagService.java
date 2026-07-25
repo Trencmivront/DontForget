@@ -27,7 +27,7 @@ public class CreateTaskTagService {
 	public ResponseEntity<String> execute(TaskTagDTO taskTag) {
 		logger.info("Executing {} for taskTag: {}", this.getClass(), taskTag);
 		try {
-			TaskTag entity = new TaskTag(taskTag.taskId(), taskTag.tagId());
+			TaskTag entity = new TaskTag(taskTag.getTaskId(), taskTag.getTagId());
 			taskTagRepository.save(entity);
 			logger.info("TaskTag saved successfully.");
 			return ResponseEntity.status(HttpStatus.CREATED).body("TASK TAG CREATED");

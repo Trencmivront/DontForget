@@ -1,3 +1,37 @@
 package main.java.dto;
 
-public record WeekDaysDTO(Long weekDayId, String dayName) {}
+import main.java.entities.WeekDays;
+
+public class WeekDaysDTO {
+
+    private Long weekDayId;
+    private String dayName;
+
+    public WeekDaysDTO() {}
+
+    public WeekDaysDTO(Long weekDayId, String dayName) {
+        this.weekDayId = weekDayId;
+        this.dayName = dayName;
+    }
+
+    public WeekDaysDTO(WeekDays weekDays) {
+        this.weekDayId = weekDays.getWeekDayId();
+        this.dayName = weekDays.getDayName();
+    }
+
+    public Long getWeekDayId() {
+        return weekDayId;
+    }
+
+    public void setWeekDayId(Long weekDayId) {
+        this.weekDayId = weekDayId;
+    }
+
+    public String getDayName() {
+        return dayName;
+    }
+
+    public void setDayName(String dayName) {
+        this.dayName = dayName;
+    }
+}

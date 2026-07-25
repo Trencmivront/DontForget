@@ -32,7 +32,7 @@ public class GetIconColorsService {
 			logger.info("Class {} executed", this.getClass());
 			List<IconColor> colors = iconColorRepository.findAll();
 			List<IconColorDTO> dtos = colors.stream()
-				.map(color -> new IconColorDTO(color.getIconColorId(), color.getRed(), color.getGreen(), color.getBlue()))
+				.map(color -> new IconColorDTO(color))
 				.collect(Collectors.toList());
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

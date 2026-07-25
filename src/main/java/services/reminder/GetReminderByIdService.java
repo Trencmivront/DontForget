@@ -30,11 +30,7 @@ public class GetReminderByIdService {
 			if (reminder == null) {
 				return ResponseEntity.notFound().build();
 			}
-			ReminderDTO dto = new ReminderDTO(
-				reminder.getTaskId(),
-				reminder.getRemindAt() != null ? reminder.getRemindAt().toLocalDateTime() : null,
-				reminder.getMessage()
-			);
+			ReminderDTO dto = new ReminderDTO(reminder);
 			return ResponseEntity.ok(dto);
 		} catch (Exception e) {
 			logger.warn("Error getting reminder for ID {}: {}", id, e.getMessage());

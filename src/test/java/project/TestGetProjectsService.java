@@ -49,7 +49,7 @@ class TestGetProjectsService {
 //		testing
 		assertNotNull(projects);
 		assertEquals(1, projects.size());
-		assertEquals("Hello" , projects.get(0).projectTitle());
+		assertEquals("Hello" , projects.get(0).getProjectTitle());
 		
 		verify(projectRepository).findAllByOrderByListOrderAsc();
 	}

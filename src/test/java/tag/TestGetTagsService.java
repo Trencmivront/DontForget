@@ -52,8 +52,8 @@ class TestGetTagsService {
 		// Assertions
 		assertNotNull(tags);
 		assertEquals(1, tags.size());
-		assertEquals("Urgent", tags.get(0).tagName());
-		assertEquals(Long.valueOf(2L), tags.get(0).iconColorId());
+		assertEquals("Urgent", tags.get(0).getTagName());
+		assertEquals(Long.valueOf(2L), tags.get(0).getIconColorId());
 		
 		// Verify interactions
 		verify(tagRepository).findAll();

@@ -29,11 +29,7 @@ public class GetRemindersService {
 		try {
 			List<Reminder> reminders = reminderRepository.findAllOrderByRemindAtAsc();
 			List<ReminderDTO> dtos = reminders.stream()
-				.map(r -> new ReminderDTO(
-					r.getTaskId(),
-					r.getRemindAt() != null ? r.getRemindAt().toLocalDateTime() : null,
-					r.getMessage()
-				))
+				.map(r -> new ReminderDTO(r))
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
