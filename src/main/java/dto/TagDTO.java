@@ -6,11 +6,11 @@ public class TagDTO {
 
     private Long tagId;
     private String tagName;
-    private Integer iconColorId;
+    private Long iconColorId;
 
     public TagDTO() {}
 
-    public TagDTO(Long tagId, String tagName, Integer iconColorId) {
+    public TagDTO(Long tagId, String tagName, Long iconColorId) {
         this.tagId = tagId;
         this.tagName = tagName;
         this.iconColorId = iconColorId;
@@ -19,7 +19,7 @@ public class TagDTO {
     public TagDTO(Tag tag) {
         this.tagId = tag.getTagId();
         this.tagName = tag.getTagName();
-        this.iconColorId = tag.getIconColorId() != null ? tag.getIconColorId().intValue() : null;
+        this.iconColorId = tag.getIconColorId() != null ? tag.getIconColorId().longValue() : null;
     }
 
     public Long getTagId() {
@@ -38,11 +38,11 @@ public class TagDTO {
         this.tagName = tagName;
     }
 
-    public Integer getIconColorId() {
+    public Long getIconColorId() {
         return iconColorId;
     }
 
-    public void setIconColorId(Integer iconColorId) {
+    public void setIconColorId(Long iconColorId) {
         this.iconColorId = iconColorId;
     }
 }
