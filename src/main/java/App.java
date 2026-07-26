@@ -1,5 +1,7 @@
 package main.java;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -141,19 +143,27 @@ public class App {
     }
     
     private static void applySettings() {
-    	
+//    	get the JsonNode from file
     	try {
-    		JsonNode node = mapper.readTree(settingsFile);
-    		checkIconSet(node);
-    		System.setProperty("sun.java2d.uiScale", checkUiScaleSet(node));
-    		System.setProperty("awt.useSystemAAFontSettings", checkSystemAAFontSet(node));
-    		System.setProperty("swing.aatext", checkSwingAATextSet(node));
+    		if(!settingsFile.exists()) {
+    			settingsFile.getParentFile().mkdirs();
+				mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, mapper.createObjectNode());
+    		}
+    		final JsonNode node = mapper.readTree(settingsFile);
+    		
+//        	read and insert values
+        	checkIconSet(node);
+        	checkSystemAAFontSet(node);
+        	checkSwingAATextSet(node);
+//        	apply saved scale BEFORE AWT initializes
+        	if (!applyScaleFromSettings(node)) {
+//        		no saved scale — detect after AWT starts and save for next launch
+        		SwingUtilities.invokeLater(App::detectAndSaveScale);
+        	}
     	}catch (IOException e) {
-			e.printStackTrace();
-			System.setProperty("sun.java2d.uiScale", "2.0");
-			System.setProperty("awt.useSystemAAFontSettings", "on");
-			System.setProperty("swing.aatext", "true");
+    		logger.warn("applySettings: {}", e.getMessage());
 		}
+    	
     	FlatMacDarkLaf.setup();
     }
     
@@ -174,52 +184,66 @@ public class App {
     	}
     }
 
-    private static String checkUiScaleSet(JsonNode node) {
-    	final String defaultValue = "2.0";
+//  Returns true if a valid scale was found in settings and applied
+    private static boolean applyScaleFromSettings(JsonNode node) {
     	JsonNode scaleNode = node.get("uiScale");
     	if (scaleNode != null && !scaleNode.isNull()) {
     		try {
     			double scale = Double.parseDouble(scaleNode.asText());
     			if (scale > 0) {
-    				return scaleNode.asText();
+    				long rounded = Math.round(scale);
+    				System.setProperty("sun.java2d.uiScale", String.valueOf(rounded));
+    				logger.info("Applied uiScale: {}", rounded);
+    				return true;
     			}
-    			logger.warn("uiScale must be above 0, falling back to default {}.", defaultValue);
+    			logger.warn("uiScale must be above 0, detecting from screen.");
     		} catch (NumberFormatException _) {
-    			logger.warn("Invalid uiScale value '{}', falling back to default {}.", scaleNode.asText(), defaultValue);
+    			logger.warn("Invalid uiScale value '{}', detecting from screen.", scaleNode.asText());
     		}
-    	} else {
-    		setKeyValue("uiScale", defaultValue);
     	}
-    	return defaultValue;
+    	return false;
     }
 
-    private static String checkSystemAAFontSet(JsonNode node) {
+//  Runs in invokeLater — safe to use Toolkit here
+    private static void detectAndSaveScale() {
+    	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    	final long scale = Math.round(screen.getWidth() / screen.getHeight());
+    	setKeyValue("uiScale", scale);
+    	logger.info("Detected screen {}x{}, saved uiScale={} for next launch.", screen.width, screen.height, scale);
+    }
+
+
+    private static void checkSystemAAFontSet(JsonNode node) {
     	final String defaultValue = "on";
     	JsonNode aaNode = node.get("awtUseSystemAAFontSettings");
     	if (aaNode != null && !aaNode.isNull()) {
-    		return aaNode.asText();
+    		System.setProperty("awt.useSystemAAFontSettings", aaNode.asText());
+    		return;
     	}
+    	System.setProperty("awt.useSystemAAFontSettings", defaultValue);
     	setKeyValue("awtUseSystemAAFontSettings", defaultValue);
-    	return defaultValue;
     }
 
-    private static String checkSwingAATextSet(JsonNode node) {
+    private static void checkSwingAATextSet(JsonNode node) {
     	final String defaultValue = "true";
     	JsonNode aaNode = node.get("swingAAText");
     	if (aaNode != null && !aaNode.isNull()) {
-    		return aaNode.asText();
+    		System.setProperty("swing.aatext", aaNode.asText());
+    		return;
     	}
+    	System.setProperty("swing.aatext", defaultValue);
     	setKeyValue("swingAAText", defaultValue);
-    	return defaultValue;
     }
     
     private static void setKeyValue(String key, Object value) {
         try {
-            ObjectNode rootNode = mapper.createObjectNode();
+            ObjectNode rootNode = settingsFile.exists() ?
+            		(ObjectNode) mapper.readTree(settingsFile) : 
+            			mapper.createObjectNode();
             // put object and let json cast it
             rootNode.putPOJO(key, value);
             mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, rootNode);
-            logger.info("Saved settings.");
+            logger.info("Saved {} => {}", key, value);
         } catch (IOException e) {
             e.printStackTrace();
         }
