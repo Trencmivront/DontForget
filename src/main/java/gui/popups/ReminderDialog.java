@@ -14,7 +14,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
@@ -32,6 +31,11 @@ import javax.swing.border.EmptyBorder;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
+import main.java.controllers.RecurringTaskController;
+import main.java.controllers.ReminderController;
+import main.java.custom.SpringContext;
+import main.java.dto.ReminderDTO;
+import main.java.gui.Main;
 import main.java.gui.windows.CreateUpdateTaskWindow;
 
 public class ReminderDialog extends JDialog {
@@ -45,43 +49,62 @@ public class ReminderDialog extends JDialog {
 	private ButtonGroup radioGroup = new ButtonGroup();
 	private JPanel radioPanel;
 	
-	public ReminderDialog(CreateUpdateTaskWindow source, JButton reminderBtn) {
+	private CreateUpdateTaskWindow source;
+	private JButton reminderBtn;
+	private ReminderDTO reminderDTO;
+	private boolean isUpdate;
+	
+	private final RecurringTaskController recurringTaskController;
+	private final ReminderController reminderController;
+	
+	public ReminderDialog(Long reminderId) {
 		logger.info("Initializing ReminderDialog");
-		super(source, "Reminder", false);
+		super(Main.getMain(), "Reminder", false);
 		setAlwaysOnTop(true);
 		setResizable(false);
 		setUndecorated(true);
 		setLayout(new BorderLayout(10, 10));
+		
+		if(CreateUpdateTaskWindow.getCreateUpdateTaskWindow() != null) {
+			this.source = CreateUpdateTaskWindow.getCreateUpdateTaskWindow();
+			this.reminderBtn = CreateUpdateTaskWindow.getCreateUpdateTaskWindow().getReminderBtn();
+		}
+		this.recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
+		this.reminderController = SpringContext.getBean(ReminderController.class);
+		
+		reminderDTO = reminderController.getReminderById(reminderId).getBody();
 
 		DateTimePicker picker = new DateTimePicker();
-		picker.setDateTimePermissive(LocalDateTime.now().plusHours(1));
-		if (source.getSelectedReminderTime() != null) {
-			picker.setDateTimePermissive(source.getSelectedReminderTime().toLocalDateTime());
-		}
+		
+		isUpdate = reminderDTO == null ? false : true;
 
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-		
-		// Temporary variables to track recurring choices inside this dialog
-		tempIsRecurring = source.isRecurring();
-		tempSelectedRecurringDays = new ArrayList<>(source.getSelectedRecurringDays());
-		
-		// Content fields panel containing DatePicker, Custom message, and repeat checkbox
-		JPanel fieldsPanel = new JPanel();
-		fieldsPanel.setLayout(new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS));
-		fieldsPanel.add(picker);
-		
-		fieldsPanel.add(Box.createVerticalStrut(10));
 		
 		// Custom reminder message input (optional)
 		JTextField msgField = new JTextField();
 		msgField.putClientProperty("JTextField.placeholderText", "Custom message (optional)");
 		msgField.putClientProperty("JTextField.margin", new Insets(4, 6, 4, 6));
-		if (source.getSelectedReminderMsg() != null) {
-			msgField.setText(source.getSelectedReminderMsg());
-		}
-		fieldsPanel.add(msgField);
 		
+		if(isUpdate) {
+			picker.setDateTimePermissive(reminderDTO.getRemindAt());
+			// Temporary variables to track recurring choices inside this dialog
+			tempSelectedRecurringDays = recurringTaskController.getRecurringDaysOfTask(reminderId).getBody();
+			if(!tempSelectedRecurringDays.isEmpty() || tempSelectedRecurringDays != null) {
+				tempIsRecurring = true;
+			}
+			msgField.setText(reminderDTO.getMessage());
+		}else {
+			picker.setDateTimePermissive(LocalDateTime.now().plusHours(1));
+		}
+		
+		// Content fields panel containing DatePicker, Custom message, and repeat checkbox
+		JPanel fieldsPanel = new JPanel();
+		fieldsPanel.setLayout(new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS));
+		
+		fieldsPanel.add(picker);
+		fieldsPanel.add(Box.createVerticalStrut(10));
+		fieldsPanel.add(msgField);
 		fieldsPanel.add(Box.createVerticalStrut(10));
 
 		// Repeat checkbox
@@ -129,7 +152,7 @@ public class ReminderDialog extends JDialog {
 		
 		JButton okButton = new JButton("OK");
 		okButton.putClientProperty("JButton.buttonType", "roundRect");
-		addOkButtonActionListener(okButton, picker, msgField, source, reminderBtn);
+		addOkButtonActionListener(okButton, picker, msgField);
 		
 		buttonPane.add(cancelButton);
 		buttonPane.add(okButton);
@@ -139,7 +162,7 @@ public class ReminderDialog extends JDialog {
 
 		addFocusListener();
 		pack();
-		setLocationRelativeTo(source);
+		setLocationRelativeTo(Main.getMain());
 		setVisible(true);
 	}	
 	
@@ -233,7 +256,7 @@ public class ReminderDialog extends JDialog {
 		cancelButton.addActionListener(_ -> dispose());
 	}
 
-	private void addOkButtonActionListener(JButton okButton, DateTimePicker picker, JTextField msgField, CreateUpdateTaskWindow source, JButton reminderBtn) {
+	private void addOkButtonActionListener(JButton okButton, DateTimePicker picker, JTextField msgField) {
 		okButton.addActionListener(_ -> {
 			LocalDateTime ldt = picker.getDateTimeStrict();
 			if (ldt == null) {
@@ -245,31 +268,42 @@ public class ReminderDialog extends JDialog {
 				return;
 			}
 			
-			source.setSelectedReminderTime(Timestamp.valueOf(ldt));
-			String msgText = msgField.getText().trim();
-			source.setSelectedReminderMsg(msgText.isEmpty() ? null : msgText);
-			
-			reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-			reminderBtn.setForeground(new Color(59, 130, 246));
-
-			// Commit recurring state from temp variables
-			source.setRecurring(tempIsRecurring);
-			source.getSelectedRecurringDays().clear();
-			source.getSelectedRecurringDays().addAll(tempSelectedRecurringDays);
-			source.setSelectedDueDate(null);
-
-			if (source.isRecurring()) {
-				source.getDueDateBtn().setText("Disabled");
-				source.getDueDateBtn().setToolTipText("Can't set due date when\nrecurring task is enabled");	
-				source.getDueDateBtn().setForeground(null);
-				source.getDueDateBtn().setEnabled(false);
-			} else {
-				source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():"Due Date");
-				source.getDueDateBtn().setForeground(new Color(42, 157, 143));
-				source.getDueDateBtn().setEnabled(true);
+			if(source != null) {
+				source.setSelectedReminderTime(Timestamp.valueOf(ldt));
+				String msgText = msgField.getText().trim();
+				source.setSelectedReminderMsg(msgText.isEmpty() ? null : msgText);
+				// Set recurring state from temp variables
+				source.setRecurring(tempIsRecurring);
+				source.getSelectedRecurringDays().clear();
+				source.getSelectedRecurringDays().addAll(tempSelectedRecurringDays);
+				source.setSelectedDueDate(null);
+				if (source.isRecurring()) {
+					source.getDueDateBtn().setText("Disabled");
+					source.getDueDateBtn().setToolTipText("Can't set due date when\nrecurring task is enabled");	
+					source.getDueDateBtn().setForeground(null);
+					source.getDueDateBtn().setEnabled(false);
+				} else {
+					source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():"Due Date");
+					source.getDueDateBtn().setForeground(new Color(42, 157, 143));
+					source.getDueDateBtn().setEnabled(true);
+				}
+				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				reminderBtn.setForeground(new Color(59, 130, 246));
+				source.revalidate();
+				source.repaint();
 			}
-			source.revalidate();
-			source.repaint();
+			
+//		otherwise, if it is update, just update it
+			if(isUpdate) {
+				String msgText = msgField.getText().trim();
+				ReminderDTO updatedDTO = new ReminderDTO(
+					reminderDTO.getTaskId(),
+					ldt,
+					msgText.isEmpty() ? null : msgText
+				);
+				reminderController.updateReminder(updatedDTO);
+				recurringTaskController.updateRecurringTask(reminderDTO.getTaskId(), tempSelectedRecurringDays);
+			}
 
 			dispose();
 		});
@@ -277,15 +311,13 @@ public class ReminderDialog extends JDialog {
 	
 	private void addFocusListener() {
 		addFocusListener(new FocusListener() {
-			
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				dispose();
-				
 			}
 			@Override
 			public void focusGained(FocusEvent arg0) {			
-				// I don't use it
+				// I don't use this
 			}
 		});
 	}

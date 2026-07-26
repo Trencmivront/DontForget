@@ -1,25 +1,22 @@
 package main.java.notify;
 
-import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import main.java.controllers.InboxController;
 import main.java.custom.SpringContext;
 import main.java.dto.InboxDTO;
-import main.java.controllers.InboxController;
 import main.java.gui.Main;
 
 public class WaylandNotification {
     private final InboxController inboxController = SpringContext.getBean(InboxController.class);
-
-    public WaylandNotification() {
-    }
 
     private static final Logger logger = LoggerFactory.getLogger(WaylandNotification.class.getName());
 
@@ -60,10 +57,8 @@ public class WaylandNotification {
                         logger.info("gdbus response: {}", line);
                         // If the user clicks the notification body, 'default' is returned
                         if (line.contains("'default'")) {
-                            logger.info("User clicked the default action of notification.");
                             SwingUtilities.invokeLater(() -> {
                                 if (Main.getMain() != null) {
-                                    Main.getMain().setState(Frame.NORMAL); // De-iconify if minimized
                                     Main.getMain().setVisible(true);
                                     Main.getMain().toFront();
                                     Main.getMain().requestFocus();

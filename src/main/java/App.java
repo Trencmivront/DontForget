@@ -47,21 +47,7 @@ public class App {
 
 	private static void startApp(String[] args) {
 		// Try binding to the single-instance port
-		try {
-			serverSocket = new ServerSocket(19999);
-			logger.info("Successfully bound port 19999. Starting primary instance.");
-		} catch (IOException _) {
-			// Port already in use. Connect to the existing instance and ask it to show.
-			logger.info("Another instance is running. Attempting to bring it to front...");
-			try (Socket socket = new Socket("localhost", 19999);
-				 OutputStream out = socket.getOutputStream()) {
-				out.write("SHOW\n".getBytes());
-				out.flush();
-			} catch (IOException ioException) {
-				logger.error("Could not notify running instance: {}", ioException.getMessage());
-			}
-			return;
-		}
+		showExistingWindow();
 
 		applySettings();
 		
@@ -107,7 +93,7 @@ public class App {
 		}));
 	}
     
-    private static void startSingleInstanceListener() {
+    public static void startSingleInstanceListener() {
         new Thread(() -> {
             try {
                 while (!serverSocket.isClosed()) {
@@ -120,6 +106,24 @@ public class App {
             }
         }).start();
         logger.info("Background listener started.");
+    }
+    
+    private static void showExistingWindow() {
+		try {
+			serverSocket = new ServerSocket(19999);
+			logger.info("Successfully bound port 19999. Starting primary instance.");
+		} catch (IOException _) {
+			// Port already in use. Connect to the existing instance and ask it to show.
+			logger.info("Another instance is running. Attempting to bring it to front...");
+			try (Socket socket = new Socket("localhost", 19999);
+				 OutputStream out = socket.getOutputStream()) {
+				out.write("SHOW\n".getBytes());
+				out.flush();
+			} catch (IOException ioException) {
+				logger.error("Could not notify running instance: {}", ioException.getMessage());
+			}
+			return;
+		}
     }
     
     private static void readPortMessage() {

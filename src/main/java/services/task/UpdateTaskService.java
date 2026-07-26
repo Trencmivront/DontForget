@@ -25,7 +25,8 @@ public class UpdateTaskService {
 		this.taskRepository = taskRepository;
 	}
 
-	public ResponseEntity<String> execute(TaskDTO task, Long id) {
+	public ResponseEntity<String> execute(TaskDTO task) {
+		Long id = task.getTaskId();
 		logger.info("Executing {} for task DTO: {}, id: {}", this.getClass(), task, id);
 
 		if (task == null || id == null) {

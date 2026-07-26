@@ -141,7 +141,7 @@ public class TaskRowPanel extends JPanel{
 			);
 			
 			try {
-				ResponseEntity<String> response = taskController.updateTask(updatedTask, taskId);
+				ResponseEntity<String> response = taskController.updateTask(updatedTask);
 				if (response.getStatusCode().is2xxSuccessful()) {
 					ProjectInfoPanel.getProjectInfoPanel().listTasks();
 				}

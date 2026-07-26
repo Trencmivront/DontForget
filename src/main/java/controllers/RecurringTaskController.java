@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import main.java.services.recurring.CreateRecurringTaskService;
 import main.java.services.recurring.DeleteRecurringTaskService;
 import main.java.services.recurring.GetRecurringDaysOfTaskService;
+import main.java.services.recurring.UpdateRecurringTaskService;
 
 @RestController
 @RequestMapping("/api/recurring-task")
@@ -28,14 +30,17 @@ public class RecurringTaskController {
 	private final CreateRecurringTaskService createRecurringTaskService;
 	private final DeleteRecurringTaskService deleteRecurringTaskService;
 	private final GetRecurringDaysOfTaskService getRecurringDaysOfTaskService;
+	private final UpdateRecurringTaskService updateRecurringTaskService;
 
 	public RecurringTaskController(CreateRecurringTaskService createRecurringTaskService,
 			DeleteRecurringTaskService deleteRecurringTaskService,
-			GetRecurringDaysOfTaskService getRecurringDaysOfTaskService) {
+			GetRecurringDaysOfTaskService getRecurringDaysOfTaskService,
+			UpdateRecurringTaskService updateRecurringTaskService) {
 		logger.info("Initializing RecurringTaskController");
 		this.createRecurringTaskService = createRecurringTaskService;
 		this.deleteRecurringTaskService = deleteRecurringTaskService;
 		this.getRecurringDaysOfTaskService = getRecurringDaysOfTaskService;
+		this.updateRecurringTaskService = updateRecurringTaskService;
 	}
 
 	@PostMapping("/create/{taskId}")
@@ -54,5 +59,11 @@ public class RecurringTaskController {
 	public ResponseEntity<List<DayOfWeek>> getRecurringDaysOfTask(@PathVariable Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 		return getRecurringDaysOfTaskService.execute(taskId);
+	}
+
+	@PutMapping("/update/{taskId}")
+	public ResponseEntity<String> updateRecurringTask(@PathVariable Long taskId, @RequestBody List<DayOfWeek> days) {
+		logger.info("Executing {} for taskId: {}, days: {}", this.getClass(), taskId, days);
+		return updateRecurringTaskService.execute(taskId, days);
 	}
 }

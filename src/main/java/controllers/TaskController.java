@@ -99,8 +99,8 @@ public class TaskController {
 	}
 
 	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateTask(@RequestBody TaskDTO task, @PathVariable Long id) {
-		logger.info("Executing {} for task: {}, id: {}", this.getClass(), task, id);
-		return updateTaskService.execute(task, id);
+	public ResponseEntity<String> updateTask(@RequestBody TaskDTO task) {
+		logger.info("Executing {} for task: {}, id: {}", this.getClass(), task, task.getTaskId());
+		return updateTaskService.execute(task);
 	}
 }

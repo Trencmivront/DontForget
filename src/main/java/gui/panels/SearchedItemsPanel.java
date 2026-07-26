@@ -7,6 +7,7 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -23,10 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.ProjectController;
+import main.java.controllers.ReminderController;
 import main.java.controllers.TagController;
 import main.java.controllers.TaskController;
 import main.java.custom.SpringContext;
 import main.java.dto.ProjectDTO;
+import main.java.dto.ReminderDTO;
 import main.java.dto.TagDTO;
 import main.java.dto.TaskDTO;
 import main.java.gui.windows.SearchWindow;
@@ -36,6 +39,7 @@ public class SearchedItemsPanel extends JPanel{
 	private static final Logger logger = LoggerFactory.getLogger(SearchedItemsPanel.class.getName());
 
 	private ProjectController projectController;
+	private ReminderController reminderController;
 	private TaskController taskController;
 	private TagController tagController;
 	
@@ -49,6 +53,7 @@ public class SearchedItemsPanel extends JPanel{
 		this.source = source;
 		logger.info("Initializing SearchedItemsPanel");
 		this.projectController = SpringContext.getBean(ProjectController.class);
+		this.reminderController = SpringContext.getBean(ReminderController.class);
 		this.taskController = SpringContext.getBean(TaskController.class);
 		this.tagController = SpringContext.getBean(TagController.class);
 		
@@ -73,6 +78,10 @@ public class SearchedItemsPanel extends JPanel{
 					public boolean include(RowFilter.Entry<? extends DefaultTableModel, ? extends Integer> entry) {
 						Object value = entry.getValue(0);
 						if (value instanceof JPanel panel) {
+							if(Objects.nonNull(panel.getToolTipText()) && panel.getToolTipText().equals("header")) {
+									return true;
+								}
+							
 							for (Component comp : panel.getComponents()) {
 								if (comp instanceof JLabel label) {
 									String text = label.getText();
@@ -97,6 +106,7 @@ public class SearchedItemsPanel extends JPanel{
 	
 	private JPanel createHeader(String title) {
 		JPanel panel = new JPanel();
+		panel.setToolTipText("header");
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.setBorder(new EmptyBorder(3, 2, 3, 2));
@@ -118,6 +128,7 @@ public class SearchedItemsPanel extends JPanel{
 		listProjects();
 		listTasks();
 		listTags();
+		listReminders();
 		
 		itemsTable.setModel(model);
 		itemsTable.setRowHeight(35);
@@ -201,6 +212,32 @@ public class SearchedItemsPanel extends JPanel{
 			e.printStackTrace();
 		}
 	}
+
+	private void listReminders() {
+		try {
+			ResponseEntity<List<ReminderDTO>> response = reminderController.getReminders();
+			List<ReminderDTO> reminders = response.getBody();
+			if (reminders != null && !reminders.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Reminders") });
+				for (ReminderDTO reminder : reminders) {
+					TaskDTO task = null;
+					try {
+						ResponseEntity<TaskDTO> taskResponse = taskController.getTaskById(reminder.getTaskId());
+						task = taskResponse.getBody();
+					} catch (Exception ex) {
+						logger.error("Failed to load task for reminder", ex);
+					}
+					if (task != null) {
+						ReminderRowPanel row = new ReminderRowPanel(reminder, task);
+						model.addRow(new Object[] { row });
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	private void addRowMouseListener(){
 		itemsTable.addMouseListener(new MouseAdapter() {

@@ -55,7 +55,6 @@ import main.java.dto.TagDTO;
 import main.java.dto.TaskTagDTO;
 import main.java.gui.Main;
 import main.java.gui.panels.ProjectInfoPanel;
-import main.java.gui.panels.ReminderRowPanel;
 import main.java.gui.popups.ErrorDialog;
 import main.java.gui.popups.ReminderDialog;
 
@@ -180,6 +179,14 @@ public class CreateUpdateTaskWindow extends JDialog {
 	public void setDueDateBtn(JButton dueDateBtn) {
 		this.dueDateBtn = dueDateBtn;
 	}
+
+	public JButton getReminderBtn() {
+		return reminderBtn;
+	}
+	
+	public static CreateUpdateTaskWindow getCreateUpdateTaskWindow() {
+		return createUpdateTaskWindow;
+	}
 	
 	public CreateUpdateTaskWindow(Window source,Long projectId, boolean isUpdate, JPanel rowPanel) {
 //		only one instance of task window at a time
@@ -281,7 +288,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 		getRootPane().setDefaultButton(createButton);
 		
-		addCreateButtonActionListener(createButton, isUpdate, rowPanel);
+		addCreateButtonActionListener(createButton, isUpdate);
 
 		// Set up dropdown popups for the option buttons
 		setupDueDateMenu(dueDateBtn);
@@ -394,7 +401,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 		}
 	}
 
-	private void addCreateButtonActionListener(JButton button, boolean isUpdate, JPanel taskPanel) {
+	private void addCreateButtonActionListener(JButton button, boolean isUpdate) {
 		button.addActionListener(_->{
 			String title = titleField.getText().trim();
 			String description = descArea.getText().trim();
@@ -407,10 +414,10 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 			Long taskId = null;
 			if (isUpdate) {
-				taskId = (Long) taskPanel.getClientProperty("taskId");
-				Long statusId = (Long) taskPanel.getClientProperty("statusId");
-				Integer listOrder = (Integer) taskPanel.getClientProperty("listOrder");
-				Timestamp createdAt = (Timestamp) taskPanel.getClientProperty("createdAt");
+				taskId = (Long) rowPanel.getClientProperty("taskId");
+				Long statusId = (Long) rowPanel.getClientProperty("statusId");
+				Integer listOrder = (Integer) rowPanel.getClientProperty("listOrder");
+				Timestamp createdAt = (Timestamp) rowPanel.getClientProperty("createdAt");
 				if (statusId == null) statusId = 1L;
 				if (listOrder == null) listOrder = 1;
 				if (createdAt == null) createdAt = new Timestamp(System.currentTimeMillis());
@@ -426,7 +433,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 				);
 
 				try {
-					ResponseEntity<String> response = taskController.updateTask(task, taskId);
+					ResponseEntity<String> response = taskController.updateTask(task);
 					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to update task. Make sure the title is unique.");
 						return;
@@ -487,12 +494,9 @@ public class CreateUpdateTaskWindow extends JDialog {
 			}
 //			Destroy dialogs
 			main.destroyChildWindows();
-				
-			if(rowPanel instanceof ReminderRowPanel) {
-				main.getRemindersButton().doClick();
-			}
+
 //			null case
-			else if(rowPanel == null){
+			if(rowPanel == null){
 //				relist tasks
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
 				ProjectInfoPanel.getProjectInfoPanel().revalidate();
@@ -634,7 +638,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			reminderMenu.show(button, 0, -button.getHeight());
 		});
 
-		addReminderItem.addActionListener(_ ->new ReminderDialog(CreateUpdateTaskWindow.this, button));
+		addReminderItem.addActionListener(_ ->new ReminderDialog((Long)rowPanel.getClientProperty("taskId")));
 
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;
