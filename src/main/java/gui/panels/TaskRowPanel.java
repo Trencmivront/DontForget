@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 
 import javax.swing.BoxLayout;
-import java.awt.Window;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,12 +28,10 @@ public class TaskRowPanel extends JPanel{
 	
 	private static final Logger logger = LoggerFactory.getLogger(TaskRowPanel.class.getName());
 	private final TaskController taskController = SpringContext.getBean(TaskController.class);
-	private Window parentWindow;
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
-	public TaskRowPanel(TaskDTO task, Window parentWindow) {
-		this.parentWindow = parentWindow;
+	public TaskRowPanel(TaskDTO task) {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		putClientProperty("taskId", task.getTaskId());
@@ -97,7 +94,7 @@ public class TaskRowPanel extends JPanel{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton() == MouseEvent.BUTTON1) {
-					new CreateUpdateTaskWindow(parentWindow, (Long) getClientProperty("projectId"), true, TaskRowPanel.this);
+					new CreateUpdateTaskWindow((Long) getClientProperty("projectId"), true, TaskRowPanel.this);
 				}
 			}
 		});

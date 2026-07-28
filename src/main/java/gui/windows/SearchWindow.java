@@ -34,7 +34,7 @@ public class SearchWindow extends JDialog{
 		logger.info("Initializing SearchWindow");
 		super(Main.getMain(), "Search", false);
 		
-		searchedItemsPanel = new SearchedItemsPanel(this);
+		searchedItemsPanel = new SearchedItemsPanel();
 		source = Main.getMain();
 		
 		setSize(source.getWidth() / 2, source.getHeight() / 2);

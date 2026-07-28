@@ -188,13 +188,13 @@ public class CreateUpdateTaskWindow extends JDialog {
 		return createUpdateTaskWindow;
 	}
 	
-	public CreateUpdateTaskWindow(Window source,Long projectId, boolean isUpdate, JPanel rowPanel) {
+	public CreateUpdateTaskWindow(Long projectId, boolean isUpdate, JPanel rowPanel) {
 //		only one instance of task window at a time
 		if(createUpdateTaskWindow != null) {
 			createUpdateTaskWindow.dispose();
 			createUpdateTaskWindow = null;
 		}
-		super(source, isUpdate ? "Update Task" : "Create Task");
+		super(main, isUpdate ? "Update Task" : "Create Task");
 		logger.info("Initializing CreateUpdateTaskWindow.");
 		createUpdateTaskWindow = this;
 
@@ -215,7 +215,6 @@ public class CreateUpdateTaskWindow extends JDialog {
 			setLocationRelativeTo(activeWindow);
 		} else {
 			setSize(new Dimension(480, 400));
-			setLocation(200, 200);
 		}
 
 		// Content Panel with standard margin
@@ -320,9 +319,24 @@ public class CreateUpdateTaskWindow extends JDialog {
 			
 		}
 		
+		addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				dispose();
+			}
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				return;
+			}
+		});
+		
 		revalidate();
 		repaint();
-		javax.swing.SwingUtilities.invokeLater(() -> setVisible(true));
+		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		setLocation(x, y);
+		setVisible(true);
 		logger.info("CreateUpdateTaskWindow display complete.");
 	}
 	
@@ -638,7 +652,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			reminderMenu.show(button, 0, -button.getHeight());
 		});
 
-		addReminderItem.addActionListener(_ ->new ReminderDialog((Long)rowPanel.getClientProperty("taskId")));
+		addReminderItem.addActionListener(_ ->new ReminderDialog(rowPanel == null ? null : (Long)rowPanel.getClientProperty("taskId")));
 
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;

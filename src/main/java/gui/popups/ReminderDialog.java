@@ -1,8 +1,5 @@
 package main.java.gui.popups;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -14,6 +11,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.Box;
@@ -27,6 +27,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
@@ -51,8 +54,9 @@ public class ReminderDialog extends JDialog {
 	
 	private CreateUpdateTaskWindow source;
 	private JButton reminderBtn;
-	private ReminderDTO reminderDTO;
+	private ReminderDTO reminderDTO = null;
 	private boolean isUpdate;
+	private DateTimePicker picker;
 	
 	private final RecurringTaskController recurringTaskController;
 	private final ReminderController reminderController;
@@ -72,9 +76,11 @@ public class ReminderDialog extends JDialog {
 		this.recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
 		this.reminderController = SpringContext.getBean(ReminderController.class);
 		
-		reminderDTO = reminderController.getReminderById(reminderId).getBody();
+		if(reminderId != null) {
+			reminderDTO = reminderController.getReminderById(reminderId).getBody();
+		}
 
-		DateTimePicker picker = new DateTimePicker();
+		picker = new DateTimePicker();
 		
 		isUpdate = reminderDTO == null ? false : true;
 
@@ -95,6 +101,8 @@ public class ReminderDialog extends JDialog {
 			}
 			msgField.setText(reminderDTO.getMessage());
 		}else {
+//			initialize the null values
+			tempSelectedRecurringDays = new ArrayList<DayOfWeek>();
 			picker.setDateTimePermissive(LocalDateTime.now().plusHours(1));
 		}
 		
@@ -110,6 +118,9 @@ public class ReminderDialog extends JDialog {
 		// Repeat checkbox
 		JCheckBox repeatCheckBox = new JCheckBox("repeat");
 		repeatCheckBox.setSelected(tempIsRecurring);
+		if(tempIsRecurring) {
+			setDaysPanel();
+		}
 		fieldsPanel.add(repeatCheckBox);
 		fieldsPanel.add(new JSeparator());
 		
@@ -162,7 +173,9 @@ public class ReminderDialog extends JDialog {
 
 		addFocusListener();
 		pack();
-		setLocationRelativeTo(Main.getMain());
+		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		setLocation(x, y);
 		setVisible(true);
 	}	
 	
@@ -206,11 +219,13 @@ public class ReminderDialog extends JDialog {
 			if(repeatCheckBox.isSelected()) {
 				radioPanel.setVisible(true);
 				tempIsRecurring = true;
+				picker.datePicker.setVisible(false);
 			}
 			else {
 				radioPanel.setVisible(false);
 				tempIsRecurring = false;
 				tempSelectedRecurringDays.clear();
+				picker.datePicker.setVisible(true);
 			}
 			pack();
 
@@ -246,7 +261,7 @@ public class ReminderDialog extends JDialog {
 			tempSelectedRecurringDays.clear();
 			if(rb.isSelected()) {
 				setDaysPanel();
-				daysPanel.setVisible(true);
+				picker.setVisible(false);
 			}
 			pack();
 		});
@@ -258,7 +273,22 @@ public class ReminderDialog extends JDialog {
 
 	private void addOkButtonActionListener(JButton okButton, DateTimePicker picker, JTextField msgField) {
 		okButton.addActionListener(_ -> {
-			LocalDateTime ldt = picker.getDateTimeStrict();
+			LocalDateTime ldt;
+			
+			if(tempIsRecurring) {
+				ldt = picker.getDateTimeStrict();
+			}
+			else {
+//				get the closest day
+				DayOfWeek today = LocalDateTime.now().getDayOfWeek();
+				DayOfWeek nextDay = tempSelectedRecurringDays.stream()
+						.min(Comparator.comparingInt(d -> (d.getValue() - today.getValue() + 7) % 7))
+						.orElse(today);
+				ldt =	LocalDateTime.now().toLocalDate()
+						.with(TemporalAdjusters.nextOrSame(nextDay))
+						.atTime(picker.getTimePicker().getTime());
+			}
+			
 			if (ldt == null) {
 				new ErrorDialog("Invalid Date/Time", "Please select a valid date and time.");
 				return;

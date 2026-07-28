@@ -3,7 +3,6 @@ package main.java.gui.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -32,7 +31,6 @@ import main.java.dto.ProjectDTO;
 import main.java.dto.ReminderDTO;
 import main.java.dto.TagDTO;
 import main.java.dto.TaskDTO;
-import main.java.gui.windows.SearchWindow;
 
 public class SearchedItemsPanel extends JPanel{
 
@@ -46,11 +44,8 @@ public class SearchedItemsPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private final JTable itemsTable = new JTable();
 	private DefaultTableModel model;
-
-	private Window source;
 	
-	public SearchedItemsPanel(SearchWindow source) {
-		this.source = source;
+	public SearchedItemsPanel() {
 		logger.info("Initializing SearchedItemsPanel");
 		this.projectController = SpringContext.getBean(ProjectController.class);
 		this.reminderController = SpringContext.getBean(ReminderController.class);
@@ -174,7 +169,7 @@ public class SearchedItemsPanel extends JPanel{
 			if (tasks != null && !tasks.isEmpty()) {
 				model.addRow(new Object[] { createHeader("Tasks") });
 				for (TaskDTO task : tasks) {
-					TaskRowPanel row = new TaskRowPanel(task, source);
+					TaskRowPanel row = new TaskRowPanel(task);
 					List<TagDTO> tags = null;
 					try {
 						ResponseEntity<List<TagDTO>> tagsResponse = tagController.getTagsOfTask(task.getTaskId());

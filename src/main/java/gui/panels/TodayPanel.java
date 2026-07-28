@@ -66,7 +66,7 @@ public class TodayPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		while(i.hasNext()) {
-			tasksContainer.add(new TaskRowPanel(i.next(), main));
+			tasksContainer.add(new TaskRowPanel(i.next()));
 		}
 		
 		scrollPane.setViewportView(tasksContainer);

@@ -232,6 +232,7 @@ public class Main extends JFrame {
 		toolBar.add(menuBar);
 
 		refreshWindow();
+		setLocationRelativeTo(null);
 		setVisible(true);
 		logger.info("Main window is ready.");
 	}

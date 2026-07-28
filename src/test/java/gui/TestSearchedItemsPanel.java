@@ -88,7 +88,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of(sampleTag)));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 3 headers + 1 project row + 1 task row + 1 tag row = 6 rows total
 		DefaultTableModel model = getModel(panel);
@@ -107,7 +107,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of()));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 1 header + 1 project row = 2 rows
 		DefaultTableModel model = getModel(panel);
@@ -128,7 +128,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of()));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 1 header + 1 task row = 2 rows
 		DefaultTableModel model = getModel(panel);
@@ -147,7 +147,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of(sampleTag)));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 1 header + 1 tag row = 2 rows
 		DefaultTableModel model = getModel(panel);
@@ -166,7 +166,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of()));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert
 		DefaultTableModel model = getModel(panel);
@@ -186,7 +186,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of()));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 1 header + 2 project rows = 3
 		DefaultTableModel model = getModel(panel);
@@ -207,7 +207,7 @@ class TestSearchedItemsPanel {
 				.thenReturn(ResponseEntity.ok(List.of()));
 
 //		act
-		SearchedItemsPanel panel = new SearchedItemsPanel(searchWindow);
+		SearchedItemsPanel panel = new SearchedItemsPanel();
 
 //		assert: 1 task header + 1 task row = 2 rows
 		DefaultTableModel model = getModel(panel);

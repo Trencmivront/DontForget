@@ -90,7 +90,7 @@ public class ProjectInfoPanel extends JPanel{
 		tasksContainer.setLayout(new BoxLayout(tasksContainer, BoxLayout.Y_AXIS));		
 		
 		tasks.forEach(task -> {
-			tasksContainer.add(new TaskRowPanel(task, main));
+			tasksContainer.add(new TaskRowPanel(task));
 		});
 		
 		infoScrollPane.setViewportView(tasksContainer);
@@ -113,7 +113,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_-> new CreateUpdateTaskWindow(Main.getMain() ,(Long)projectPanel.getClientProperty("projectId"), false, null));
+		button.addActionListener(_-> new CreateUpdateTaskWindow((Long)projectPanel.getClientProperty("projectId"), false, null));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);
