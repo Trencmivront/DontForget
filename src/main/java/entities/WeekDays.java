@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "WEEK_DAYS")
 public class WeekDays {
+	
     @Id
     @Column
     private Long weekDayId;
@@ -15,7 +16,7 @@ public class WeekDays {
     // No-arg constructor
     public WeekDays() {}
 
-    // All-args constructor
+    // All-args constructort
     public WeekDays(Long weekDayId, String dayName) {
         this.weekDayId = weekDayId;
         this.dayName = dayName;

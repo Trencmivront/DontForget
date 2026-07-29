@@ -63,6 +63,46 @@ public class NotificationManager {
 			return;
 		}
 		
+		setNewDateTimeForReminder(reminder);
+		
+		long delay = Timestamp.valueOf(reminder.getRemindAt()).getTime() - System.currentTimeMillis();
+		if (delay <= 0) {
+			logger.info("Reminder for task ID {} is in the past, skipping scheduling.", reminder.getTaskId());
+			return;
+		}
+		
+		TaskDTO task = null;
+		try {
+			ResponseEntity<TaskDTO> response = taskController.getTaskById(reminder.getTaskId());
+			task = response.getBody();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (task == null) {
+			logger.warn("Could not find task with ID {} for scheduling reminder.", reminder.getTaskId());
+		}
+		String description = task != null && task.getDescription() != null ? task.getDescription() : "";
+		String title = task != null ? task.getTaskTitle() : "Reminder";
+		String message = reminder.getMessage() != null ? reminder.getMessage() : description;
+ 
+		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.getTaskId(), delay);
+		ScheduledFuture<?> future = scheduler.schedule(
+			new NotificationWorker(reminder.getTaskId(), title, message),
+			delay,
+			TimeUnit.MILLISECONDS
+		);
+		scheduledTasks.put(reminder.getTaskId(), future);
+		logger.info("Reminder successfully scheduled and tracked for task ID {}", reminder.getTaskId());
+	}
+	
+	public void setNewDateTimeForReminder(ReminderDTO reminder) {
+		
+		if(reminder.getRemindAt().isAfter(LocalDateTime.now())) {
+//			Date is already set, exiting
+			return;
+		}
+		
 		List<DayOfWeek> recurringDays = recurringTaskController.getRecurringDaysOfTask(reminder.getTaskId()).getBody();
 
 		if (recurringDays != null && !recurringDays.isEmpty()) {
@@ -97,36 +137,6 @@ public class NotificationManager {
 				logger.error("Failed to persist updated remindAt for task ID {}: {}", reminder.getTaskId(), e.getMessage());
 			}
 		}
-		
-		long delay = Timestamp.valueOf(reminder.getRemindAt()).getTime() - System.currentTimeMillis();
-		if (delay <= 0) {
-			logger.info("Reminder for task ID {} is in the past, skipping scheduling.", reminder.getTaskId());
-			return;
-		}
-		
-		TaskDTO task = null;
-		try {
-			ResponseEntity<TaskDTO> response = taskController.getTaskById(reminder.getTaskId());
-			task = response.getBody();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		if (task == null) {
-			logger.warn("Could not find task with ID {} for scheduling reminder.", reminder.getTaskId());
-		}
-		String description = task != null && task.getDescription() != null ? task.getDescription() : "";
-		String title = task != null ? task.getTaskTitle() : "Reminder";
-		String message = reminder.getMessage() != null ? reminder.getMessage() : description;
- 
-		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.getTaskId(), delay);
-		ScheduledFuture<?> future = scheduler.schedule(
-			new NotificationWorker(reminder.getTaskId(), title, message),
-			delay,
-			TimeUnit.MILLISECONDS
-		);
-		scheduledTasks.put(reminder.getTaskId(), future);
-		logger.info("Reminder successfully scheduled and tracked for task ID {}", reminder.getTaskId());
 	}
 
 	public void cancelReminder(long taskId) {

@@ -118,9 +118,6 @@ public class ReminderDialog extends JDialog {
 		// Repeat checkbox
 		JCheckBox repeatCheckBox = new JCheckBox("repeat");
 		repeatCheckBox.setSelected(tempIsRecurring);
-		if(tempIsRecurring) {
-			setDaysPanel();
-		}
 		fieldsPanel.add(repeatCheckBox);
 		fieldsPanel.add(new JSeparator());
 		
@@ -139,10 +136,27 @@ public class ReminderDialog extends JDialog {
 		radioPanel.add(onceRadioButton);
 		radioPanel.add(everyDayRadioButton);
 		radioPanel.add(specialRadioButton);
+		
 		radioGroup.add(onceRadioButton);
 		radioGroup.add(everyDayRadioButton);
 		radioGroup.add(specialRadioButton);
-		radioPanel.setVisible(false);
+		
+		if(tempIsRecurring) {
+			if((tempSelectedRecurringDays.size() == 1) 
+					&& (tempSelectedRecurringDays.get(0).equals(LocalDateTime.now().getDayOfWeek()))) {
+				onceRadioButton.setSelected(true);
+			} else if((tempSelectedRecurringDays.size() == 7) && tempSelectedRecurringDays.equals(List.of(DayOfWeek.values()))) {
+				everyDayRadioButton.setSelected(true);
+			} else {
+				specialRadioButton.setSelected(true);
+				setDaysPanel();
+			}
+			radioPanel.setVisible(true);
+		}
+		else {
+			radioPanel.setVisible(false);
+		}
+		
 		fieldsPanel.add(radioPanel);
 		fieldsPanel.add(new JSeparator());
 		
@@ -293,7 +307,7 @@ public class ReminderDialog extends JDialog {
 				new ErrorDialog("Invalid Date/Time", "Please select a valid date and time.");
 				return;
 			}
-			if (ldt.isBefore(LocalDateTime.now())) {
+			if (ldt.isBefore(LocalDateTime.now()) && !tempIsRecurring) {
 				new ErrorDialog("Invalid Date/Time", "Reminder time cannot be in the past.");
 				return;
 			}
@@ -332,7 +346,12 @@ public class ReminderDialog extends JDialog {
 					msgText.isEmpty() ? null : msgText
 				);
 				reminderController.updateReminder(updatedDTO);
-				recurringTaskController.updateRecurringTask(reminderDTO.getTaskId(), tempSelectedRecurringDays);
+				
+				if(tempSelectedRecurringDays.isEmpty() && tempIsRecurring) {
+					recurringTaskController.deleteRecurringTask(reminderDTO.getTaskId());
+				} else if(tempIsRecurring) {
+					recurringTaskController.updateRecurringTask(reminderDTO.getTaskId(), tempSelectedRecurringDays);
+				}
 			}
 
 			dispose();

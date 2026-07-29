@@ -47,7 +47,10 @@ public class App {
 
 	private static void startApp(String[] args) {
 		// Try binding to the single-instance port
-		showExistingWindow();
+		if(showExistingWindow()) {
+//			if it connects, prevent further execution
+			return;
+		}
 
 		applySettings();
 		
@@ -108,7 +111,7 @@ public class App {
         logger.info("Background listener started.");
     }
     
-    private static void showExistingWindow() {
+    private static boolean showExistingWindow() {
 		try {
 			serverSocket = new ServerSocket(19999);
 			logger.info("Successfully bound port 19999. Starting primary instance.");
@@ -122,8 +125,9 @@ public class App {
 			} catch (IOException ioException) {
 				logger.error("Could not notify running instance: {}", ioException.getMessage());
 			}
-			return;
+			return true;
 		}
+		return false;
     }
     
     private static void readPortMessage() {
