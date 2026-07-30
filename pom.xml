@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>DontForget</groupId>
 	<artifactId>DontForget</artifactId>
-	<version>0.5.8~ALPHA1</version>
+	<version>0.5.8~ALPHA2</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>src</testSourceDirectory>

@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.IconColorDTO;
 import main.java.entities.IconColor;
+import main.java.inter.Query;
 import main.java.repos.IconColorRepository;
 
 @Service
-public class GetIconColorOfProjectService {
+public class GetIconColorOfProjectService implements Query<Long, IconColorDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetIconColorOfProjectService.class.getName());
 

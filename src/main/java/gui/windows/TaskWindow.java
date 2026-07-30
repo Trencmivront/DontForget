@@ -32,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AbstractDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import main.java.controllers.TagController;
 import main.java.controllers.TaskController;
 import main.java.controllers.TaskTagController;
 import main.java.custom.CustomIcon;
+import main.java.custom.DocumentFilterFactory;
 import main.java.custom.SpringContext;
 import main.java.dto.TaskDTO;
 import main.java.dto.IconColorDTO;
@@ -58,10 +60,10 @@ import main.java.gui.panels.ProjectInfoPanel;
 import main.java.gui.popups.ErrorDialog;
 import main.java.gui.popups.ReminderDialog;
 
-public class CreateUpdateTaskWindow extends JDialog {
+public class TaskWindow extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(CreateUpdateTaskWindow.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(TaskWindow.class.getName());
 
 	private LocalDate selectedDueDate = null;
 	private Integer selectedPriority = null;
@@ -90,7 +92,10 @@ public class CreateUpdateTaskWindow extends JDialog {
 	private final TaskTagController taskTagController = SpringContext.getBean(TaskTagController.class);
 	private final IconColorController iconColorController = SpringContext.getBean(IconColorController.class);
 	
-	private static CreateUpdateTaskWindow createUpdateTaskWindow;
+	private static final int TITLE_MAX_LENGTH = 100;
+	private static final int BODY_MAX_LENGTH = 1000;
+	
+	private static TaskWindow taskWindow;
 	
 	public LocalDate getSelectedDueDate() {
 		return selectedDueDate;
@@ -184,19 +189,19 @@ public class CreateUpdateTaskWindow extends JDialog {
 		return reminderBtn;
 	}
 	
-	public static CreateUpdateTaskWindow getCreateUpdateTaskWindow() {
-		return createUpdateTaskWindow;
+	public static TaskWindow getCreateUpdateTaskWindow() {
+		return taskWindow;
 	}
 	
-	public CreateUpdateTaskWindow(Long projectId, boolean isUpdate, JPanel rowPanel) {
+	public TaskWindow(Long projectId, boolean isUpdate, JPanel rowPanel) {
 //		only one instance of task window at a time
-		if(createUpdateTaskWindow != null) {
-			createUpdateTaskWindow.dispose();
-			createUpdateTaskWindow = null;
+		if(taskWindow != null) {
+			taskWindow.dispose();
+			taskWindow = null;
 		}
 		super(main, isUpdate ? "Update Task" : "Create Task");
-		logger.info("Initializing CreateUpdateTaskWindow.");
-		createUpdateTaskWindow = this;
+		logger.info("Initializing TaskWindow.");
+		taskWindow = this;
 
 		this.projectId = projectId;
 		this.rowPanel = rowPanel;
@@ -227,6 +232,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 		titleField.setFont(new Font("Dialog", Font.BOLD, 15));
 		titleField.putClientProperty("JTextField.placeholderText", "Title of the task");
 		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
+		setTitleFieldDocumentFilter(titleField);
 		contentPanel.add(titleField, BorderLayout.NORTH);
 
 		// 2. Center Panel (Description + Options)
@@ -238,7 +244,8 @@ public class CreateUpdateTaskWindow extends JDialog {
 		descArea.setWrapStyleWord(true);
 		descArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
 		descArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
-
+		setDescriptionFieldDocumentFilter(descArea);
+		
 		JScrollPane descScrollPane = new JScrollPane(descArea);
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
 
@@ -337,7 +344,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
 		setLocation(x, y);
 		setVisible(true);
-		logger.info("CreateUpdateTaskWindow display complete.");
+		logger.info("TaskWindow display complete.");
 	}
 	
 	private void setDueDate(Timestamp dueDate) {
@@ -421,7 +428,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			String description = descArea.getText().trim();
 
 			if (title.isEmpty()) {
-				JOptionPane.showMessageDialog(CreateUpdateTaskWindow.this, "Task title cannot be empty.", "Validation Error",
+				JOptionPane.showMessageDialog(TaskWindow.this, "Task title cannot be empty.", "Validation Error",
 						JOptionPane.WARNING_MESSAGE);
 				return;
 			}
@@ -457,14 +464,6 @@ public class CreateUpdateTaskWindow extends JDialog {
 					new ErrorDialog("Error", "Failed to update task. Make sure the title is unique.");
 					return;
 				}
-
-				try {
-					reminderController.deleteReminder(taskId);
-					taskTagController.deleteTaskTag(taskId);
-					recurringTaskController.deleteRecurringTask(taskId);
-				} catch (Exception e) {
-					logger.error("Failed to delete old task associations", e);
-				}
 			} else {
 				try {
 					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority, selectedDueDate, projectId));
@@ -490,6 +489,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			}
 
 			if (taskId != null && selectedTags != null) {
+				taskTagController.deleteTagsOfTask(taskId);
 				for (TagDTO tag : selectedTags) {
 					try {
 						taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.getTagId()));
@@ -562,7 +562,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			DatePicker picker = new DatePicker();
 			picker.setDateToToday();
 			
-			JDialog inputDialog = new JDialog(CreateUpdateTaskWindow.this, "Due-Date", true);
+			JDialog inputDialog = new JDialog(TaskWindow.this, "Due-Date", true);
 			
 			Container contentPane = inputDialog.getContentPane();
 			
@@ -676,7 +676,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 
 	private void setupTagsDialog(JButton button) {
 		button.addActionListener(_ -> {
-			JDialog tagsDialog = new JDialog(CreateUpdateTaskWindow.this);
+			JDialog tagsDialog = new JDialog(TaskWindow.this);
 			tagsDialog.setTitle("Select Tags");
 			tagsDialog.setModal(true);
 			tagsDialog.setResizable(false);
@@ -771,7 +771,7 @@ public class CreateUpdateTaskWindow extends JDialog {
 			tagsDialog.add(buttonPane, BorderLayout.SOUTH);
 
 			tagsDialog.pack();
-			tagsDialog.setLocationRelativeTo(CreateUpdateTaskWindow.this);
+			tagsDialog.setLocationRelativeTo(TaskWindow.this);
 			tagsDialog.setVisible(true);
 		});
 	}
@@ -787,6 +787,14 @@ public class CreateUpdateTaskWindow extends JDialog {
 			button.setText(selectedTags.size() + " Tags Selected");
 			button.setForeground(new Color(59, 130, 246));
 		}
+	}
+	
+	private void setTitleFieldDocumentFilter(JTextField field) {
+		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(TITLE_MAX_LENGTH));
+	}
+	
+	private void setDescriptionFieldDocumentFilter(JTextArea field) {
+		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(BODY_MAX_LENGTH));
 	}
 
 }

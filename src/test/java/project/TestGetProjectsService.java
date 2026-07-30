@@ -44,7 +44,7 @@ class TestGetProjectsService {
 //		test case
 		when(projectRepository.findAllByOrderByListOrderAsc()).thenReturn(List.of(sampleProject));
 //		values to be tested
-		ResponseEntity<List<ProjectDTO>> response = getProjectsService.execute();
+		ResponseEntity<List<ProjectDTO>> response = getProjectsService.execute(null);
 		List<ProjectDTO> projects = response.getBody();
 //		testing
 		assertNotNull(projects);
@@ -58,7 +58,7 @@ class TestGetProjectsService {
 	void testServiceReturnsNullValueOnException() {
 		when(projectRepository.findAllByOrderByListOrderAsc()).thenThrow(new RuntimeException());
 		
-		ResponseEntity<List<ProjectDTO>> response = getProjectsService.execute();
+		ResponseEntity<List<ProjectDTO>> response = getProjectsService.execute(null);
 		
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		

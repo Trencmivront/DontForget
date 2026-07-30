@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
+import main.java.inter.Query;
 import main.java.repos.ProjectRepository;
 
 @Service
-public class GetProjectsService {
+public class GetProjectsService implements Query<Void, List<ProjectDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetProjectsService.class.getName());
 
@@ -24,12 +25,12 @@ public class GetProjectsService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<List<ProjectDTO>> execute() {
+	public ResponseEntity<List<ProjectDTO>> execute(Void i) {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Project> projects = projectRepository.findAllByOrderByListOrderAsc();
 			List<ProjectDTO> dtos = projects.stream()
-				.map(project -> new ProjectDTO(project))
+				.map(ProjectDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

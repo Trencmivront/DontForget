@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TagDTO;
 import main.java.entities.Tag;
+import main.java.inter.Query;
 import main.java.repos.TagRepository;
 
 @Service
-public class GetTagsService {
+public class GetTagsService implements Query<Void, List<TagDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTagsService.class.getName());
 
@@ -25,12 +26,12 @@ public class GetTagsService {
 		this.tagRepository = tagRepository;
 	}
 
-	public ResponseEntity<List<TagDTO>> execute() {
+	public ResponseEntity<List<TagDTO>> execute(Void i) {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Tag> tags = tagRepository.findAll();
 			List<TagDTO> dtos = tags.stream()
-				.map(tag -> new TagDTO(tag))
+				.map(TagDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

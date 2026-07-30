@@ -10,12 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.java.entities.Task;
+import main.java.inter.Command;
 import main.java.repos.ProjectRepository;
 import main.java.repos.TaskRepository;
 import main.java.services.task.DeleteTaskService;
 
 @Service
-public class DeleteProjectService {
+public class DeleteProjectService implements Command<Long> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteProjectService.class.getName());
 

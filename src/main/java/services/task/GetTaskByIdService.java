@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskDTO;
 import main.java.entities.Task;
+import main.java.inter.Query;
 import main.java.repos.TaskRepository;
 
 @Service
-public class GetTaskByIdService {
+public class GetTaskByIdService implements Query<Long, TaskDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTaskByIdService.class.getName());
 
@@ -30,8 +31,7 @@ public class GetTaskByIdService {
 			if (task == null) {
 				return ResponseEntity.notFound().build();
 			}
-			TaskDTO dto = new TaskDTO(task);
-			return ResponseEntity.ok(dto);
+			return ResponseEntity.ok(new TaskDTO(task));
 		} catch (Exception e) {
 			logger.warn("An exception occurred: {}", e.getMessage());
 			e.printStackTrace();

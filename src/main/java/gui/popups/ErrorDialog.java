@@ -13,6 +13,9 @@ public class ErrorDialog extends JDialog{
 
 	public ErrorDialog(String title, String message) {
 		logger.info("Initializing ErrorDialog");
+		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		setLocation(x, y);
 		JOptionPane.showMessageDialog(this, message,
 				title, JOptionPane.ERROR_MESSAGE);
 	}

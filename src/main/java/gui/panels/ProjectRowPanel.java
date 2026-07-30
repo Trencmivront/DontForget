@@ -27,7 +27,7 @@ import main.java.custom.CustomIcon;
 import main.java.dto.IconColorDTO;
 import main.java.dto.ProjectDTO;
 import main.java.gui.Main;
-import main.java.gui.windows.CreateUpdateProjectWindow;
+import main.java.gui.windows.ProjectWindow;
 
 public class ProjectRowPanel extends JPanel {
 
@@ -121,7 +121,7 @@ public class ProjectRowPanel extends JPanel {
 
 	private void addEditActionListener(JMenuItem button) {
 		button.addActionListener(_ -> {
-			CreateUpdateProjectWindow dialog = new CreateUpdateProjectWindow(main, true, this);
+			ProjectWindow dialog = new ProjectWindow(main, true, this);
 			dialog.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent we) {

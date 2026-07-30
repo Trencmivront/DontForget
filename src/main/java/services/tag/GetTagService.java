@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TagDTO;
 import main.java.entities.Tag;
+import main.java.inter.Query;
 import main.java.repos.TagRepository;
 
 @Service
-public class GetTagService {
+public class GetTagService implements Query<Long, TagDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTagService.class.getName());
 
@@ -30,8 +31,7 @@ public class GetTagService {
 			if (tag == null) {
 				return ResponseEntity.notFound().build();
 			}
-			TagDTO dto = new TagDTO(tag);
-			return ResponseEntity.ok(dto);
+			return ResponseEntity.ok(new TagDTO(tag));
 		} catch (Exception e) {
 			logger.warn("Error fetching tag with ID {}: {}", tagId, e.getMessage());
 			e.printStackTrace();

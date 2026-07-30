@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskDTO;
 import main.java.entities.Task;
+import main.java.inter.Query;
 import main.java.repos.TaskRepository;
 
 @Service
-public class GetTodaysTasksService {
+public class GetTodaysTasksService implements Query<Void, List<TaskDTO>>{
 	private static final Logger logger = LoggerFactory.getLogger(GetTodaysTasksService.class.getName());
 
 	@Autowired
@@ -24,12 +25,12 @@ public class GetTodaysTasksService {
 		this.taskRepository = taskRepository;
 	}
 
-	public ResponseEntity<List<TaskDTO>> execute() {
+	public ResponseEntity<List<TaskDTO>> execute(Void i) {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Task> tasks = taskRepository.findTodaysTasks();
 			List<TaskDTO> dtos = tasks.stream()
-				.map(task -> new TaskDTO(task))
+				.map(TaskDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

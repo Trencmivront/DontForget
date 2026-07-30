@@ -89,13 +89,13 @@ public class TaskController {
 	@GetMapping("/get-all")
 	public ResponseEntity<List<TaskDTO>> getTasks() {
 		logger.info("Executing {}", this.getClass());
-		return getTasksService.execute();
+		return getTasksService.execute(null);
 	}
 
 	@GetMapping("/today")
 	public ResponseEntity<List<TaskDTO>> getTodaysTasks() {
 		logger.info("Executing {}", this.getClass());
-		return getTodaysTasksService.execute();
+		return getTodaysTasksService.execute(null);
 	}
 
 	@PutMapping("/update/{id}")

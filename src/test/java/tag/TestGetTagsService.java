@@ -46,7 +46,7 @@ class TestGetTagsService {
 		when(tagRepository.findAll()).thenReturn(List.of(sampleTag));
 		
 		// Call service method
-		ResponseEntity<List<TagDTO>> response = getTagsService.execute();
+		ResponseEntity<List<TagDTO>> response = getTagsService.execute(null);
 		List<TagDTO> tags = response.getBody();
 		
 		// Assertions
@@ -65,7 +65,7 @@ class TestGetTagsService {
 		when(tagRepository.findAll()).thenThrow(new RuntimeException("DB error"));
 		
 		// Call service method
-		ResponseEntity<List<TagDTO>> response = getTagsService.execute();
+		ResponseEntity<List<TagDTO>> response = getTagsService.execute(null);
 		
 		// Assertions
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

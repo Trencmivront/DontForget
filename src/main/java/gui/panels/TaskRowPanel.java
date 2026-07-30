@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import main.java.controllers.TaskController;
 import main.java.custom.SpringContext;
 import main.java.dto.TaskDTO;
-import main.java.gui.windows.CreateUpdateTaskWindow;
+import main.java.gui.windows.TaskWindow;
 
 public class TaskRowPanel extends JPanel{
 
@@ -94,7 +94,7 @@ public class TaskRowPanel extends JPanel{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton() == MouseEvent.BUTTON1) {
-					new CreateUpdateTaskWindow((Long) getClientProperty("projectId"), true, TaskRowPanel.this);
+					new TaskWindow((Long) getClientProperty("projectId"), true, TaskRowPanel.this);
 				}
 			}
 		});

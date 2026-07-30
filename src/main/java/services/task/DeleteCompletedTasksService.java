@@ -9,9 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskDTO;
+import main.java.inter.Command;
 
 @Service
-public class DeleteCompletedTasksService {
+public class DeleteCompletedTasksService implements Command<Long> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteCompletedTasksService.class.getName());
 

@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.inter.Command;
 import main.java.notify.NotificationManager;
 import main.java.repos.ReminderRepository;
 import main.java.services.recurring.DeleteRecurringTaskService;
 
 @Service
-public class DeleteReminderService {
+public class DeleteReminderService implements Command<Long> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteReminderService.class.getName());
 

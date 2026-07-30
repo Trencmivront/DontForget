@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import main.java.dto.ReminderDTO;
+import main.java.inter.Command;
 import main.java.entities.Reminder;
 import main.java.notify.NotificationManager;
 import main.java.repos.ReminderRepository;
 
 @Service
-public class UpdateReminderService {
+public class UpdateReminderService implements Command<ReminderDTO> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateReminderService.class.getName());
 

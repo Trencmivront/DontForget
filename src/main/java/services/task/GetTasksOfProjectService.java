@@ -13,10 +13,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskDTO;
 import main.java.entities.Task;
+import main.java.inter.Query;
 import main.java.repos.TaskRepository;
 
 @Service
-public class GetTasksOfProjectService {
+public class GetTasksOfProjectService implements Query<Long, List<TaskDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTasksOfProjectService.class.getName());
 
@@ -32,7 +33,7 @@ public class GetTasksOfProjectService {
 		try {
 			List<Task> tasks = taskRepository.findByprojectId(id);
 			List<TaskDTO> dtos = tasks.stream()
-				.map(task -> new TaskDTO(task))
+				.map(TaskDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

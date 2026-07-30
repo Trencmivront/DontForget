@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.ReminderDTO;
 import main.java.entities.Reminder;
+import main.java.inter.Query;
 import main.java.repos.ReminderRepository;
 
 @Service
-public class GetReminderByIdService {
+public class GetReminderByIdService implements Query<Long, ReminderDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetReminderByIdService.class.getName());
 
@@ -30,8 +31,7 @@ public class GetReminderByIdService {
 			if (reminder == null) {
 				return ResponseEntity.notFound().build();
 			}
-			ReminderDTO dto = new ReminderDTO(reminder);
-			return ResponseEntity.ok(dto);
+			return ResponseEntity.ok(new ReminderDTO(reminder));
 		} catch (Exception e) {
 			logger.warn("Error getting reminder for ID {}: {}", id, e.getMessage());
 			e.printStackTrace();

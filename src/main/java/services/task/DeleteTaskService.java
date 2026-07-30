@@ -8,12 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.inter.Command;
 import main.java.repos.TaskRepository;
 import main.java.services.reminder.DeleteReminderService;
 import main.java.services.tasktag.DeleteTaskTagService;
 
 @Service
-public class DeleteTaskService {
+public class DeleteTaskService implements Command<Long> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteTaskService.class.getName());
 

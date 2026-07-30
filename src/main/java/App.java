@@ -52,7 +52,6 @@ public class App {
 			return;
 		}
 
-		applySettings();
 		
 		// Start Spring Boot
 		new SpringApplicationBuilder(App.class).
@@ -64,6 +63,9 @@ public class App {
 			try {
 				logger.info("Starting DontForget application...");
 				// Initialize the look and feel
+				
+				applySettings();
+
 				
 //				show window
 				new Main();

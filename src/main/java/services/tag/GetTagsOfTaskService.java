@@ -2,6 +2,8 @@ package main.java.services.tag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +13,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TagDTO;
 import main.java.dto.TaskTagDTO;
+import main.java.inter.Query;
 import main.java.services.tasktag.GetTaskTagByTaskService;
 
 @Service
-public class GetTagsOfTaskService {
+public class GetTagsOfTaskService implements Query<Long, List<TagDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTagsOfTaskService.class.getName());
 
@@ -32,18 +35,14 @@ public class GetTagsOfTaskService {
 	public ResponseEntity<List<TagDTO>> execute(Long taskId) {
 		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
 
-		List<TagDTO> tags = new ArrayList<>();
+		List<TagDTO> tags = new ArrayList<TagDTO>();
 		ResponseEntity<List<TaskTagDTO>> taskTagsResponse = getTaskTagByTaskService.execute(taskId);
 		List<TaskTagDTO> taskTags = taskTagsResponse.getBody();
 
 		if (taskTags != null) {
-			for (TaskTagDTO tt : taskTags) {
-				ResponseEntity<TagDTO> tagResponse = getTagService.execute(tt.getTagId());
-				TagDTO tag = tagResponse.getBody();
-				if (tag != null) {
-					tags.add(tag);
-				}
-			}
+			tags = taskTags.stream()
+				    .map(tt -> getTagService.execute(tt.getTagId()).getBody())
+				    .filter(Objects::nonNull).toList();
 		}
 
 		return ResponseEntity.ok(tags);

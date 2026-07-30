@@ -55,6 +55,10 @@ public class SearchWindow extends JDialog{
 		addSearchTextFieldEventListener();
 		addFocusListener();
 		
+		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		setLocation(x, y);
+		
 		refresh();
 		setVisible(true);
 	}

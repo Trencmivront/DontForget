@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.InboxDTO;
 import main.java.entities.Inbox;
+import main.java.inter.Query;
 import main.java.repos.InboxRepository;
 
 @Service
-public class GetInboxService {
+public class GetInboxService implements Query<Void, List<InboxDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetInboxService.class.getName());
 
@@ -25,12 +26,12 @@ public class GetInboxService {
 		this.inboxRepository = inboxRepository;
 	}
 
-	public ResponseEntity<List<InboxDTO>> execute() {
+	public ResponseEntity<List<InboxDTO>> execute(Void i) {
 		logger.info("Executing {}", this.getClass());
 		try {
 			List<Inbox> inboxList = inboxRepository.findAll(Sort.by(Sort.Direction.DESC, "inboxId"));
 			List<InboxDTO> dtos = inboxList.stream()
-				.map(item -> new InboxDTO(item))
+				.map(InboxDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

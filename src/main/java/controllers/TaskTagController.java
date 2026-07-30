@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import main.java.dto.TaskTagDTO;
 import main.java.services.tasktag.CreateTaskTagService;
+import main.java.services.tasktag.DeleteTagsOfTaskService;
 import main.java.services.tasktag.DeleteTaskTagService;
 import main.java.services.tasktag.GetTaskTagByTaskService;
 
@@ -27,14 +28,17 @@ public class TaskTagController {
 
 	private final CreateTaskTagService createTaskTagService;
 	private final DeleteTaskTagService deleteTaskTagService;
+	private final DeleteTagsOfTaskService deleteTagsOfTaskService;
 	private final GetTaskTagByTaskService getTaskTagByTaskService;
 
 	public TaskTagController(CreateTaskTagService createTaskTagService,
 			DeleteTaskTagService deleteTaskTagService,
+			DeleteTagsOfTaskService deleteTagsOfTaskService,
 			GetTaskTagByTaskService getTaskTagByTaskService) {
 		logger.info("Initializing TaskTagController");
 		this.createTaskTagService = createTaskTagService;
 		this.deleteTaskTagService = deleteTaskTagService;
+		this.deleteTagsOfTaskService = deleteTagsOfTaskService;
 		this.getTaskTagByTaskService = getTaskTagByTaskService;
 	}
 
@@ -48,6 +52,12 @@ public class TaskTagController {
 	public ResponseEntity<String> deleteTaskTag(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return deleteTaskTagService.execute(id);
+	}
+
+	@DeleteMapping("/delete/task/{taskId}")
+	public ResponseEntity<String> deleteTagsOfTask(@PathVariable Long taskId) {
+		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
+		return deleteTagsOfTaskService.execute(taskId);
 	}
 
 	@GetMapping("/task/{taskId}")

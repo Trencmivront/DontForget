@@ -53,6 +53,6 @@ public class InboxController {
 	@GetMapping("/get-all")
 	public ResponseEntity<List<InboxDTO>> getInbox() {
 		logger.info("Executing {}", this.getClass());
-		return getInboxService.execute();
+		return getInboxService.execute(null);
 	}
 }

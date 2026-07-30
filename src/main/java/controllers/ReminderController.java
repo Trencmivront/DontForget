@@ -68,7 +68,7 @@ public class ReminderController {
 	@GetMapping("/get-all")
 	public ResponseEntity<List<ReminderDTO>> getReminders() {
 		logger.info("Executing {}", this.getClass());
-		return getRemindersService.execute();
+		return getRemindersService.execute(null);
 	}
 
 	@PutMapping("/update")

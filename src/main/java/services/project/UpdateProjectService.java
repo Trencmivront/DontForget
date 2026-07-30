@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
+import main.java.inter.Command;
 import main.java.repos.ProjectRepository;
 
 @Service
-public class UpdateProjectService {
+public class UpdateProjectService implements Command<ProjectDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateProjectService.class.getName());
 
@@ -24,13 +25,14 @@ public class UpdateProjectService {
 		this.projectRepository = projectRepository;
 	}
 
-	public ResponseEntity<String> execute(ProjectDTO p, Long id) {
-		logger.info("Executing {} for p: {}, id: {}", this.getClass(), p, id);
-
+	public ResponseEntity<String> execute(ProjectDTO p) {
 		if (p == null) {
 			logger.warn("ProjectDCO is null. Aborting update.");
 			return ResponseEntity.badRequest().body("NULL PROJECT");
 		}
+		
+		Long id = p.getProjectId();
+		logger.info("Executing {} for p: {}, id: {}", this.getClass(), p, id);
 
 		try {
 			Project project = projectRepository.findById(id).orElse(null);

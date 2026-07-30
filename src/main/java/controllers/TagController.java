@@ -61,6 +61,6 @@ public class TagController {
 	@GetMapping("/get-all")
 	public ResponseEntity<List<TagDTO>> getTags() {
 		logger.info("Executing {}", this.getClass());
-		return getTagsService.execute();
+		return getTagsService.execute(null);
 	}
 }

@@ -11,11 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskDTO;
+import main.java.inter.Post;
 import main.java.entities.Task;
 import main.java.repos.TaskRepository;
 
 @Service
-public class CreateTaskService {
+public class CreateTaskService implements Post<TaskDTO> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateTaskService.class.getName());
 

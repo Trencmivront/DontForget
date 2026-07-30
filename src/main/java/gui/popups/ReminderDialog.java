@@ -39,7 +39,7 @@ import main.java.controllers.ReminderController;
 import main.java.custom.SpringContext;
 import main.java.dto.ReminderDTO;
 import main.java.gui.Main;
-import main.java.gui.windows.CreateUpdateTaskWindow;
+import main.java.gui.windows.TaskWindow;
 
 public class ReminderDialog extends JDialog {
 
@@ -52,7 +52,7 @@ public class ReminderDialog extends JDialog {
 	private ButtonGroup radioGroup = new ButtonGroup();
 	private JPanel radioPanel;
 	
-	private CreateUpdateTaskWindow source;
+	private TaskWindow source;
 	private JButton reminderBtn;
 	private ReminderDTO reminderDTO = null;
 	private boolean isUpdate;
@@ -69,9 +69,9 @@ public class ReminderDialog extends JDialog {
 		setUndecorated(true);
 		setLayout(new BorderLayout(10, 10));
 		
-		if(CreateUpdateTaskWindow.getCreateUpdateTaskWindow() != null) {
-			this.source = CreateUpdateTaskWindow.getCreateUpdateTaskWindow();
-			this.reminderBtn = CreateUpdateTaskWindow.getCreateUpdateTaskWindow().getReminderBtn();
+		if(TaskWindow.getCreateUpdateTaskWindow() != null) {
+			this.source = TaskWindow.getCreateUpdateTaskWindow();
+			this.reminderBtn = TaskWindow.getCreateUpdateTaskWindow().getReminderBtn();
 		}
 		this.recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
 		this.reminderController = SpringContext.getBean(ReminderController.class);
@@ -195,7 +195,7 @@ public class ReminderDialog extends JDialog {
 	
 	private void setDaysPanel() {
 		daysPanel.removeAll();
-		daysPanel.setLayout(new BoxLayout(daysPanel, BoxLayout.X_AXIS));
+		daysPanel.setLayout(new WrapLayout(WrapLayout.CENTER));
 		daysPanel.setVisible(false);
 				
 		for(int i = 1; i <= 7; i ++) {

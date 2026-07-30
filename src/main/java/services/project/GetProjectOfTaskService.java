@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.ProjectDTO;
 import main.java.entities.Project;
+import main.java.inter.Query;
 import main.java.repos.ProjectRepository;
 
 @Service
-public class GetProjectOfTaskService {
+public class GetProjectOfTaskService implements Query<Long, ProjectDTO>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetProjectOfTaskService.class.getName());
 

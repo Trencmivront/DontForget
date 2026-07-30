@@ -42,7 +42,7 @@ class TestGetInboxService {
 		when(inboxRepository.findAll(any(Sort.class))).thenReturn(expectedList);
 
 		// Act
-		ResponseEntity<List<InboxDTO>> response = getInboxService.execute();
+		ResponseEntity<List<InboxDTO>> response = getInboxService.execute(null);
 
 		// Assertions
 		assertNotNull(response);
@@ -63,7 +63,7 @@ class TestGetInboxService {
 		when(inboxRepository.findAll(any(Sort.class))).thenThrow(new RuntimeException("DB error"));
 
 		// Act
-		ResponseEntity<List<InboxDTO>> response = getInboxService.execute();
+		ResponseEntity<List<InboxDTO>> response = getInboxService.execute(null);
 
 		// Assertions
 		assertNotNull(response);

@@ -13,6 +13,8 @@ import java.util.Enumeration;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import main.java.custom.DocumentFilterFactory;
 import main.java.custom.SpringContext;
 import main.java.dto.ProjectDTO;
 
@@ -32,9 +34,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
 
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
@@ -44,17 +43,17 @@ import main.java.dto.IconColorDTO;
 import main.java.gui.panels.ProjectRowPanel;
 import main.java.gui.popups.ErrorDialog;
 
-public class CreateUpdateProjectWindow extends JDialog {
+public class ProjectWindow extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 	private JTextField projectTitleTextField;
 	private JTextArea descriptionTextArea;
 	private ButtonGroup bg;
-	private static final Logger logger = LoggerFactory.getLogger(CreateUpdateProjectWindow.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(ProjectWindow.class.getName());
 
-	private static final int TITLE_MAX_CHARACTER = 50;
-	private static final int BODY_MAX_CHARACTER = 500;
+	private static final int TITLE_MAX_LENGTH = 50;
+	private static final int BODY_MAX_LENGTH = 500;
 	private boolean isUpdate = false;
 	private ProjectRowPanel updatedProject;
 	private final ProjectController projectController = SpringContext.getBean(ProjectController.class);
@@ -63,7 +62,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public CreateUpdateProjectWindow(JFrame source, Boolean isUpdate, ProjectRowPanel updatedProject) {
+	public ProjectWindow(JFrame source, Boolean isUpdate, ProjectRowPanel updatedProject) {
 		logger.info("Drawing the window.");
 		
 		super(source, "Create Project", false);
@@ -78,7 +77,6 @@ public class CreateUpdateProjectWindow extends JDialog {
 		int w = Math.min(480, (int) (size.getWidth() * 0.75));
 		int h = Math.min(400, (int) (size.getHeight() * 0.75));
 		setSize(new Dimension(w, h));
-		setLocationRelativeTo(source);
 
 		// Content Panel with standard margin
 		contentPanel.setLayout(new BorderLayout(15, 15));
@@ -150,6 +148,9 @@ public class CreateUpdateProjectWindow extends JDialog {
 
 		revalidate();
 		repaint();
+		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		setLocation(x, y);
 		setVisible(true);
 
 		logger.info("Window is ready.");
@@ -177,7 +178,7 @@ public class CreateUpdateProjectWindow extends JDialog {
 			if(isUpdate) {
 				Long id = (Long)updatedProject.getClientProperty("projectId");
 				try {
-					ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId), id);
+					ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId));
 					if (re.getStatusCode().value() >= 400) {
 						new ErrorDialog("Database Error", "Error while updating project");
 					}
@@ -280,51 +281,11 @@ public class CreateUpdateProjectWindow extends JDialog {
 	}
 	
 	private void addTextFieldDocumentFilter(JTextField field) {
-		((AbstractDocument) field.getDocument()).setDocumentFilter(createDocumentFilter(TITLE_MAX_CHARACTER));
+		((AbstractDocument) field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(TITLE_MAX_LENGTH));
 	}
 	
 	private void addTextAreaDocumentFilter(JTextArea area) {
-		((AbstractDocument) area.getDocument()).setDocumentFilter(createDocumentFilter(BODY_MAX_CHARACTER));
-	}
-	
-	private DocumentFilter createDocumentFilter(int maxCharacter) {
-		return new DocumentFilter() {
-//			Here we update the text area same way we update jtable.
-			@Override
-			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-				if (string == null) {
-//					and there is no string to be inserted
-					return;
-				}
-//				Insert the string if it length is smaller than max character length
-				if ((fb.getDocument().getLength() + string.length()) <= maxCharacter) {
-					super.insertString(fb, offset, string, attr);
-				} else {
-//					get substring of string if text size is bigger than max character
-					int remaining = maxCharacter - fb.getDocument().getLength();
-					if (remaining > 0) {
-						super.insertString(fb, offset, string.substring(0, remaining), attr);
-					}
-				}
-			}
-
-			@Override
-			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-				if (text == null) {
-					super.replace(fb, offset, length, null, attrs);
-					return;
-				}
-				int currentLength = fb.getDocument().getLength();
-				if ((currentLength - length + text.length()) <= maxCharacter) {
-					super.replace(fb, offset, length, text, attrs);
-				} else {
-					int remaining = maxCharacter - currentLength + length;
-					if (remaining > 0) {
-						super.replace(fb, offset, length, text.substring(0, remaining), attrs);
-					}
-				}
-			}
-		};
+		((AbstractDocument) area.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(BODY_MAX_LENGTH));
 	}
 
 }

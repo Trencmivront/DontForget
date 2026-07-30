@@ -9,11 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.java.dto.ProjectDTO;
+import main.java.inter.Post;
 import main.java.entities.Project;
 import main.java.repos.ProjectRepository;
 
 @Service
-public class CreateProjectService {
+public class CreateProjectService implements Post<ProjectDTO> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateProjectService.class.getName());
 

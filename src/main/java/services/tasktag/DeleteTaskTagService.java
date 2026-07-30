@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import main.java.inter.Command;
 import main.java.repos.TaskTagRepository;
 
 @Service
-public class DeleteTaskTagService {
+public class DeleteTaskTagService implements Command<Long> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteTaskTagService.class.getName());
 

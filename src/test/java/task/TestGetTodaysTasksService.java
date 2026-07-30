@@ -45,7 +45,7 @@ class TestGetTodaysTasksService {
 		List<Task> expectedTasks = List.of(sampleTask);
 		when(taskRepository.findTodaysTasks()).thenReturn(expectedTasks);
 
-		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute();
+		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute(null);
 		List<TaskDTO> actualTasks = response.getBody();
 
 		assertNotNull(actualTasks);
@@ -58,7 +58,7 @@ class TestGetTodaysTasksService {
 	void testExecuteReturnsEmptyListOnException() {
 		when(taskRepository.findTodaysTasks()).thenThrow(new RuntimeException("Database error"));
 
-		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute();
+		ResponseEntity<List<TaskDTO>> response = getTodaysTasksService.execute(null);
 		List<TaskDTO> actualTasks = response.getBody();
 
 		assertNotNull(actualTasks);

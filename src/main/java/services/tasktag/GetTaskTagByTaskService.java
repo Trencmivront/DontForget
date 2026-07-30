@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 import main.java.dto.TaskTagDTO;
 import main.java.entities.TaskTag;
+import main.java.inter.Query;
 import main.java.repos.TaskTagRepository;
 
 @Service
-public class GetTaskTagByTaskService {
+public class GetTaskTagByTaskService implements Query<Long, List<TaskTagDTO>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetTaskTagByTaskService.class.getName());
 
@@ -29,7 +30,7 @@ public class GetTaskTagByTaskService {
 		try {
 			List<TaskTag> taskTags = taskTagRepository.findBytaskId(taskId);
 			List<TaskTagDTO> dtos = taskTags.stream()
-				.map(tt -> new TaskTagDTO(tt))
+				.map(TaskTagDTO::new)
 				.toList();
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {

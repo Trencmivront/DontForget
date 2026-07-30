@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import main.java.controllers.TaskController;
 import main.java.dto.TaskDTO;
 import main.java.gui.Main;
-import main.java.gui.windows.CreateUpdateTaskWindow;
+import main.java.gui.windows.TaskWindow;
 
 public class ProjectInfoPanel extends JPanel{
 	
@@ -113,7 +113,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_-> new CreateUpdateTaskWindow((Long)projectPanel.getClientProperty("projectId"), false, null));
+		button.addActionListener(_-> new TaskWindow((Long)projectPanel.getClientProperty("projectId"), false, null));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);

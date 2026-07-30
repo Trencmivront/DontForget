@@ -11,10 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.java.entities.RecurringTask;
+import main.java.inter.Query;
 import main.java.repos.RecurringTaskRepository;
 
 @Service
-public class GetRecurringDaysOfTaskService {
+public class GetRecurringDaysOfTaskService implements Query<Long, List<DayOfWeek>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(GetRecurringDaysOfTaskService.class.getName());
 
@@ -30,9 +31,7 @@ public class GetRecurringDaysOfTaskService {
 		List<DayOfWeek> days = new ArrayList<>();
 		try {
 			List<RecurringTask> records = recurringTaskRepository.findBytaskId(taskId);
-			for (RecurringTask rt : records) {
-				days.add(DayOfWeek.of(rt.getWeekDayId().intValue()));
-			}
+			records.forEach(rt -> days.add(DayOfWeek.of(rt.getWeekDayId().intValue())));
 			return ResponseEntity.ok(days);
 		} catch (Exception e) {
 			logger.error("Error retrieving recurring days: {}", e.getMessage());

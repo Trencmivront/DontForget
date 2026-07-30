@@ -33,7 +33,6 @@ public class CreateTaskTagService {
 			return ResponseEntity.status(HttpStatus.CREATED).body("TASK TAG CREATED");
 		} catch (Exception e) {
 			logger.error("Database error: {}", e.getMessage());
-			e.printStackTrace();
 			return ResponseEntity.internalServerError().body("FAILED TO CREATE TASK TAG");
 		}
 	}

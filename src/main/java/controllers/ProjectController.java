@@ -68,12 +68,12 @@ public class ProjectController {
 	@GetMapping("/get-all")
 	public ResponseEntity<List<ProjectDTO>> getProjects() {
 		logger.info("Executing {}", this.getClass());
-		return getProjectsService.execute();
+		return getProjectsService.execute(null);
 	}
 
 	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateProject(@RequestBody ProjectDTO p, @PathVariable Long id) {
-		logger.info("Executing {} for p: {}, id: {}", this.getClass(), p, id);
-		return updateProjectService.execute(p, id);
+	public ResponseEntity<String> updateProject(@RequestBody ProjectDTO p) {
+		logger.info("Executing {}", this.getClass());
+		return updateProjectService.execute(p);
 	}
 }
