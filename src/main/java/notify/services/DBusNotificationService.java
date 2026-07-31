@@ -1,4 +1,4 @@
-package main.java.notify;
+package main.java.notify.services;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -14,11 +14,12 @@ import main.java.controllers.InboxController;
 import main.java.custom.SpringContext;
 import main.java.dto.InboxDTO;
 import main.java.gui.Main;
+import main.java.inter.NotificationService;
 
-public class WaylandNotification {
+public class DBusNotificationService implements NotificationService{
     private final InboxController inboxController = SpringContext.getBean(InboxController.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(WaylandNotification.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DBusNotificationService.class.getName());
 
     public void sendNotification(Long taskId, String title, String body) {
         logger.info("Preparing to send notification. Task ID: {}, Title: {}", taskId, title);

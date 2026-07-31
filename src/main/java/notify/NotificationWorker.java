@@ -16,7 +16,7 @@ public class NotificationWorker implements Runnable{
 	private String title;
 //	message of the reminder
 	private String message;
-	
+		
 	public NotificationWorker(Long id, String title, String message) {
 		super();
 		this.id = id;
@@ -45,19 +45,21 @@ public class NotificationWorker implements Runnable{
 				logger.info("Playing notification sound...");
 				clip.start();
 				
-				new WaylandNotification().sendNotification(id, title, message);
-				
+				NotificationFactory.getNotificationService().sendNotification(id, title, message);
+//				want to send notification while song is playing
 				long playDurationMs = clip.getMicrosecondLength() / 1000;
 				logger.info("Sleeping {} ms for audio playback.", playDurationMs);
-				Thread.sleep(playDurationMs);
+				this.wait(playDurationMs);
 			} else {
 				logger.warn("Notification sound file not found at {}. Sending notification without sound.", audioFile.getAbsolutePath());
-				new WaylandNotification().sendNotification(id, title, message);
+				NotificationFactory.getNotificationService().sendNotification(id, title, message);
 			}
+			
 		} catch (Exception e) {
 			logger.error("Exception occurred in NotificationWorker run: {}", e.getMessage());
 			e.printStackTrace();
 		} finally {
+//			close all doors
 			if (clip != null) {
 				try {
 					clip.close();
