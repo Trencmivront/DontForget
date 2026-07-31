@@ -46,4 +46,19 @@ public class ReminderDTO {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReminderDTO)) return false;
+        ReminderDTO other = (ReminderDTO) o;
+        return java.util.Objects.equals(taskId, other.taskId)
+            && java.util.Objects.equals(remindAt, other.remindAt)
+            && java.util.Objects.equals(message, other.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(taskId, remindAt, message);
+    }
 }

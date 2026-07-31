@@ -100,7 +100,9 @@ public class NotificationManager {
 	
 	public void setNewDateTimeForReminder(ReminderDTO reminder) {
 
-		if (reminder.getRemindAt().isAfter(LocalDateTime.now())) {
+		LocalDateTime now = LocalDateTime.now();
+		
+		if (reminder.getRemindAt().isAfter(now)) {
 //			Date is already in the future, exiting
 			return;
 		}
@@ -111,30 +113,23 @@ public class NotificationManager {
 			return;
 		}
 
-		LocalDateTime now = LocalDateTime.now();
 		LocalDate today = now.toLocalDate();
 		DayOfWeek todayDow = now.getDayOfWeek();
 		LocalTime reminderTime = reminder.getRemindAt().toLocalTime();
 
 		LocalDateTime nextRemindAt;
 
-		// If today is a recurring day and the time-of-day hasn't passed yet, keep today
-		if (recurringDays.contains(todayDow) && today.atTime(reminderTime).isAfter(now)) {
-			nextRemindAt = today.atTime(reminderTime);
+		// If today is a recurring day and it is the only fucking recurring day, then set next week as new reminder date
+//		stupid ass AI
+		if (recurringDays.contains(todayDow) && recurringDays.size() == 1) {
+			nextRemindAt = today.plusWeeks(1l).atTime(reminderTime);
 		} else {
-			// Find the closest recurring day strictly after today (never lands in the past)
+			// Find the closest recurring day strictly after today
 			DayOfWeek nextDay = recurringDays.stream()
 					.filter(d -> (d.getValue() - todayDow.getValue() + 7) % 7 != 0)
-					.min(Comparator.comparingInt(d -> (d.getValue() - todayDow.getValue() + 7) % 7))
-					.orElse(null);
+					.min(Comparator.comparingInt(d -> (d.getValue() - todayDow.getValue() + 7) % 7)).orElseThrow();
 
-			if (nextDay != null) {
-				// next() always advances at least 1 day from today, guaranteeing a future date
-				nextRemindAt = today.with(TemporalAdjusters.next(nextDay)).atTime(reminderTime);
-			} else {
-				// Only recurring day is today and its time has passed — schedule same day next week
-				nextRemindAt = today.plusWeeks(1).atTime(reminderTime);
-			}
+			nextRemindAt = today.with(TemporalAdjusters.next(nextDay)).atTime(reminderTime);
 		}
 
 		logger.info("Recurring reminder for task ID {}: advancing remindAt from {} to {}",

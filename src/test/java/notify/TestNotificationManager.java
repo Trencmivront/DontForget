@@ -24,6 +24,7 @@ import main.java.custom.SpringContext;
 import main.java.dto.ReminderDTO;
 import main.java.dto.TaskDTO;
 import main.java.notify.NotificationManager;
+import main.java.services.reminder.GetReminderByIdService;
 
 @ExtendWith(MockitoExtension.class)
 class TestNotificationManager {
@@ -56,17 +57,14 @@ class TestNotificationManager {
 
 		manager = new NotificationManager();
 
-		// Use minusMinutes(1) so remindAt is reliably in the past,
-		// ensuring setNewDateTimeForReminder actually proceeds past the early-return guard.
 		LocalDateTime pastDateTime = LocalDateTime.now().minusMinutes(1);
 		LocalDateTime nextDateTime = pastDateTime.plusDays(1L);
 
 		testReminder = new ReminderDTO(1L, pastDateTime, "Hello World");
 		testNextReminder = new ReminderDTO(testReminder.getTaskId(),
-				testReminder.getRemindAt().plusDays(1L),
+				nextDateTime,
 				testReminder.getMessage());
 
-		// Recurring days: today (time already passed) and tomorrow → should advance to tomorrow
 		testDayOfWeeks = List.of(pastDateTime.getDayOfWeek(), nextDateTime.getDayOfWeek());
 
 		testTask = new TaskDTO();
@@ -76,7 +74,6 @@ class TestNotificationManager {
 
 	@AfterEach
 	void tearDown() {
-		// Always close the static mock to avoid leaking it into other tests
 		springContextMock.close();
 	}
 
@@ -85,7 +82,7 @@ class TestNotificationManager {
 		when(recurringTaskController.getRecurringDaysOfTask(1L)).thenReturn(ResponseEntity.ok(testDayOfWeeks));
 		when(taskController.getTaskById(1L)).thenReturn(ResponseEntity.ok(testTask));
 		when(reminderController.updateReminder(testReminder)).thenReturn(ResponseEntity.ok("REMINDER UPDATED"));
-
+		
 		manager.scheduleReminder(testReminder);
 
 		assertEquals(testNextReminder, testReminder);
