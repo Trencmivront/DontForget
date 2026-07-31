@@ -3,7 +3,9 @@ package main.java.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ICON_COLOR")
+@Table(name = "ICON_COLOR", uniqueConstraints = {
+		@UniqueConstraint(name = "unq_red_green_blue", columnNames = {"red", "green", "blue"})
+})
 public class IconColor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -38,6 +38,14 @@ public class App {
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final File settingsFile = Path.of("src/data/settings/settings.json").toFile();
     
+	public static ObjectMapper getMapper() {
+		return mapper;
+	}
+
+	public static File getSettingsfile() {
+		return settingsFile;
+	}
+
 	public static void main(String[] args) {
 	    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
 	        logger.error("Uncaught exception in thread {}: {}", thread.getName(), throwable.getMessage(), throwable);
@@ -51,22 +59,20 @@ public class App {
 //			if it connects, prevent further execution
 			return;
 		}
-
 		
 		// Start Spring Boot
 		new SpringApplicationBuilder(App.class).
 		headless(false).
 		run(args);
 		
+		// Initialize settings
+		applySettings();
+				
 		SwingUtilities.invokeLater(() ->{
 //			Displaying app
 			try {
 				logger.info("Starting DontForget application...");
-				// Initialize the look and feel
-				
-				applySettings();
-
-				
+								
 //				show window
 				new Main();
 //				Start background listener
@@ -187,7 +193,7 @@ public class App {
     			Path dest = Paths.get(System.getProperty("user.home"), ".local/share/icons/hicolor/32x32/apps/dontforget.png");
     			Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
     			logger.info("Icon copied to system icons directory.");
-        		setKeyValue("isIconSet", true);
+        		setSettingValue("isIconSet", true);
     		} catch (Exception e) {
     			logger.warn("Could not copy icon to system icons directory, skipping: {}", e.getMessage());
     		}
@@ -202,14 +208,15 @@ public class App {
     			double scale = Double.parseDouble(scaleNode.asText());
     			if (scale > 0) {
     				long rounded = Math.round(scale);
-    				System.setProperty("sun.java2d.uiScale", String.valueOf(rounded));
-    				logger.info("Applied uiScale: {}", rounded);
+//				Must be set on the main thread BEFORE AWT initializes — invokeLater is too late
+				System.setProperty("sun.java2d.uiScale", String.valueOf(rounded));
+				logger.info("Applied uiScale: {}", rounded);
     				return true;
     			}
     			logger.warn("uiScale must be above 0, detecting from screen.");
     		} catch (NumberFormatException _) {
     			logger.warn("Invalid uiScale value '{}', detecting from screen.", scaleNode.asText());
-    		}
+    		} 
     	}
     	return false;
     }
@@ -218,11 +225,10 @@ public class App {
     private static void detectAndSaveScale() {
     	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     	final long scale = Math.round(screen.getWidth() / screen.getHeight());
-    	setKeyValue("uiScale", scale);
+    	setSettingValue("uiScale", scale);
     	logger.info("Detected screen {}x{}, saved uiScale={} for next launch.", screen.width, screen.height, scale);
     }
-
-
+    
     private static void checkSystemAAFontSet(JsonNode node) {
     	final String defaultValue = "on";
     	JsonNode aaNode = node.get("awtUseSystemAAFontSettings");
@@ -231,7 +237,7 @@ public class App {
     		return;
     	}
     	System.setProperty("awt.useSystemAAFontSettings", defaultValue);
-    	setKeyValue("awtUseSystemAAFontSettings", defaultValue);
+    	setSettingValue("awtUseSystemAAFontSettings", defaultValue);
     }
 
     private static void checkSwingAATextSet(JsonNode node) {
@@ -242,10 +248,10 @@ public class App {
     		return;
     	}
     	System.setProperty("swing.aatext", defaultValue);
-    	setKeyValue("swingAAText", defaultValue);
+    	setSettingValue("swingAAText", defaultValue);
     }
     
-    private static void setKeyValue(String key, Object value) {
+    public static void setSettingValue(String key, Object value) {
         try {
             ObjectNode rootNode = settingsFile.exists() ?
             		(ObjectNode) mapper.readTree(settingsFile) : 

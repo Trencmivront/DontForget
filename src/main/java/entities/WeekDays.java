@@ -10,7 +10,7 @@ public class WeekDays {
     @Column
     private Long weekDayId;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 10, unique = true)
     private String dayName;
 
     // No-arg constructor

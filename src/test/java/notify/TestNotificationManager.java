@@ -24,7 +24,6 @@ import main.java.custom.SpringContext;
 import main.java.dto.ReminderDTO;
 import main.java.dto.TaskDTO;
 import main.java.notify.NotificationManager;
-import main.java.services.reminder.GetReminderByIdService;
 
 @ExtendWith(MockitoExtension.class)
 class TestNotificationManager {
