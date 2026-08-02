@@ -4,6 +4,8 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import main.java.dto.ReminderDTO;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -16,10 +18,12 @@ public class NotificationWorker implements Runnable{
 	private String title;
 //	message of the reminder
 	private String message;
+	private ReminderDTO reminderDTO;
 		
-	public NotificationWorker(Long id, String title, String message) {
+	public NotificationWorker(ReminderDTO reminderDTO, String title, String message) {
 		super();
-		this.id = id;
+		this.reminderDTO = reminderDTO;
+		this.id = reminderDTO.getTaskId();
 		this.title = title;
 		this.message = message;
 	}
@@ -46,10 +50,13 @@ public class NotificationWorker implements Runnable{
 				clip.start();
 				
 				NotificationFactory.getNotificationService().sendNotification(id, title, message);
+//				reschedule it if it is recurring
+				NotificationManager.getInstance().scheduleReminder(reminderDTO);
+					
 //				want to send notification while song is playing
 				long playDurationMs = clip.getMicrosecondLength() / 1000;
 				logger.info("Sleeping {} ms for audio playback.", playDurationMs);
-				this.wait(playDurationMs);
+				Thread.sleep(playDurationMs);
 			} else {
 				logger.warn("Notification sound file not found at {}. Sending notification without sound.", audioFile.getAbsolutePath());
 				NotificationFactory.getNotificationService().sendNotification(id, title, message);

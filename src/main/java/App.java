@@ -79,8 +79,7 @@ public class App {
 				startSingleInstanceListener();
 				
 //				initialize the notification manager
-				NotificationManager nm = new NotificationManager();
-				nm.initialize();
+				NotificationManager.getInstance().initialize();
 			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(new JDialog(), e.getMessage(), "ok", JOptionPane.WARNING_MESSAGE);

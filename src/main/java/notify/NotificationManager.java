@@ -28,12 +28,20 @@ import main.java.dto.TaskDTO;
 public class NotificationManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(NotificationManager.class.getName());
+	private static NotificationManager instance;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
 	private final ReminderController reminderController = SpringContext.getBean(ReminderController.class);
 	private final TaskController taskController = SpringContext.getBean(TaskController.class);
 	private final RecurringTaskController recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
+
+	public static NotificationManager getInstance() {
+		if (instance == null) {
+			instance = new NotificationManager();
+		}
+		return instance;
+	}
 
 	public void initialize() {
 		logger.info("Initializing NotificationManager and scheduling existing reminders...");
@@ -90,7 +98,7 @@ public class NotificationManager {
  
 		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.getTaskId(), delay);
 		ScheduledFuture<?> future = scheduler.schedule(
-			new NotificationWorker(reminder.getTaskId(), title, message),
+			new NotificationWorker(reminder, title, message),
 			delay,
 			TimeUnit.MILLISECONDS
 		);

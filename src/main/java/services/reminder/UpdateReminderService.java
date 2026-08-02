@@ -39,8 +39,7 @@ public class UpdateReminderService implements Command<ReminderDTO> {
 			reminderRepository.save(entity);
 			logger.info("Reminder updated successfully for taskId: {}", reminder.getTaskId());
 			// Reschedule the notification with the updated time
-			NotificationManager nm = new NotificationManager();
-			nm.scheduleReminder(reminder);
+			NotificationManager.getInstance().scheduleReminder(reminder);
 			return ResponseEntity.ok("REMINDER UPDATED");
 		} catch (Exception e) {
 			logger.error("Database error: {}", e.getMessage());

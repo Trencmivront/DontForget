@@ -3,11 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>DontForget</groupId>
   <artifactId>DontForget</artifactId>
-  <version>0.6.3~ALPHA1</version>
+  <version>0.6.5</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>src</testSourceDirectory>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.5.1</version>

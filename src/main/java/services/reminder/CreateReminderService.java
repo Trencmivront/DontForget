@@ -37,8 +37,7 @@ public class CreateReminderService {
 			reminderRepository.save(entity);
 			logger.info("Reminder saved successfully.");
 			// Start the reminder once it is saved
-			NotificationManager nm = new NotificationManager();
-			nm.scheduleReminder(reminder);
+			NotificationManager.getInstance().scheduleReminder(reminder);
 			return ResponseEntity.status(HttpStatus.CREATED).body("REMINDER CREATED");
 		} catch (Exception e) {
 			logger.error("Database error: {}", e.getMessage());

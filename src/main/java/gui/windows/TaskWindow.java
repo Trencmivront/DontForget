@@ -205,7 +205,7 @@ public class TaskWindow extends JDialog {
 		if(taskId != null) {
 			isUpdate = true;
 			updateTaskDTO = taskController.getTaskById(taskId).getBody();
-			projectId = updateTaskDTO.getProjectId();
+			this.projectId = updateTaskDTO.getProjectId();
 		} else if (projectId != null){
 			isUpdate = false;
 			this.projectId = projectId;
