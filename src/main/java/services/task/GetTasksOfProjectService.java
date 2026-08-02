@@ -32,9 +32,13 @@ public class GetTasksOfProjectService implements Query<Long, List<TaskDTO>>{
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		try {
 			List<Task> tasks = taskRepository.findByprojectId(id);
+			if(tasks == null || tasks.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
 			List<TaskDTO> dtos = tasks.stream()
 				.map(TaskDTO::new)
 				.toList();
+			
 			return ResponseEntity.ok(dtos);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(new JDialog(), "Error while getting tasks for project id=" + id);

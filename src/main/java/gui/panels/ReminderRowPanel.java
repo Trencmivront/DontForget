@@ -30,30 +30,15 @@ public class ReminderRowPanel extends JPanel {
 	private static final Logger logger = LoggerFactory.getLogger(ReminderRowPanel.class.getName());
 
 	private ReminderController reminderController;
-	private TaskDTO task;
+	private TaskDTO taskDTO;
 	
-	public ReminderRowPanel(ReminderDTO reminder, TaskDTO task) {
+	public ReminderRowPanel(ReminderDTO reminder, TaskDTO taskDTO) {
 		logger.info("Initializing ReminderRowPanel");
 		this.reminderController = SpringContext.getBean(ReminderController.class);
-		this.task = task;
+		this.taskDTO = taskDTO;
 		setLayout(new BorderLayout());
-		
-		putClientProperty("taskId", task.getTaskId());
-		putClientProperty("taskTitle", task.getTaskTitle());
-		putClientProperty("description", task.getDescription());
-		putClientProperty("statusId", task.getStatusId());
-		putClientProperty("priority", task.getPriority());
-		putClientProperty("dueDate", task.getDueDate() != null ? java.sql.Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
-		putClientProperty("listOrder", null);
-		putClientProperty("projectId", task.getProjectId());
-		putClientProperty("createdAt", null);
-		putClientProperty("updatedAt", null);
-		putClientProperty("completedAt", null);
-		
-		putClientProperty("remindAt", reminder.getRemindAt() != null ? java.sql.Timestamp.valueOf(reminder.getRemindAt()) : null);
-		putClientProperty("message", reminder.getMessage());
 
-		JLabel title = new JLabel(task.getTaskTitle());
+		JLabel title = new JLabel(taskDTO.getTaskTitle());
 		title.setHorizontalTextPosition(SwingConstants.CENTER);
 		add(title, BorderLayout.CENTER);
 
@@ -72,7 +57,7 @@ public class ReminderRowPanel extends JPanel {
 		popupMenu.add(deleteItem);
 		
 		deleteItem.addActionListener(_ -> {
-			Long taskId = (Long) getClientProperty("taskId");
+			Long taskId = taskDTO.getTaskId();
 			try {
 				ResponseEntity<String> response = reminderController.deleteReminder(taskId);
 				if (response.getStatusCode().is2xxSuccessful()) {
@@ -90,7 +75,7 @@ public class ReminderRowPanel extends JPanel {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) { // Left click
-					new ReminderDialog(task.getTaskId());
+					new ReminderDialog(taskDTO.getTaskId());
 				} else if (e.getButton() == MouseEvent.BUTTON3) { // Right click
 					popupMenu.show(e.getComponent(), e.getX(), e.getY());
 				}

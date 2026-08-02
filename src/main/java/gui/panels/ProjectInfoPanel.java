@@ -20,6 +20,7 @@ import main.java.custom.SpringContext;
 import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.TaskController;
+import main.java.dto.ProjectDTO;
 import main.java.dto.TaskDTO;
 import main.java.gui.Main;
 import main.java.gui.windows.TaskWindow;
@@ -30,27 +31,22 @@ public class ProjectInfoPanel extends JPanel{
 	private JScrollPane infoScrollPane;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProjectInfoPanel.class.getName());
-	private ProjectRowPanel projectPanel;
+	private ProjectDTO projectDTO;
 	private static ProjectInfoPanel projectInfoPanel;
 	private final Main main = Main.getMain();
-	private TaskController taskController;
+	private final TaskController taskController = SpringContext.getBean(TaskController.class);
 	
 	public static ProjectInfoPanel getProjectInfoPanel() {
 		return projectInfoPanel;
 	}
 	
-	public ProjectInfoPanel(TaskController taskController) {
-		this.taskController = taskController;
-	}
-	
-	public ProjectInfoPanel(ProjectRowPanel panel) {
+	public ProjectInfoPanel(ProjectDTO projectDTO) {
 		if(projectInfoPanel != null) {
 			projectInfoPanel = null;
 		}
 		projectInfoPanel = this;
 		
-		projectPanel = panel;
-		this.taskController = SpringContext.getBean(TaskController.class);
+		this.projectDTO = projectDTO;
 		
 		setLayout(new BorderLayout());
 		add(createHeaderPanel(), BorderLayout.NORTH);
@@ -70,7 +66,7 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	public void listTasks() {
-		Long id = (Long)projectPanel.getClientProperty("projectId");
+		Long id = projectDTO.getProjectId();
 		
 		ResponseEntity<List<TaskDTO>> tasksResponseEntity = taskController.getTasksOfProject(id);
 		
@@ -100,8 +96,8 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	private JPanel createHeaderPanel() {
-		String title = (String)projectPanel.getClientProperty("projectTitle");
-		String description = (String)projectPanel.getClientProperty("description");				
+		String title = projectDTO.getProjectTitle();
+		String description = projectDTO.getDescription();				
 		return new HeaderPanel(title, description);
 	}
 	
@@ -113,14 +109,14 @@ public class ProjectInfoPanel extends JPanel{
 		button.setHorizontalAlignment(SwingConstants.CENTER);
 		button.setFont(new Font("Ariel", 1, 20));
 		
-		button.addActionListener(_-> new TaskWindow((Long)projectPanel.getClientProperty("projectId"), false, null));
+		button.addActionListener(_-> new TaskWindow(null, projectDTO.getProjectId()));
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);
 	}
 	
 	private void createDeleteCompletedTasksButton(JPanel panel) {
-		JButton button = new JButton("DC");
+		JButton button = new JButton("Del Completed");
 		
 		button.setToolTipText("Delete Completed Task(s)");
 		button.setHorizontalAlignment(SwingConstants.CENTER);
@@ -143,8 +139,9 @@ public class ProjectInfoPanel extends JPanel{
 					JOptionPane.WARNING_MESSAGE
 				);
 			if(confirm == JOptionPane.YES_OPTION) {
-				Long id = (Long) projectPanel.getClientProperty("projectId");
-				taskController.deleteTask(id);
+//				and I was wondering why this won't work. It turns out our AI firend made some changes here and
+//				replaced deleteCompletedTasks with deleteTask, like how smart it is.
+				taskController.deleteCompletedTasks(projectDTO.getProjectId());
 				listTasks();
 			}
 		});

@@ -68,7 +68,7 @@ public class Main extends JFrame {
 	private JPanel prevProjectPanel;
 	private static final Logger logger = LoggerFactory.getLogger(Main.class.getName());
 	private static Main main;
-	private List<JPanel> selectedProjects = new ArrayList<>();
+	private List<ProjectRowPanel> selectedProjects = new ArrayList<>();
 	
 	private JButton deleteProjectsButton;
 	private JButton tagsButton;
@@ -94,7 +94,7 @@ public class Main extends JFrame {
 		return main;
 	}
 	
-	public List<JPanel> getSelectedProjects(){
+	public List<ProjectRowPanel> getSelectedProjects(){
 		return selectedProjects;
 	}
 	public JPanel getShowInfoPanel() {
@@ -119,7 +119,7 @@ public class Main extends JFrame {
 //		setting the global toucher for main, freaky
 		
 		setTitle("DontForget");
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		try {
@@ -279,13 +279,13 @@ public class Main extends JFrame {
 	
 	private void addCheckBoxEventListener(JCheckBox ck) {
 		ck.addActionListener(_->{
-			JPanel panel = (JPanel) ck.getParent();
+			ProjectRowPanel panel = (ProjectRowPanel)ck.getParent();
 			if (panel == null) {
 				return;
 			}
 			if (ck.isSelected()) {
 				if (!Main.getMain().getSelectedProjects().contains(panel)) {
-					Main.getMain().getSelectedProjects().add(panel);
+					this.getSelectedProjects().add(panel);
 				}
 			} else {
 				Main.getMain().getSelectedProjects().remove(panel);
@@ -319,8 +319,8 @@ public class Main extends JFrame {
 			);
 
 			if (confirm == JOptionPane.YES_OPTION) {
-				for (JPanel panel : selectedProjects) {
-					Long projectId = (Long) panel.getClientProperty("projectId");
+				for (ProjectRowPanel panel : selectedProjects) {
+					Long projectId = panel.getProjectDTO().getProjectId();
 					if (projectId != null) {
 						try {
 							projectController.deleteProject(projectId);
@@ -341,7 +341,7 @@ public class Main extends JFrame {
 	private void addCreateProjectActionListener(JButton button) {
 		button.addActionListener(_ -> {
 //			Here we want to create the project
-			ProjectWindow projectWindow = new ProjectWindow(Main.this, false, null);
+			ProjectWindow projectWindow = new ProjectWindow(null);
 			projectWindow.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent e) {
@@ -404,6 +404,14 @@ public class Main extends JFrame {
 	
 	public void destroyChildWindows() {
 		requestFocus();
+	}
+	
+	public void destroyChildWindowsExcluding(Window exclude) {
+		for(Window w : getOwnedWindows()) {
+			if(w != exclude) {
+				w.dispose();
+			}
+		}
 	}
 	
 	public void refreshWindow() {

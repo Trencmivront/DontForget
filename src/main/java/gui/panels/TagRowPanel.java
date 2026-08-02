@@ -34,31 +34,31 @@ public class TagRowPanel extends JPanel {
 
 	private IconColorController iconColorController;
 	private TagController tagController;
+	private TagDTO tagDTO;
 
-	public TagRowPanel(TagDTO tag) {
+	public TagRowPanel(TagDTO tagDTO) {
 		logger.info("Initializing TagRowPanel");
-		this(null, tag);
+		this(null, tagDTO);
 	}
 	
-	public TagRowPanel(JCheckBox ck, TagDTO tag) {
+	public TagRowPanel(JCheckBox ck, TagDTO tagDTO) {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.tagController = SpringContext.getBean(TagController.class);
-		putClientProperty("tagId", tag.getTagId());
-		putClientProperty("tagName", tag.getTagName());
-		putClientProperty("iconColorId", tag.getIconColorId());
+		
+		this.tagDTO = tagDTO;
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
 
-		JLabel label = new JLabel(tag.getTagName());
+		JLabel label = new JLabel(tagDTO.getTagName());
 		label.setFont(new Font("Dialog", Font.PLAIN, 20));
 
 		IconColorDTO ic = null;
 		try {
-			ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.getTagId());
+			ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tagDTO.getTagId());
 			ic = response.getBody();
 		} catch (Exception e) {
-			logger.error("Failed to fetch icon color for tag " + tag.getTagId(), e);
+			logger.error("Failed to fetch icon color for tag " + tagDTO.getTagId(), e);
 		}
 		// if color not found, make it gray
 		Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
@@ -97,7 +97,7 @@ public class TagRowPanel extends JPanel {
 	
 	private void addDeleteActionListener(JMenuItem deleteItem) {
 		deleteItem.addActionListener(_ -> {
-				Long tagId = (Long) getClientProperty("tagId");
+				Long tagId = tagDTO.getTagId();
 				int code = 500;
 				try {
 					ResponseEntity<String> response = tagController.deleteTag(tagId);

@@ -9,10 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import main.java.dto.TagDTO;
+import main.java.services.tag.CreateTagService;
 import main.java.services.tag.DeleteTagService;
 import main.java.services.tag.GetTagService;
 import main.java.services.tag.GetTagsOfTaskService;
@@ -24,20 +27,29 @@ public class TagController {
 
 	private static final Logger logger = LoggerFactory.getLogger(TagController.class.getName());
 
+	private final CreateTagService createTagService;
 	private final DeleteTagService deleteTagService;
 	private final GetTagService getTagService;
 	private final GetTagsOfTaskService getTagsOfTaskService;
 	private final GetTagsService getTagsService;
 
-	public TagController(DeleteTagService deleteTagService,
+	public TagController(CreateTagService createTagService,
+			DeleteTagService deleteTagService,
 			GetTagService getTagService,
 			GetTagsOfTaskService getTagsOfTaskService,
 			GetTagsService getTagsService) {
 		logger.info("Initializing TagController");
+		this.createTagService = createTagService;
 		this.deleteTagService = deleteTagService;
 		this.getTagService = getTagService;
 		this.getTagsOfTaskService = getTagsOfTaskService;
 		this.getTagsService = getTagsService;
+	}
+
+	@PostMapping("/create")
+	public ResponseEntity<Long> createTag(@RequestBody TagDTO tagDTO) {
+		logger.info("Executing {} for tag: {}", this.getClass(), tagDTO);
+		return createTagService.execute(tagDTO);
 	}
 
 	@DeleteMapping("/delete/{id}")

@@ -8,8 +8,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -21,11 +21,8 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -41,24 +38,22 @@ import org.springframework.http.ResponseEntity;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
-import main.java.controllers.IconColorController;
 import main.java.controllers.RecurringTaskController;
 import main.java.controllers.ReminderController;
 import main.java.controllers.TagController;
 import main.java.controllers.TaskController;
 import main.java.controllers.TaskTagController;
-import main.java.custom.CustomIcon;
 import main.java.custom.DocumentFilterFactory;
 import main.java.custom.SpringContext;
-import main.java.dto.TaskDTO;
-import main.java.dto.IconColorDTO;
 import main.java.dto.ReminderDTO;
 import main.java.dto.TagDTO;
+import main.java.dto.TaskDTO;
 import main.java.dto.TaskTagDTO;
 import main.java.gui.Main;
 import main.java.gui.panels.ProjectInfoPanel;
 import main.java.gui.popups.ErrorDialog;
 import main.java.gui.popups.ReminderDialog;
+import main.java.gui.popups.TagsDialog;
 
 public class TaskWindow extends JDialog {
 
@@ -69,7 +64,6 @@ public class TaskWindow extends JDialog {
 	private Integer selectedPriority = null;
 
 	private Long projectId;
-	private JPanel rowPanel;
 	private JTextField titleField;
 	private JTextArea descArea;
 	private List<TagDTO> selectedTags = new ArrayList<>();
@@ -84,13 +78,15 @@ public class TaskWindow extends JDialog {
 	private JButton priorityBtn;
 	private JButton reminderBtn;
 	private static final Main main = Main.getMain();
+	
+	private boolean isUpdate;
+	private TaskDTO updateTaskDTO;
 
 	private final TaskController taskController = SpringContext.getBean(TaskController.class);
 	private final TagController tagController = SpringContext.getBean(TagController.class);
 	private final RecurringTaskController recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
 	private final ReminderController reminderController = SpringContext.getBean(ReminderController.class);
 	private final TaskTagController taskTagController = SpringContext.getBean(TaskTagController.class);
-	private final IconColorController iconColorController = SpringContext.getBean(IconColorController.class);
 	
 	private static final int TITLE_MAX_LENGTH = 100;
 	private static final int BODY_MAX_LENGTH = 1000;
@@ -193,18 +189,31 @@ public class TaskWindow extends JDialog {
 		return taskWindow;
 	}
 	
-	public TaskWindow(Long projectId, boolean isUpdate, JPanel rowPanel) {
+//	if it is update, taskId is not null and projectId is null
+//	if it is new task, taskId is null and projectId is not null
+	public TaskWindow(Long taskId, Long projectId) {
 //		only one instance of task window at a time
 		if(taskWindow != null) {
 			taskWindow.dispose();
 			taskWindow = null;
 		}
-		super(main, isUpdate ? "Update Task" : "Create Task");
+		
+		super(main, "Task");
 		logger.info("Initializing TaskWindow.");
 		taskWindow = this;
 
-		this.projectId = projectId;
-		this.rowPanel = rowPanel;
+		if(taskId != null) {
+			isUpdate = true;
+			updateTaskDTO = taskController.getTaskById(taskId).getBody();
+			projectId = updateTaskDTO.getProjectId();
+		} else if (projectId != null){
+			isUpdate = false;
+			this.projectId = projectId;
+		} else {
+			taskId = 1l;
+			projectId = 1l;
+			logger.error("GO TO HELL");
+		}
 		
 		setResizable(false);
 		setUndecorated(true);
@@ -302,19 +311,18 @@ public class TaskWindow extends JDialog {
 		setupReminderMenu(reminderBtn);
 		setupTagsDialog(tagsBtn);
 
-		if (isUpdate && rowPanel != null) {
-			String taskTitle = (String) rowPanel.getClientProperty("taskTitle");
+		if (isUpdate && updateTaskDTO != null) {
+			String taskTitle = updateTaskDTO.getTaskTitle();
 			if (taskTitle != null) {
 				titleField.setText(taskTitle);
 			}
-			String description = (String) rowPanel.getClientProperty("description");
+			String description = updateTaskDTO.getDescription();
 			if (description != null) {
 				descArea.setText(description);
 			}
 			
-			Long taskId = (Long) rowPanel.getClientProperty("taskId");
-			Timestamp dueDate = (Timestamp) rowPanel.getClientProperty("dueDate");
-			Integer priority = (Integer) rowPanel.getClientProperty("priority");
+			LocalDate dueDate = updateTaskDTO.getDueDate();
+			Integer priority = updateTaskDTO.getPriority();
 			
 			setDueDate(dueDate);
 			setPriority(priority);
@@ -326,30 +334,18 @@ public class TaskWindow extends JDialog {
 			
 		}
 		
-		addFocusListener(new FocusListener() {
-			
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				dispose();
-			}
-			@Override
-			public void focusGained(FocusEvent arg0) {
-				return;
-			}
-		});
+		addFocusListener();
 		
 		revalidate();
 		repaint();
-		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
-		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
-		setLocation(x, y);
+		setLocationToCenter(this);
 		setVisible(true);
 		logger.info("TaskWindow display complete.");
 	}
 	
-	private void setDueDate(Timestamp dueDate) {
+	private void setDueDate(LocalDate dueDate) {
 		if (dueDate != null) {
-			selectedDueDate = dueDate.toLocalDateTime().toLocalDate();
+			selectedDueDate = dueDate;
 			dueDateBtn.setText(selectedDueDate.toString());
 			dueDateBtn.setForeground(new Color(42, 157, 143));
 		}		
@@ -428,20 +424,15 @@ public class TaskWindow extends JDialog {
 			String description = descArea.getText().trim();
 
 			if (title.isEmpty()) {
-				JOptionPane.showMessageDialog(TaskWindow.this, "Task title cannot be empty.", "Validation Error",
-						JOptionPane.WARNING_MESSAGE);
+				new ErrorDialog("Title Empty", "Task title cannot be empty.");
 				return;
 			}
 
 			Long taskId = null;
 			if (isUpdate) {
-				taskId = (Long) rowPanel.getClientProperty("taskId");
-				Long statusId = (Long) rowPanel.getClientProperty("statusId");
-				Integer listOrder = (Integer) rowPanel.getClientProperty("listOrder");
-				Timestamp createdAt = (Timestamp) rowPanel.getClientProperty("createdAt");
+				taskId = updateTaskDTO.getTaskId();
+				Long statusId = updateTaskDTO.getStatusId();
 				if (statusId == null) statusId = 1L;
-				if (listOrder == null) listOrder = 1;
-				if (createdAt == null) createdAt = new Timestamp(System.currentTimeMillis());
 
 				TaskDTO task = new TaskDTO(
 					taskId,
@@ -488,7 +479,7 @@ public class TaskWindow extends JDialog {
 				}
 			}
 
-			if (taskId != null && selectedTags != null) {
+			if (taskId != null && (selectedTags != null || !selectedTags.isEmpty())) {
 				taskTagController.deleteTagsOfTask(taskId);
 				for (TagDTO tag : selectedTags) {
 					try {
@@ -510,11 +501,9 @@ public class TaskWindow extends JDialog {
 			main.destroyChildWindows();
 
 //			null case
-			if(rowPanel == null){
+			if(ProjectInfoPanel.getProjectInfoPanel() != null){
 //				relist tasks
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
-				ProjectInfoPanel.getProjectInfoPanel().revalidate();
-				ProjectInfoPanel.getProjectInfoPanel().repaint();
 			}
 //			refresh window
 			main.refreshWindow();
@@ -652,7 +641,7 @@ public class TaskWindow extends JDialog {
 			reminderMenu.show(button, 0, -button.getHeight());
 		});
 
-		addReminderItem.addActionListener(_ ->new ReminderDialog(rowPanel == null ? null : (Long)rowPanel.getClientProperty("taskId")));
+		addReminderItem.addActionListener(_ ->new ReminderDialog(isUpdate ? updateTaskDTO.getTaskId() : null));
 
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;
@@ -676,102 +665,26 @@ public class TaskWindow extends JDialog {
 
 	private void setupTagsDialog(JButton button) {
 		button.addActionListener(_ -> {
-			JDialog tagsDialog = new JDialog(TaskWindow.this);
-			tagsDialog.setTitle("Select Tags");
-			tagsDialog.setModal(true);
-			tagsDialog.setResizable(false);
-			tagsDialog.setUndecorated(true);
-			tagsDialog.setLayout(new BorderLayout(10, 10));
+			TagsDialog tagsDialog = new TagsDialog();
 			
-			tagsDialog.addFocusListener(new FocusListener() {
-				
-				@Override
-				public void focusLost(FocusEvent arg0) {
-					tagsDialog.dispose();
-				}
-				@Override
-				public void focusGained(FocusEvent arg0) {
-					// No need
-					}
-			});
-
-			JPanel mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-			mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-
-			List<TagDTO> allTags = Collections.emptyList();
-			try {
-				ResponseEntity<List<TagDTO>> response = tagController.getTags();
-				allTags = response.getBody();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			List<JCheckBox> checkBoxes = new ArrayList<>();
-			List<TagDTO> tagsList = new ArrayList<>();
-
-			if (allTags == null || allTags.isEmpty()) {
-				mainPanel.add(new JLabel("No tags found."));
-			} else {
-				for (TagDTO tag : allTags) {
-					JPanel tagRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-					JCheckBox cb = new JCheckBox();
-					if (selectedTags.contains(tag)) {
-						cb.setSelected(true);
-					}
-					JLabel label = new JLabel(tag.getTagName());
-					label.setFont(new Font("Dialog", Font.PLAIN, 14));
-
-					IconColorDTO ic = null;
-					try {
-						ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfTag(tag.getTagId());
-						ic = response.getBody();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					Color color = (ic == null) ? Color.GRAY : new Color(ic.getRed(), ic.getGreen(), ic.getBlue());
-					label.setIcon(new CustomIcon(color, 12, 12));
-
-					tagRow.add(cb);
-					tagRow.add(label);
-					mainPanel.add(tagRow);
-
-					checkBoxes.add(cb);
-					tagsList.add(tag);
-				}
-			}
-
-			JScrollPane scrollPane = new JScrollPane(mainPanel);
-			scrollPane.setPreferredSize(new Dimension(250, 200));
-			tagsDialog.add(scrollPane, BorderLayout.CENTER);
+			tagsDialog.setSelectedTags(selectedTags);
 
 			JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 			buttonPane.setBorder(new EmptyBorder(0, 15, 15, 15));
 
-			JButton cancelButton = new JButton("Cancel");
-			cancelButton.putClientProperty("JButton.buttonType", "roundRect");
-			cancelButton.addActionListener(_ -> tagsDialog.dispose());
-
 			JButton okButton = new JButton("OK");
 			okButton.putClientProperty("JButton.buttonType", "roundRect");
 			okButton.addActionListener(_ -> {
-				selectedTags.clear();
-				for (int i = 0; i < checkBoxes.size(); i++) {
-					if (checkBoxes.get(i).isSelected()) {
-						selectedTags.add(tagsList.get(i));
-					}
-				}
+				selectedTags = tagsDialog.getSelectedTags();
 				updateTagsButton(button);
 				tagsDialog.dispose();
 			});
 
-			buttonPane.add(cancelButton);
 			buttonPane.add(okButton);
 			tagsDialog.add(buttonPane, BorderLayout.SOUTH);
 
 			tagsDialog.pack();
-			tagsDialog.setLocationRelativeTo(TaskWindow.this);
+			setLocationToCenter(tagsDialog);
 			tagsDialog.setVisible(true);
 		});
 	}
@@ -795,6 +708,22 @@ public class TaskWindow extends JDialog {
 	
 	private void setDescriptionFieldDocumentFilter(JTextArea field) {
 		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(BODY_MAX_LENGTH));
+	}
+	
+	private void setLocationToCenter(Window window) {
+		int x = (int) window.getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
+		int y = (int) window.getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		window.setLocation(x, y);
+	}
+	
+	private void addFocusListener() {
+		addWindowFocusListener(new WindowAdapter() {
+			@Override
+			public void windowGainedFocus(WindowEvent e) {
+				main.destroyChildWindowsExcluding(taskWindow);
+				super.windowGainedFocus(e);
+			}
+		});
 	}
 
 }

@@ -1,46 +1,32 @@
 package main.java.gui.windows;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import main.java.custom.DocumentFilterFactory;
-import main.java.custom.SpringContext;
-import main.java.dto.ProjectDTO;
-
-import org.springframework.http.ResponseEntity;
-
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import main.java.controllers.ProjectController;
-import main.java.controllers.IconColorController;
+import main.java.custom.DocumentFilterFactory;
+import main.java.custom.SpringContext;
 import main.java.dto.IconColorDTO;
-import main.java.gui.panels.ProjectRowPanel;
+import main.java.dto.ProjectDTO;
+import main.java.gui.Main;
+import main.java.gui.panels.IconColorPanel;
 import main.java.gui.popups.ErrorDialog;
 
 public class ProjectWindow extends JDialog {
@@ -49,31 +35,34 @@ public class ProjectWindow extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTextField projectTitleTextField;
 	private JTextArea descriptionTextArea;
-	private ButtonGroup bg;
 	private static final Logger logger = LoggerFactory.getLogger(ProjectWindow.class.getName());
 
 	private static final int TITLE_MAX_LENGTH = 50;
 	private static final int BODY_MAX_LENGTH = 500;
-	private boolean isUpdate = false;
-	private ProjectRowPanel updatedProject;
+	private boolean isUpdate;
+	private ProjectDTO updateProjectDTO;
+	private IconColorPanel iconColorPanel;
 	private final ProjectController projectController = SpringContext.getBean(ProjectController.class);
-	private final IconColorController iconColorController = SpringContext.getBean(IconColorController.class);
+	
+	private static final Main main = Main.getMain();
 	
 	/**
 	 * Create the dialog.
 	 */
-	public ProjectWindow(JFrame source, Boolean isUpdate, ProjectRowPanel updatedProject) {
+	public ProjectWindow(ProjectDTO projectDTO) {
 		logger.info("Drawing the window.");
+		super(main, "Project", false);
 		
-		super(source, "Create Project", false);
-		this.isUpdate = isUpdate;
-		this.updatedProject = updatedProject;
+		if(projectDTO!= null) {
+			isUpdate = true;
+			this.updateProjectDTO = projectDTO;
+		}
 		
 		setResizable(false);
 		setUndecorated(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		Dimension size = source.getSize();
+		Dimension size = main.getSize();
 		int w = Math.min(480, (int) (size.getWidth() * 0.75));
 		int h = Math.min(400, (int) (size.getHeight() * 0.75));
 		setSize(new Dimension(w, h));
@@ -107,18 +96,7 @@ public class ProjectWindow extends JDialog {
 		JScrollPane descScrollPane = new JScrollPane(descriptionTextArea);
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
 
-		// Color Panel under description (replaces task options Panel)
-		JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-		colorPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
-
-		JLabel colorLabel = new JLabel("Color: ");
-		colorLabel.setFont(new Font("Dialog", Font.BOLD, 14));
-		colorPanel.add(colorLabel);
-
-		JPanel colorRadioPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 5, 0));
-		colorPanel.add(colorRadioPanel);
-
-		centerPanel.add(colorPanel, BorderLayout.SOUTH);
+		addColorPanel(centerPanel);
 		contentPanel.add(centerPanel, BorderLayout.CENTER);
 
 		// 3. Footer Panel (Cancel + Create buttons)
@@ -137,13 +115,12 @@ public class ProjectWindow extends JDialog {
 
 		getRootPane().setDefaultButton(okButton);
 		
-		listColors(colorRadioPanel);
 		addOkButtonActionListener(okButton);
 
-		if (isUpdate && (updatedProject != null)) {
-			projectTitleTextField.setText((String)updatedProject.getClientProperty("projectTitle"));
-			descriptionTextArea.setText((String)updatedProject.getClientProperty("description"));
-			setSelectedRadioButton(colorRadioPanel);
+		if (isUpdate && (updateProjectDTO != null)) {
+			projectTitleTextField.setText(updateProjectDTO.getProjectTitle());
+			descriptionTextArea.setText(updateProjectDTO.getDescription());
+			iconColorPanel.setSelectedColor(updateProjectDTO.getIconColorId());
 		}
 
 		revalidate();
@@ -166,17 +143,15 @@ public class ProjectWindow extends JDialog {
 				JOptionPane.showMessageDialog(new JDialog(), "Please write a title for your project.");
 				return;
 			}
-			JRadioButton selectedRadioButton = getSelectedRadioButton(bg);
+			IconColorDTO selectedIconColorDTO = iconColorPanel.getSelectedColor();
 			Long iconColorId = 1L;
-			if(selectedRadioButton != null) {
-				Object colorIdObj = selectedRadioButton.getClientProperty("iconColorId");
-				if (colorIdObj instanceof Number) {
-					iconColorId = ((Number) colorIdObj).longValue();
-				}
+			
+			if(selectedIconColorDTO != null) {
+				iconColorId = selectedIconColorDTO.getIconColorId();
 			}
 			
 			if(isUpdate) {
-				Long id = (Long)updatedProject.getClientProperty("projectId");
+				Long id = updateProjectDTO.getProjectId();
 				try {
 					ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId));
 					if (re.getStatusCode().value() >= 400) {
@@ -203,81 +178,10 @@ public class ProjectWindow extends JDialog {
 		});
 	}
 	
-	private void listColors(Container container) {
+	private void addColorPanel(JPanel panel) {
 		logger.info("Running function.");
-
-		List<IconColorDTO> ic = Collections.emptyList();
-		try {
-			ResponseEntity<List<IconColorDTO>> response = iconColorController.getIconColors();
-			ic = response.getBody();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		// initialize the ButtonGroup here
-		bg = new ButtonGroup();
-		
-		if (ic != null) {
-			for(IconColorDTO color : ic) {
-				JRadioButton rb = new JRadioButton();
-			rb.setActionCommand(Long.toString(color.getIconColorId()));
-				rb.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue()));
-				rb.putClientProperty("iconColorId", color.getIconColorId());
-				bg.add(rb);
-				container.add(rb);
-			}
-		}
-		
-		bg.setSelected(bg.getSelection(), true);
-				
-	}
-	
-	// a function for getting selected radio button from a button group
-	private JRadioButton getSelectedRadioButton(ButtonGroup group) {
-		logger.info("Running function.");
-
-	    // Get all buttons added to the group
-	    Enumeration<AbstractButton> buttons = group.getElements();
-	    
-	    while (buttons.hasMoreElements()) {
-	        JRadioButton button = (JRadioButton) buttons.nextElement();
-	        if (button.isSelected()) {
-	            return button; // Return the selected button component
-	        }
-	    }
-	    return null; // Return null if no button is selected
-	}
-	
-	private void setSelectedRadioButton(JPanel colorRadioPanel) {
-		if (updatedProject == null) {
-			return;
-		}
-		Object projIdObj = updatedProject.getClientProperty("projectId");
-		if (projIdObj instanceof Number) {
-			Long projectId = ((Number) projIdObj).longValue();
-			IconColorDTO projectColor = null;
-			try {
-				ResponseEntity<IconColorDTO> response = iconColorController.getIconColorOfProject(projectId);
-				projectColor = response.getBody();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (projectColor != null) {
-				for (Component comp : colorRadioPanel.getComponents()) {
-					if (comp instanceof JRadioButton) {
-						JRadioButton rb = (JRadioButton) comp;
-						Object rbColorIdObj = rb.getClientProperty("iconColorId");
-						if (rbColorIdObj instanceof Number) {
-							Long rbColorId = ((Number) rbColorIdObj).longValue();
-							if (rbColorId.equals(projectColor.getIconColorId())) {
-								rb.setSelected(true);
-								bg.setSelected(rb.getModel(), true);
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
+		iconColorPanel = new IconColorPanel();
+		panel.add(iconColorPanel, BorderLayout.SOUTH);
 	}
 	
 	private void addTextFieldDocumentFilter(JTextField field) {

@@ -40,6 +40,12 @@ public class ProjectRowPanel extends JPanel {
 	private IconColorController iconColorController;
 	private ProjectController projectController;
 
+	private ProjectDTO projectDTO;
+	
+	public ProjectDTO getProjectDTO() {
+		return projectDTO;
+	}
+	
 	public ProjectRowPanel(ProjectDTO project) {
 		logger.info("Initializing ProjectRowPanel");
 		this(null, project);
@@ -49,15 +55,11 @@ public class ProjectRowPanel extends JPanel {
 		this.iconColorController = SpringContext.getBean(IconColorController.class);
 		this.projectController = SpringContext.getBean(ProjectController.class);
 		
-		JLabel label = new JLabel(project.getProjectTitle());
+		projectDTO = project;
 		
-		Long projectId = project.getProjectId();
+		JLabel label = new JLabel(projectDTO.getProjectTitle());
 		
-		putClientProperty("projectTitle", project.getProjectTitle());
-		putClientProperty("description", project.getDescription());
-		putClientProperty("projectId", projectId);
-		putClientProperty("listOrder", null);
-		putClientProperty("iconColorId", project.getIconColorId());
+		Long projectId = projectDTO.getProjectId();
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setAlignmentX(LEFT_ALIGNMENT);
@@ -104,7 +106,7 @@ public class ProjectRowPanel extends JPanel {
 					main.setProjectBackgroundColorOfProject(ProjectRowPanel.this);
 					JPanel showInfoPanel = main.getShowInfoPanel();
 					showInfoPanel.removeAll();
-					showInfoPanel.add(new ProjectInfoPanel(ProjectRowPanel.this));
+					showInfoPanel.add(new ProjectInfoPanel(projectDTO));
 					main.refreshWindow();
 				}
 				else if(e.getButton() == MouseEvent.BUTTON3) {
@@ -121,7 +123,7 @@ public class ProjectRowPanel extends JPanel {
 
 	private void addEditActionListener(JMenuItem button) {
 		button.addActionListener(_ -> {
-			ProjectWindow dialog = new ProjectWindow(main, true, this);
+			ProjectWindow dialog = new ProjectWindow(projectDTO);
 			dialog.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent we) {
@@ -141,7 +143,7 @@ public class ProjectRowPanel extends JPanel {
 				JOptionPane.WARNING_MESSAGE
 			);
 			if (confirm == JOptionPane.YES_OPTION) {
-				Long projectId = (Long) getClientProperty("projectId");
+				Long projectId = projectDTO.getProjectId();
 				int code = 500;
 				try {
 					ResponseEntity<String> response = projectController.deleteProject(projectId);

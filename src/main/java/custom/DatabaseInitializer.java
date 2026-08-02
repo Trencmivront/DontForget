@@ -38,10 +38,9 @@ public class DatabaseInitializer implements CommandLineRunner{
 	}
 	
     private static boolean isDatabaseInitialized(JsonNode node) {
-    	JsonNode dbNode = node.get("databaseInitialized");
-    	if ((dbNode != null && !dbNode.isNull()) || !dbNode.asBoolean()) {
-    		initializeDatabase();
-    		return false;
+    	if (!node.path("databaseInitialized").asBoolean(false)) {
+    	    initializeDatabase();
+    	    return false;
     	}
 		logger.info("Database is already initialized. Skipping...");
 		return true;
@@ -63,6 +62,5 @@ public class DatabaseInitializer implements CommandLineRunner{
 			}
 		}
     }
-
 
 }

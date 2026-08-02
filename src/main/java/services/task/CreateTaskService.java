@@ -50,7 +50,7 @@ public class CreateTaskService implements Post<TaskDTO> {
 		} catch (Exception e) {
 			logger.error("Database error: {}", e.getMessage());
 			e.printStackTrace();
-			return ResponseEntity.internalServerError().body(0L);
+			return ResponseEntity.internalServerError().body(null);
 		}
 	}
 }

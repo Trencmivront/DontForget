@@ -28,23 +28,15 @@ public class TaskRowPanel extends JPanel{
 	
 	private static final Logger logger = LoggerFactory.getLogger(TaskRowPanel.class.getName());
 	private final TaskController taskController = SpringContext.getBean(TaskController.class);
+	
+	private TaskDTO taskDTO;
 
 //	we take panel in case it is ProjectInfoPanel and we need to refresh it
 //	im doing tons of bullsht rn
 	public TaskRowPanel(TaskDTO task) {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		putClientProperty("taskId", task.getTaskId());
-		putClientProperty("taskTitle", task.getTaskTitle());
-		putClientProperty("description", task.getDescription());
-		putClientProperty("statusId", task.getStatusId());
-		putClientProperty("priority", task.getPriority());
-		putClientProperty("dueDate", task.getDueDate() != null ? Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
-		putClientProperty("listOrder", null);
-		putClientProperty("projectId", task.getProjectId());
-		putClientProperty("createdAt", null);
-		putClientProperty("updatedAt", null);
-		putClientProperty("completedAt", null);
+		this.taskDTO = task;
 		
 		setToolTipText(String.format("Show: %s", task.getTaskTitle()));
 		
@@ -94,7 +86,7 @@ public class TaskRowPanel extends JPanel{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton() == MouseEvent.BUTTON1) {
-					new TaskWindow((Long) getClientProperty("projectId"), true, TaskRowPanel.this);
+					new TaskWindow(taskDTO.getTaskId(), null);
 				}
 			}
 		});
@@ -108,19 +100,19 @@ public class TaskRowPanel extends JPanel{
 				return;
 			}
 			
-			Long taskId = (Long) parentContainer.getClientProperty("taskId");
-			String taskTitle = (String) parentContainer.getClientProperty("taskTitle");
-			String description = (String) parentContainer.getClientProperty("description");
-			Integer priority = (Integer) parentContainer.getClientProperty("priority");
-			Timestamp dueDate = (Timestamp) parentContainer.getClientProperty("dueDate");
-			Long projectId = (Long) parentContainer.getClientProperty("projectId");
+			Long taskId = taskDTO.getTaskId();
+			String taskTitle = taskDTO.getTaskTitle();
+			String description = taskDTO.getDescription();
+			Integer priority = taskDTO.getPriority();
+			LocalDate dueDate = taskDTO.getDueDate();
+			Long projectId = taskDTO.getProjectId();
 
 			Long newStatusId = 1L;
 			if (chk.isSelected()) {
 				newStatusId = 2L; // COMPLETED
 				dueDate = null;
 			} else {
-				if (dueDate != null && dueDate.toLocalDateTime().toLocalDate().isBefore(LocalDate.now())) {
+				if (dueDate != null && dueDate.isBefore(LocalDate.now())) {
 					newStatusId = 3L; // PAST
 				} else {
 					newStatusId = 1L; // ACTIVE
@@ -133,7 +125,7 @@ public class TaskRowPanel extends JPanel{
 				description,
 				newStatusId,
 				priority,
-				dueDate != null ? dueDate.toLocalDateTime().toLocalDate() : null,
+				dueDate != null ? dueDate : null,
 				projectId
 			);
 			

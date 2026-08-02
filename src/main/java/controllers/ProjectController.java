@@ -19,6 +19,7 @@ import main.java.dto.ProjectDTO;
 import main.java.services.project.CreateProjectService;
 import main.java.services.project.DeleteProjectService;
 import main.java.services.project.GetProjectOfTaskService;
+import main.java.services.project.GetProjectByIdService;
 import main.java.services.project.GetProjectsService;
 import main.java.services.project.UpdateProjectService;
 
@@ -30,18 +31,21 @@ public class ProjectController {
 
 	private final CreateProjectService createProjectService;
 	private final DeleteProjectService deleteProjectService;
+	private final GetProjectByIdService getProjectByIdService;
 	private final GetProjectOfTaskService getProjectOfTaskService;
 	private final GetProjectsService getProjectsService;
 	private final UpdateProjectService updateProjectService;
 
 	public ProjectController(CreateProjectService createProjectService,
 			DeleteProjectService deleteProjectService,
+			GetProjectByIdService getProjectByIdService,
 			GetProjectOfTaskService getProjectOfTaskService,
 			GetProjectsService getProjectsService,
 			UpdateProjectService updateProjectService) {
 		logger.info("Initializing ProjectController");
 		this.createProjectService = createProjectService;
 		this.deleteProjectService = deleteProjectService;
+		this.getProjectByIdService = getProjectByIdService;
 		this.getProjectOfTaskService = getProjectOfTaskService;
 		this.getProjectsService = getProjectsService;
 		this.updateProjectService = updateProjectService;
@@ -57,6 +61,12 @@ public class ProjectController {
 	public ResponseEntity<String> deleteProject(@PathVariable Long id) {
 		logger.info("Executing {} for id: {}", this.getClass(), id);
 		return deleteProjectService.execute(id);
+	}
+
+	@GetMapping("/get/{id}")
+	public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
+		logger.info("Executing {} for id: {}", this.getClass(), id);
+		return getProjectByIdService.execute(id);
 	}
 
 	@GetMapping("/task/{taskId}")
