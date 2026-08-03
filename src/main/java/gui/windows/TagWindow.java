@@ -64,7 +64,7 @@ public class TagWindow extends JDialog {
 		tagNameField.putClientProperty("JTextField.placeholderText", "Tag name");
 		tagNameField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		((AbstractDocument) tagNameField.getDocument())
-				.setDocumentFilter(DocumentFilterFactory.createDocumentFilter(TAG_NAME_MAX_LENGTH));
+				.setDocumentFilter(DocumentFilterFactory.getDocumentFilter(TAG_NAME_MAX_LENGTH));
 		contentPanel.add(tagNameField);
 
 //		Color panel

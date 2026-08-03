@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 
 import main.java.dto.ReminderDTO;
 import main.java.dto.TaskDTO;
+import main.java.gui.panels.rows.ReminderRowPanel;
 
 public class ReminderPanel extends JPanel{
 	

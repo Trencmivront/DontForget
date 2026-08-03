@@ -1,148 +1,55 @@
 package main.java.gui.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
 import java.util.List;
+
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.AbstractCellEditor;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-
+import main.java.controllers.InboxController;
 import main.java.custom.SpringContext;
 import main.java.dto.InboxDTO;
-import main.java.controllers.InboxController;
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
+import main.java.gui.panels.rows.MessageRowPanel;
 
 public class InboxPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(InboxPanel.class.getName());
-	private InboxController inboxController;
+
+	private final InboxController inboxController;
 	private final JScrollPane scrollPane = new JScrollPane();
 
 	public InboxPanel() {
 		logger.info("Initializing InboxPanel.");
 		this.inboxController = SpringContext.getBean(InboxController.class);
-		
-		setLayout(new BorderLayout());
 
+		setLayout(new BorderLayout());
 		add(new HeaderPanel("Messages"), BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
-		
+
 		listMessages();
 
 		logger.info("InboxPanel drawn.");
 	}
-	
+
 	private void listMessages() {
 		List<InboxDTO> inboxItems = inboxController.getInbox().getBody();
 
 		if (inboxItems == null || inboxItems.isEmpty()) {
 			scrollPane.setViewportView(new EmptyPanel("Your inbox is empty."));
 		} else {
-			DefaultTableModel model = new DefaultTableModel(new Object[] { "Message", "Date", "Action" }, 0) {
-				private static final long serialVersionUID = 1L;
+			JPanel rowsContainer = new JPanel();
+			rowsContainer.setLayout(new BoxLayout(rowsContainer, BoxLayout.Y_AXIS));
 
-				@Override
-				public boolean isCellEditable(int row, int column) {
-					return column == 2;
-				}
-				
-				@Override
-				public Class<?> getColumnClass(int columnIndex) {
-					return String.class;
-				}
-			};
-			
 			for (InboxDTO item : inboxItems) {
-				model.addRow(new Object[] { item.getMessage(), item.getCreatedAt().toString(), "" });
-			}			
-			scrollPane.setViewportView(createTable(model, inboxItems));
-		}
-	}
-	
-	private JTable createTable(DefaultTableModel model, List<InboxDTO> inboxItems){
-		JTable table = new JTable(model);
-		table.setRowHeight(35);
-		table.setFillsViewportHeight(true);
-
-		// Adjust column widths
-		table.getColumnModel().getColumn(0).setPreferredWidth(400);
-		table.getColumnModel().getColumn(1).setPreferredWidth(160);
-		table.getColumnModel().getColumn(2).setPreferredWidth(100);
-
-		// Set cell renderer and editor for action column
-		table.getColumnModel().getColumn(2).setCellRenderer(new ActionCellRenderer());
-		table.getColumnModel().getColumn(2).setCellEditor(new ActionCellEditor(table, model, inboxItems, inboxController));
-		
-		return table;
-	}
-
-	private static class ActionPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		private final JButton deleteButton = new JButton("Delete");
-
-		public ActionPanel() {
-			setLayout(new WrapLayout(FlowLayout.CENTER, 5, 0));
-			add(deleteButton);
-		}
-	}
-
-	private static class ActionCellRenderer implements TableCellRenderer {
-		private final ActionPanel panel = new ActionPanel();
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value,
-				boolean isSelected, boolean hasFocus, int row, int column) {
-			if (isSelected) {
-				panel.setBackground(table.getSelectionBackground());
-			} else {
-				panel.setBackground(table.getBackground());
+				rowsContainer.add(new MessageRowPanel(item));
 			}
-			return panel;
-		}
-	}
 
-	private static class ActionCellEditor extends AbstractCellEditor implements TableCellEditor {
-		private static final long serialVersionUID = 1L;
-		private final ActionPanel panel = new ActionPanel();
-
-		public ActionCellEditor(JTable table, DefaultTableModel model, List<InboxDTO> inboxItems, InboxController inboxController) {
-			panel.deleteButton.addActionListener(_ -> {
-				int row = table.getEditingRow();
-				fireEditingStopped();
-				if (row != -1) {
-					int modelRow = table.convertRowIndexToModel(row);
-					InboxDTO item = inboxItems.get(modelRow);
-					try {
-						inboxController.deleteMessageById(item.getInboxId());
-					} catch (Exception e) {
-						logger.error("Failed to delete inbox item", e);
-					}
-					model.removeRow(modelRow);
-					inboxItems.remove(modelRow);
-				}
-			});
-		}
-
-		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value,
-				boolean isSelected, int row, int column) {
-			panel.setBackground(table.getSelectionBackground());
-			return panel;
-		}
-
-		@Override
-		public Object getCellEditorValue() {
-			return "";
+			scrollPane.setViewportView(rowsContainer);
 		}
 	}
 }

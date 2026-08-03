@@ -1,4 +1,4 @@
-package main.java.gui.panels;
+package main.java.gui.panels.rows;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,7 @@ import main.java.custom.CustomIcon;
 import main.java.dto.IconColorDTO;
 import main.java.dto.ProjectDTO;
 import main.java.gui.Main;
+import main.java.gui.panels.ProjectInfoPanel;
 import main.java.gui.windows.ProjectWindow;
 
 public class ProjectRowPanel extends JPanel {

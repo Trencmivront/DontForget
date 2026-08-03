@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -78,12 +80,11 @@ public class ReminderDialog extends JDialog {
 		
 		if(reminderId != null) {
 			reminderDTO = reminderController.getReminderById(reminderId).getBody();
+			isUpdate = true;
 		}
 
 		picker = new DateTimePicker();
 		
-		isUpdate = reminderDTO == null ? false : true;
-
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 		
@@ -142,6 +143,7 @@ public class ReminderDialog extends JDialog {
 		radioGroup.add(specialRadioButton);
 		
 		if(tempIsRecurring) {
+			picker.getDatePicker().setVisible(false);
 			if((tempSelectedRecurringDays.size() == 1) 
 					&& (tempSelectedRecurringDays.get(0).equals(LocalDateTime.now().getDayOfWeek()))) {
 				onceRadioButton.setSelected(true);
@@ -154,6 +156,7 @@ public class ReminderDialog extends JDialog {
 			radioPanel.setVisible(true);
 		}
 		else {
+			picker.getDatePicker().setVisible(true);
 			radioPanel.setVisible(false);
 		}
 		
@@ -186,6 +189,7 @@ public class ReminderDialog extends JDialog {
 		getRootPane().setDefaultButton(okButton);
 
 		addFocusListener();
+		addWindowCloseListener();
 		pack();
 		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
 		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
@@ -367,6 +371,15 @@ public class ReminderDialog extends JDialog {
 			@Override
 			public void focusGained(FocusEvent arg0) {			
 				// I don't use this
+			}
+		});
+	}
+	
+	private void addWindowCloseListener() {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				Main.getMain().getRemindersButton().doClick();
 			}
 		});
 	}

@@ -1,4 +1,4 @@
-package main.java.gui.panels;
+package main.java.gui.panels.rows;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -25,6 +26,7 @@ import main.java.custom.CustomIcon;
 import main.java.dto.IconColorDTO;
 import main.java.dto.TagDTO;
 import main.java.gui.Main;
+import main.java.gui.panels.TagsPanel;
 
 public class TagRowPanel extends JPanel {
 
@@ -98,18 +100,26 @@ public class TagRowPanel extends JPanel {
 	private void addDeleteActionListener(JMenuItem deleteItem) {
 		deleteItem.addActionListener(_ -> {
 				Long tagId = tagDTO.getTagId();
-				int code = 500;
-				try {
-					ResponseEntity<String> response = tagController.deleteTag(tagId);
-					code = response.getStatusCode().value();
-				} catch (Exception e) {
-					logger.error("Failed to delete tag " + tagId, e);
+				
+				List<TagDTO> selectedTags = TagsPanel.getTagsPanel().getSelectedTags();
+				
+				if(!selectedTags.isEmpty() && selectedTags != null) {
+					int option = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete tags?", "Delete Selected Tags",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE);
+					if(option == JOptionPane.YES_OPTION) {
+						for(TagDTO tag : selectedTags) {
+							tagController.deleteTag(tag.getTagId());
+						}
+						refreshTagsList();
+						return;
+					}
+					else return;
+					
 				}
-				if (code < 400) {
-					refreshTagsList();
-				} else {
-					JOptionPane.showMessageDialog(this, "Failed to delete the tag.");
-				}
+				
+				tagController.deleteTag(tagId);
+				refreshTagsList();
 		});
 	}
 	

@@ -47,10 +47,10 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 import main.java.dto.ProjectDTO;
 import main.java.gui.panels.InboxPanel;
-import main.java.gui.panels.ProjectRowPanel;
 import main.java.gui.panels.ReminderPanel;
 import main.java.gui.panels.TagsPanel;
 import main.java.gui.panels.TodayPanel;
+import main.java.gui.panels.rows.ProjectRowPanel;
 import main.java.gui.windows.ProjectWindow;
 import main.java.gui.windows.SearchWindow;
 
@@ -346,7 +346,6 @@ public class Main extends JFrame {
 				@Override
 				public void windowClosed(WindowEvent e) {
 					listProjects(projectsContainer);
-					refreshWindow();
 				}
 				
 			});

@@ -31,6 +31,10 @@ import main.java.dto.ProjectDTO;
 import main.java.dto.ReminderDTO;
 import main.java.dto.TagDTO;
 import main.java.dto.TaskDTO;
+import main.java.gui.panels.rows.ProjectRowPanel;
+import main.java.gui.panels.rows.ReminderRowPanel;
+import main.java.gui.panels.rows.TagRowPanel;
+import main.java.gui.panels.rows.TaskRowPanel;
 
 public class SearchedItemsPanel extends JPanel{
 

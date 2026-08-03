@@ -10,14 +10,10 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import main.java.controllers.InboxController;
-import main.java.custom.SpringContext;
-import main.java.dto.InboxDTO;
 import main.java.gui.Main;
 import main.java.inter.NotificationService;
 
 public class DBusNotificationService implements NotificationService{
-    private final InboxController inboxController = SpringContext.getBean(InboxController.class);
 
     private static final Logger logger = LoggerFactory.getLogger(DBusNotificationService.class.getName());
 
@@ -51,8 +47,6 @@ public class DBusNotificationService implements NotificationService{
                 // Listen to the command output
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;
-                    logger.info("Saving notification message to inbox DB: {}", body);
-                    inboxController.createMessage((new InboxDTO(body)));
 
                     while ((line = reader.readLine()) != null) {
                         logger.info("gdbus response: {}", line);

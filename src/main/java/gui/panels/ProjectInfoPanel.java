@@ -23,6 +23,7 @@ import main.java.controllers.TaskController;
 import main.java.dto.ProjectDTO;
 import main.java.dto.TaskDTO;
 import main.java.gui.Main;
+import main.java.gui.panels.rows.TaskRowPanel;
 import main.java.gui.windows.TaskWindow;
 
 public class ProjectInfoPanel extends JPanel{

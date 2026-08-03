@@ -18,6 +18,7 @@ import main.java.controllers.TaskController;
 import org.springframework.http.ResponseEntity;
 import main.java.dto.TaskDTO;
 import main.java.gui.Main;
+import main.java.gui.panels.rows.TaskRowPanel;
 
 public class TodayPanel extends JPanel{
 

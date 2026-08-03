@@ -1,4 +1,4 @@
-package main.java.gui.panels;
+package main.java.gui.panels.rows;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;

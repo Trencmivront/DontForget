@@ -44,6 +44,8 @@ public class ProjectWindow extends JDialog {
 	private IconColorPanel iconColorPanel;
 	private final ProjectController projectController = SpringContext.getBean(ProjectController.class);
 	
+	private static ProjectWindow projectWindow;
+	
 	private static final Main main = Main.getMain();
 	
 	/**
@@ -51,7 +53,16 @@ public class ProjectWindow extends JDialog {
 	 */
 	public ProjectWindow(ProjectDTO projectDTO) {
 		logger.info("Drawing the window.");
+		
+//		only one instance of task window at a time
+		if(projectWindow != null) {
+			projectWindow.dispose();
+			projectWindow = null;
+		}
+		
 		super(main, "Project", false);
+		
+		projectWindow = this;
 		
 		if(projectDTO!= null) {
 			isUpdate = true;
@@ -185,11 +196,11 @@ public class ProjectWindow extends JDialog {
 	}
 	
 	private void addTextFieldDocumentFilter(JTextField field) {
-		((AbstractDocument) field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(TITLE_MAX_LENGTH));
+		((AbstractDocument) field.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(TITLE_MAX_LENGTH));
 	}
 	
 	private void addTextAreaDocumentFilter(JTextArea area) {
-		((AbstractDocument) area.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(BODY_MAX_LENGTH));
+		((AbstractDocument) area.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(BODY_MAX_LENGTH));
 	}
 
 }

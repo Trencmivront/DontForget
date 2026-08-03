@@ -6,7 +6,7 @@ import javax.swing.text.DocumentFilter;
 
 public class DocumentFilterFactory {
 
-	public static DocumentFilter createDocumentFilter(int maxCharacter) {
+	public static DocumentFilter getDocumentFilter(int maxCharacter) {
 		return new DocumentFilter() {
 //			Here we update the text area same way we update jtable.
 			@Override

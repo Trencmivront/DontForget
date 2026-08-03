@@ -703,11 +703,11 @@ public class TaskWindow extends JDialog {
 	}
 	
 	private void setTitleFieldDocumentFilter(JTextField field) {
-		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(TITLE_MAX_LENGTH));
+		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(TITLE_MAX_LENGTH));
 	}
 	
 	private void setDescriptionFieldDocumentFilter(JTextArea field) {
-		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.createDocumentFilter(BODY_MAX_LENGTH));
+		((AbstractDocument)field.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(BODY_MAX_LENGTH));
 	}
 	
 	private void setLocationToCenter(Window window) {

@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import main.java.controllers.TagController;
 import main.java.custom.SpringContext;
 import main.java.dto.TagDTO;
+import main.java.gui.panels.rows.TagRowPanel;
 import main.java.gui.windows.TagWindow;
 
 public class TagsPanel extends JPanel {
@@ -30,6 +31,7 @@ public class TagsPanel extends JPanel {
 	
 	private final TagController tagController = SpringContext.getBean(TagController.class);
 	private List<TagDTO> selectedTags = new ArrayList<TagDTO>();
+	private static TagsPanel tagsPanel;
 	
 	public List<TagDTO> getSelectedTags(){
 		logger.warn("Tags Panel: {}", selectedTags);
@@ -40,7 +42,17 @@ public class TagsPanel extends JPanel {
 		this.selectedTags = selectedTags;
 	}
 	
+	public static TagsPanel getTagsPanel() {
+		return tagsPanel;
+	}
+	
 	public TagsPanel() {
+//		I want a new instance every time I use it
+		if(tagsPanel != null) {
+			tagsPanel = null;
+		}
+
+		tagsPanel = this;
 		
 		logger.info("Drawing TagsPanel.");
 		

@@ -94,7 +94,9 @@ public class NotificationManager {
 		}
 		String description = task != null && task.getDescription() != null ? task.getDescription() : "";
 		String title = task != null ? task.getTaskTitle() : "Reminder";
-		String message = reminder.getMessage() != null ? reminder.getMessage() : description;
+		String message = reminder.getMessage() != null && !reminder.getMessage().isBlank()
+				? reminder.getMessage()
+				: (!description.isBlank() ? description : "Reminder for " + title);
  
 		logger.info("Scheduling reminder for task ID {} in {} ms.", reminder.getTaskId(), delay);
 		ScheduledFuture<?> future = scheduler.schedule(

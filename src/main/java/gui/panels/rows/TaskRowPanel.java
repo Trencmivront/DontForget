@@ -1,10 +1,9 @@
-package main.java.gui.panels;
+package main.java.gui.panels.rows;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 
 import javax.swing.BoxLayout;
@@ -20,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import main.java.controllers.TaskController;
 import main.java.custom.SpringContext;
 import main.java.dto.TaskDTO;
+import main.java.gui.panels.ProjectInfoPanel;
 import main.java.gui.windows.TaskWindow;
 
 public class TaskRowPanel extends JPanel{

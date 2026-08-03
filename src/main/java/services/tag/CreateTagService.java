@@ -1,6 +1,7 @@
 package main.java.services.tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class CreateTagService implements Post<TagDTO>{
 			return ResponseEntity.ok(id);
 		}catch (Exception _) {
 			logger.warn("Error while creating tag: {}", tagDTO);
-			return ResponseEntity.ofNullable(0l);
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(0l);
 		}
 	}
 }
