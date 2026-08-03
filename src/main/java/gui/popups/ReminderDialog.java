@@ -97,7 +97,7 @@ public class ReminderDialog extends JDialog {
 			picker.setDateTimePermissive(reminderDTO.getRemindAt());
 			// Temporary variables to track recurring choices inside this dialog
 			tempSelectedRecurringDays = recurringTaskController.getRecurringDaysOfTask(reminderId).getBody();
-			if(!tempSelectedRecurringDays.isEmpty() || tempSelectedRecurringDays != null) {
+			if(!tempSelectedRecurringDays.isEmpty() && tempSelectedRecurringDays != null) {
 				tempIsRecurring = true;
 			}
 			msgField.setText(reminderDTO.getMessage());
@@ -293,7 +293,7 @@ public class ReminderDialog extends JDialog {
 		okButton.addActionListener(_ -> {
 			LocalDateTime ldt;
 			
-			if(tempIsRecurring) {
+			if(!tempIsRecurring) {
 				ldt = picker.getDateTimeStrict();
 			}
 			else {
@@ -351,7 +351,7 @@ public class ReminderDialog extends JDialog {
 				);
 				reminderController.updateReminder(updatedDTO);
 				
-				if(tempSelectedRecurringDays.isEmpty() && tempIsRecurring) {
+				if(tempSelectedRecurringDays.isEmpty() && !tempIsRecurring) {
 					recurringTaskController.deleteRecurringTask(reminderDTO.getTaskId());
 				} else if(tempIsRecurring) {
 					recurringTaskController.updateRecurringTask(reminderDTO.getTaskId(), tempSelectedRecurringDays);

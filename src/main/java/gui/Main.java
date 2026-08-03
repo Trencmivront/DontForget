@@ -183,16 +183,16 @@ public class Main extends JFrame {
 		JPanel buttonMenuPanel = new JPanel();
 		buttonMenuPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 20, 5));
 		
-		tagsButton = new JButton("tags");
+		tagsButton = new JButton("Tags");
 		buttonMenuPanel.add(tagsButton);
 		
-		inboxButton = new JButton("inbox");
+		inboxButton = new JButton("Inbox");
 		buttonMenuPanel.add(inboxButton);
 		
-		todayButton = new JButton("today");
+		todayButton = new JButton("Today");
 		buttonMenuPanel.add(todayButton);
 		
-		remindersButton = new JButton("reminders");
+		remindersButton = new JButton("Reminders");
 		buttonMenuPanel.add(remindersButton);
 		
 		JPanel navigationPanel = new JPanel();
@@ -212,6 +212,7 @@ public class Main extends JFrame {
 		addNavigationButtonActionListener(tagsButton, TagsPanel.class);
 		addNavigationButtonActionListener(todayButton, TodayPanel.class);
 		addSearchButtonActionListener(searchButton);
+		
 		setSplitDivider();
 		addWindowFocusListener();
 		
@@ -347,7 +348,6 @@ public class Main extends JFrame {
 				public void windowClosed(WindowEvent e) {
 					listProjects(projectsContainer);
 				}
-				
 			});
 		});
 	}
@@ -423,4 +423,5 @@ public class Main extends JFrame {
 		if(project != null) project.setBackground(Color.cyan);
 		prevProjectPanel = project;
 	}
+
 }
