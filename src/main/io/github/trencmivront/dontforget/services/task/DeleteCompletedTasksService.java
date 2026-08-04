@@ -1,0 +1,54 @@
+package main.io.github.trencmivront.dontforget.services.task;
+
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.inter.Command;
+
+@Service
+public class DeleteCompletedTasksService implements Command<Long> {
+
+	private static final Logger logger = LoggerFactory.getLogger(DeleteCompletedTasksService.class.getName());
+
+	@Autowired
+	private GetTasksOfProjectService getTasksOfProjectService;
+
+	@Autowired
+	private DeleteTaskService deleteTaskService;
+
+	public DeleteCompletedTasksService(GetTasksOfProjectService getTasksOfProjectService, DeleteTaskService deleteTaskService) {
+		this.getTasksOfProjectService = getTasksOfProjectService;
+		this.deleteTaskService = deleteTaskService;
+	}
+
+	public ResponseEntity<String> execute(Long projectId) {
+		logger.info("Executing {} for projectId: {}", this.getClass(), projectId);
+
+		ResponseEntity<List<TaskDTO>> tasksResponse = getTasksOfProjectService.execute(projectId);
+		List<TaskDTO> tasks = tasksResponse.getBody();
+		if (tasks == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		boolean success = true;
+		for (TaskDTO task : tasks) {
+			if (task.getStatusId() != null && task.getStatusId() == 2L) { // 2 = COMPLETED
+				ResponseEntity<String> res = deleteTaskService.execute(task.getTaskId());
+				if (res.getStatusCode().isError()) {
+					success = false;
+				}
+			}
+		}
+		if (success) {
+			return ResponseEntity.ok("COMPLETED TASKS DELETED");
+		} else {
+			return ResponseEntity.internalServerError().body("FAILED TO DELETE COMPLETED TASKS");
+		}
+	}
+}

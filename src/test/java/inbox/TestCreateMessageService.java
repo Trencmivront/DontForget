@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import main.java.entities.Inbox;
-import main.java.repos.InboxRepository;
-import main.java.services.inbox.CreateMessageService;
+import main.io.github.trencmivront.dontforget.entities.Inbox;
+import main.io.github.trencmivront.dontforget.repos.InboxRepository;
+import main.io.github.trencmivront.dontforget.services.inbox.CreateMessageService;
 
 @ExtendWith(MockitoExtension.class)
 class TestCreateMessageService {

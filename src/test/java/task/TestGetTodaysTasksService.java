@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import main.java.dto.TaskDTO;
-import main.java.entities.Task;
-import main.java.repos.TaskRepository;
-import main.java.services.task.GetTodaysTasksService;
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.entities.Task;
+import main.io.github.trencmivront.dontforget.repos.TaskRepository;
+import main.io.github.trencmivront.dontforget.services.task.GetTodaysTasksService;
 
 @ExtendWith(MockitoExtension.class)
 class TestGetTodaysTasksService {

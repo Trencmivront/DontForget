@@ -18,15 +18,15 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import main.java.controllers.ProjectController;
-import main.java.controllers.TagController;
-import main.java.controllers.TaskController;
-import main.java.custom.SpringContext;
-import main.java.dto.ProjectDTO;
-import main.java.dto.TagDTO;
-import main.java.dto.TaskDTO;
-import main.java.gui.panels.SearchedItemsPanel;
-import main.java.gui.windows.SearchWindow;
+import main.io.github.trencmivront.dontforget.controllers.ProjectController;
+import main.io.github.trencmivront.dontforget.controllers.TagController;
+import main.io.github.trencmivront.dontforget.controllers.TaskController;
+import main.io.github.trencmivront.dontforget.custom.SpringContext;
+import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
+import main.io.github.trencmivront.dontforget.dto.TagDTO;
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.gui.panels.SearchedItemsPanel;
+import main.io.github.trencmivront.dontforget.gui.windows.SearchWindow;
 
 @ExtendWith(MockitoExtension.class)
 class TestSearchedItemsPanel {

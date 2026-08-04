@@ -16,10 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import main.java.dto.TagDTO;
-import main.java.entities.Tag;
-import main.java.repos.TagRepository;
-import main.java.services.tag.GetTagsService;
+import main.io.github.trencmivront.dontforget.dto.TagDTO;
+import main.io.github.trencmivront.dontforget.entities.Tag;
+import main.io.github.trencmivront.dontforget.repos.TagRepository;
+import main.io.github.trencmivront.dontforget.services.tag.GetTagsService;
 
 @ExtendWith(MockitoExtension.class)
 class TestGetTagsService {

@@ -17,13 +17,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import main.java.controllers.RecurringTaskController;
-import main.java.controllers.ReminderController;
-import main.java.controllers.TaskController;
-import main.java.custom.SpringContext;
-import main.java.dto.ReminderDTO;
-import main.java.dto.TaskDTO;
-import main.java.notify.NotificationManager;
+import main.io.github.trencmivront.dontforget.controllers.RecurringTaskController;
+import main.io.github.trencmivront.dontforget.controllers.ReminderController;
+import main.io.github.trencmivront.dontforget.controllers.TaskController;
+import main.io.github.trencmivront.dontforget.custom.SpringContext;
+import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.notify.NotificationManager;
 
 @ExtendWith(MockitoExtension.class)
 class TestNotificationManager {

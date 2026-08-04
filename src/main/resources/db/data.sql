@@ -24,6 +24,7 @@ INSERT INTO ICON_COLOR (red, green, blue) VALUES (30, 136, 229);  -- Dodger Blue
 INSERT INTO ICON_COLOR (red, green, blue) VALUES (216, 27, 96);   -- Crimson
 INSERT INTO ICON_COLOR (red, green, blue) VALUES (85, 139, 47);   -- Olive Green
 INSERT INTO ICON_COLOR (red, green, blue) VALUES (69, 90, 100);   -- Slate
+INSERT INTO ICON_COLOR (red, green, blue) VALUES (205, 220, 57);  -- Lime
 
 -- Insert TASK_STATUS records
 INSERT INTO TASK_STATUS (statusName) VALUES ('ACTIVE');

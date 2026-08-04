@@ -15,8 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import main.java.repos.InboxRepository;
-import main.java.services.inbox.DeleteMessageByIdService;
+import main.io.github.trencmivront.dontforget.repos.InboxRepository;
+import main.io.github.trencmivront.dontforget.services.inbox.DeleteMessageByIdService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDeleteMessageByIdService {

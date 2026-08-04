@@ -1,0 +1,89 @@
+package main.io.github.trencmivront.dontforget.controllers;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
+import main.io.github.trencmivront.dontforget.services.project.CreateProjectService;
+import main.io.github.trencmivront.dontforget.services.project.DeleteProjectService;
+import main.io.github.trencmivront.dontforget.services.project.GetProjectByIdService;
+import main.io.github.trencmivront.dontforget.services.project.GetProjectOfTaskService;
+import main.io.github.trencmivront.dontforget.services.project.GetProjectsService;
+import main.io.github.trencmivront.dontforget.services.project.UpdateProjectService;
+
+@RestController
+@RequestMapping("/api/project")
+public class ProjectController {
+
+	private static final Logger logger = LoggerFactory.getLogger(ProjectController.class.getName());
+
+	private final CreateProjectService createProjectService;
+	private final DeleteProjectService deleteProjectService;
+	private final GetProjectByIdService getProjectByIdService;
+	private final GetProjectOfTaskService getProjectOfTaskService;
+	private final GetProjectsService getProjectsService;
+	private final UpdateProjectService updateProjectService;
+
+	public ProjectController(CreateProjectService createProjectService,
+			DeleteProjectService deleteProjectService,
+			GetProjectByIdService getProjectByIdService,
+			GetProjectOfTaskService getProjectOfTaskService,
+			GetProjectsService getProjectsService,
+			UpdateProjectService updateProjectService) {
+		logger.info("Initializing ProjectController");
+		this.createProjectService = createProjectService;
+		this.deleteProjectService = deleteProjectService;
+		this.getProjectByIdService = getProjectByIdService;
+		this.getProjectOfTaskService = getProjectOfTaskService;
+		this.getProjectsService = getProjectsService;
+		this.updateProjectService = updateProjectService;
+	}
+
+	@PostMapping("/create")
+	public ResponseEntity<Long> createProject(@RequestBody ProjectDTO p) {
+		logger.info("Executing {} for project: {}", this.getClass(), p);
+		return createProjectService.execute(p);
+	}
+
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteProject(@PathVariable Long id) {
+		logger.info("Executing {} for id: {}", this.getClass(), id);
+		return deleteProjectService.execute(id);
+	}
+
+	@GetMapping("/get/{id}")
+	public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
+		logger.info("Executing {} for id: {}", this.getClass(), id);
+		return getProjectByIdService.execute(id);
+	}
+
+	@GetMapping("/task/{taskId}")
+	public ResponseEntity<ProjectDTO> getProjectOfTask(@PathVariable Long taskId) {
+		logger.info("Executing {} for taskId: {}", this.getClass(), taskId);
+		return getProjectOfTaskService.execute(taskId);
+	}
+
+	@GetMapping("/get-all")
+	public ResponseEntity<List<ProjectDTO>> getProjects() {
+		logger.info("Executing {}", this.getClass());
+		return getProjectsService.execute(null);
+	}
+
+	@PutMapping("/update/{id}")
+	public ResponseEntity<String> updateProject(@RequestBody ProjectDTO p) {
+		logger.info("Executing {}", this.getClass());
+		return updateProjectService.execute(p);
+	}
+}

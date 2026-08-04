@@ -1,0 +1,44 @@
+package main.io.github.trencmivront.dontforget.services.tag;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import main.io.github.trencmivront.dontforget.dto.TagDTO;
+import main.io.github.trencmivront.dontforget.entities.Tag;
+import main.io.github.trencmivront.dontforget.inter.Query;
+import main.io.github.trencmivront.dontforget.repos.TagRepository;
+
+@Service
+public class GetTagsService implements Query<Void, List<TagDTO>>{
+
+	private static final Logger logger = LoggerFactory.getLogger(GetTagsService.class.getName());
+
+	@Autowired
+	private TagRepository tagRepository;
+
+	public GetTagsService(TagRepository tagRepository) {
+		this.tagRepository = tagRepository;
+	}
+
+	public ResponseEntity<List<TagDTO>> execute(Void i) {
+		logger.info("Executing {}", this.getClass());
+		try {
+			List<Tag> tags = tagRepository.findAll();
+			List<TagDTO> dtos = tags.stream()
+				.map(TagDTO::new)
+				.toList();
+			return ResponseEntity.ok(dtos);
+		} catch (Exception e) {
+			logger.error("Error fetching tags: {}", e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().build();
+		}
+	}
+
+}

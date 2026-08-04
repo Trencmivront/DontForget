@@ -15,10 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import main.java.dto.ProjectDTO;
-import main.java.entities.Project;
-import main.java.repos.ProjectRepository;
-import main.java.services.project.CreateProjectService;
+import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
+import main.io.github.trencmivront.dontforget.entities.Project;
+import main.io.github.trencmivront.dontforget.repos.ProjectRepository;
+import main.io.github.trencmivront.dontforget.services.project.CreateProjectService;
 
 @ExtendWith(MockitoExtension.class)
 class TestCreateProjectService {

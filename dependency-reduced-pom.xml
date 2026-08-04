@@ -22,6 +22,12 @@
                 <transformer>
                   <mainClass>main.App</mainClass>
                 </transformer>
+                <transformer>
+                  <resource>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</resource>
+                </transformer>
+                <transformer>
+                  <resource>META-INF/spring.factories</resource>
+                </transformer>
               </transformers>
             </configuration>
           </execution>

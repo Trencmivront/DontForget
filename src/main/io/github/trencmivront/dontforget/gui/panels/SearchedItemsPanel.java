@@ -1,0 +1,283 @@
+package main.io.github.trencmivront.dontforget.gui.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+import java.util.Objects;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.RowFilter;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+
+import main.io.github.trencmivront.dontforget.controllers.ProjectController;
+import main.io.github.trencmivront.dontforget.controllers.ReminderController;
+import main.io.github.trencmivront.dontforget.controllers.TagController;
+import main.io.github.trencmivront.dontforget.controllers.TaskController;
+import main.io.github.trencmivront.dontforget.custom.SpringContext;
+import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
+import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
+import main.io.github.trencmivront.dontforget.dto.TagDTO;
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.gui.panels.rows.ProjectRowPanel;
+import main.io.github.trencmivront.dontforget.gui.panels.rows.ReminderRowPanel;
+import main.io.github.trencmivront.dontforget.gui.panels.rows.TagRowPanel;
+import main.io.github.trencmivront.dontforget.gui.panels.rows.TaskRowPanel;
+
+public class SearchedItemsPanel extends JPanel{
+
+	private static final Logger logger = LoggerFactory.getLogger(SearchedItemsPanel.class.getName());
+
+	private ProjectController projectController;
+	private ReminderController reminderController;
+	private TaskController taskController;
+	private TagController tagController;
+	
+	private static final long serialVersionUID = 1L;
+	private final JTable itemsTable = new JTable();
+	private DefaultTableModel model;
+	
+	public SearchedItemsPanel() {
+		logger.info("Initializing SearchedItemsPanel");
+		this.projectController = SpringContext.getBean(ProjectController.class);
+		this.reminderController = SpringContext.getBean(ReminderController.class);
+		this.taskController = SpringContext.getBean(TaskController.class);
+		this.tagController = SpringContext.getBean(TagController.class);
+		
+		setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane scrollPane = new JScrollPane(itemsTable);
+		add(scrollPane, BorderLayout.CENTER);
+		
+		listItems();
+		addRowMouseListener();
+	}
+	
+	public void filterRows(String key) {
+		if (model != null) {
+			TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+			if (key == null || key.trim().isEmpty()) {
+				sorter.setRowFilter(null);
+			} else {
+				String lowerKey = key.toLowerCase();
+				sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+					@Override
+					public boolean include(RowFilter.Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+						Object value = entry.getValue(0);
+						if (value instanceof JPanel panel) {
+							if(Objects.nonNull(panel.getToolTipText()) && panel.getToolTipText().equals("header")) {
+									return true;
+								}
+							
+							for (Component comp : panel.getComponents()) {
+								if (comp instanceof JLabel label) {
+									String text = label.getText();
+									String toolTipText = ((JPanel)label.getParent()).getToolTipText();
+									
+									boolean isTitleMatch = text != null && text.toLowerCase().contains(lowerKey);
+									boolean isToolTipMatch = toolTipText != null && toolTipText.toLowerCase().contains(lowerKey);
+
+									if (isTitleMatch || isToolTipMatch) {
+										return true;
+									}
+								}
+							}
+						}
+						return false;
+					}
+				});
+			}
+			itemsTable.setRowSorter(sorter);
+		}
+	}
+	
+	private JPanel createHeader(String title) {
+		JPanel panel = new JPanel();
+		panel.setToolTipText("header");
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel.setBorder(new EmptyBorder(3, 2, 3, 2));
+		JLabel label = new JLabel(title);
+		label.setFont(new Font("Dialog", Font.BOLD, 16));
+		panel.add(label);
+		return panel;
+	}
+
+	public void listItems() {		
+		model = new DefaultTableModel(new Object[] { "Search Results" }, 0) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		
+		listProjects();
+		listTasks();
+		listTags();
+		listReminders();
+		
+		itemsTable.setModel(model);
+		itemsTable.setRowHeight(35);
+		itemsTable.setFillsViewportHeight(true);
+		
+		itemsTable.getColumnModel().getColumn(0).setCellRenderer((table, value, _, hasFocus, _, _) -> {
+			if (value instanceof Component c) {
+				if(hasFocus) {
+					c.setBackground(table.getSelectionBackground());
+					c.setForeground(table.getSelectionForeground());
+				} else {
+					c.setBackground(table.getBackground());
+					c.setForeground(table.getForeground());
+				}
+				return c;
+			}
+			return null;
+		});
+		
+	}
+	
+	private void listProjects() {
+		try {
+			ResponseEntity<List<ProjectDTO>> response = projectController.getProjects();
+			List<ProjectDTO> projects = response.getBody();
+			
+			if (projects != null && !projects.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Projects") });
+				for (ProjectDTO project : projects) {
+					ProjectRowPanel row = new ProjectRowPanel(project);
+					model.addRow(new Object[] { row });
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void listTasks() {
+		try {
+			ResponseEntity<List<TaskDTO>> response = taskController.getTasks();
+			List<TaskDTO> tasks = response.getBody();
+			if (tasks != null && !tasks.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Tasks") });
+				for (TaskDTO task : tasks) {
+					TaskRowPanel row = new TaskRowPanel(task);
+					List<TagDTO> tags = null;
+					try {
+						ResponseEntity<List<TagDTO>> tagsResponse = tagController.getTagsOfTask(task.getTaskId());
+						tags = tagsResponse.getBody();
+					} catch (Exception ex) {
+						logger.error("Failed to load tags for task", ex);
+					}
+					if (tags != null && !tags.isEmpty()) {
+						StringBuilder tagsBuilder = new StringBuilder();
+						for (TagDTO tag : tags) {
+							tagsBuilder.append(" ").append(tag.getTagName());
+						}
+						row.setToolTipText(tagsBuilder.toString());
+					}
+					model.addRow(new Object[] { row });
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void listTags() {
+		try {
+			ResponseEntity<List<TagDTO>> response = tagController.getTags();
+			List<TagDTO> tags = response.getBody();
+			if (tags != null && !tags.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Tags") });
+				for (TagDTO tag : tags) {
+					TagRowPanel row = new TagRowPanel(tag);
+					model.addRow(new Object[] { row });
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void listReminders() {
+		try {
+			ResponseEntity<List<ReminderDTO>> response = reminderController.getReminders();
+			List<ReminderDTO> reminders = response.getBody();
+			if (reminders != null && !reminders.isEmpty()) {
+				model.addRow(new Object[] { createHeader("Reminders") });
+				for (ReminderDTO reminder : reminders) {
+					TaskDTO task = null;
+					try {
+						ResponseEntity<TaskDTO> taskResponse = taskController.getTaskById(reminder.getTaskId());
+						task = taskResponse.getBody();
+					} catch (Exception ex) {
+						logger.error("Failed to load task for reminder", ex);
+					}
+					if (task != null) {
+						ReminderRowPanel row = new ReminderRowPanel(reminder, task);
+						model.addRow(new Object[] { row });
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	private void addRowMouseListener(){
+		itemsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				handleMouseEvent(e);
+			}
+
+			private void handleMouseEvent(MouseEvent e) {
+				int row = itemsTable.rowAtPoint(e.getPoint());
+				if (row >= 0) {
+					if (itemsTable.getSelectedRow() != row) {
+						itemsTable.setRowSelectionInterval(row, row);
+					}
+					Object value = itemsTable.getValueAt(row, 0);
+					if (value instanceof JPanel panel) {
+						panel.dispatchEvent(new MouseEvent(
+							itemsTable,
+							e.getID(),
+							e.getWhen(),
+							e.getModifiersEx(),
+							e.getX(),
+							e.getY(),
+							e.getClickCount(),
+							e.isPopupTrigger(),
+							e.getButton()
+						));
+					}
+				}
+			}
+		});
+	}
+	
+}

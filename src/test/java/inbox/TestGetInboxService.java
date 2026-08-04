@@ -18,10 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import main.java.dto.InboxDTO;
-import main.java.entities.Inbox;
-import main.java.repos.InboxRepository;
-import main.java.services.inbox.GetInboxService;
+import main.io.github.trencmivront.dontforget.dto.InboxDTO;
+import main.io.github.trencmivront.dontforget.entities.Inbox;
+import main.io.github.trencmivront.dontforget.repos.InboxRepository;
+import main.io.github.trencmivront.dontforget.services.inbox.GetInboxService;
 
 @ExtendWith(MockitoExtension.class)
 class TestGetInboxService {
