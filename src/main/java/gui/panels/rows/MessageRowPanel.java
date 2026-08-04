@@ -7,12 +7,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
@@ -30,8 +31,8 @@ public class MessageRowPanel extends JPanel {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageRowPanel.class.getName());
 
-	private static final Color BG_DEFAULT  = Color.WHITE;
-	private static final Color BG_HOVER    = new Color(230, 240, 255);
+	private static final Color BG_DEFAULT  = Color.lightGray;
+	private static final Color BG_HOVER    = Color.GRAY;
 
 	private final InboxController inboxController = SpringContext.getBean(InboxController.class);
 	private final InboxDTO inboxDTO;
@@ -72,12 +73,15 @@ public class MessageRowPanel extends JPanel {
 		deleteButton.setMaximumSize(new Dimension(80, 26));
 		deleteButton.addActionListener(_ -> handleDelete());
 
+		JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
+
 		add(messageLabel);
-		add(Box.createHorizontalGlue());
+		add(separator);
+		
 		add(dateLabel);
-		add(Box.createHorizontalStrut(4));
+		add(separator);
+		
 		add(deleteButton);
-		add(Box.createHorizontalStrut(6));
 
 		addHoverEffect();
 	}

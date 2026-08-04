@@ -30,9 +30,22 @@ public class SearchWindow extends JDialog{
 	private SearchedItemsPanel searchedItemsPanel;
 	private boolean itemsListed = false;
 	
+	private static SearchWindow searchWindow;
+	
+	public static SearchWindow getSearchWindow() {
+		return searchWindow;
+	}
+	
 	public SearchWindow() {
 		logger.info("Initializing SearchWindow");
+		
+		if(searchWindow != null) {
+			searchWindow.dispose();
+			searchWindow = null;
+		}
 		super(Main.getMain(), "Search", false);
+		
+		searchWindow = this;
 		
 		searchedItemsPanel = new SearchedItemsPanel();
 		source = Main.getMain();
@@ -59,6 +72,7 @@ public class SearchWindow extends JDialog{
 		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
 		setLocation(x, y);
 		
+		searchTextField.requestFocus();
 		refresh();
 		setVisible(true);
 	}
@@ -87,6 +101,14 @@ public class SearchWindow extends JDialog{
 	private void refresh() {
 		revalidate();
 		repaint();
+	}
+	
+	public void clear() {
+//		refrehs the searched items panel
+		searchedItemsPanel.listItems();
+		remove(searchedItemsPanel);
+		add(emptyPanel);
+		refresh();
 	}
 	
 	private void addFocusListener() {

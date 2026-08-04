@@ -17,6 +17,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -34,13 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.lgooddatepicker.components.DateTimePicker;
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.java.controllers.RecurringTaskController;
 import main.java.controllers.ReminderController;
+import main.java.custom.CustomDateTimePicker;
 import main.java.custom.SpringContext;
 import main.java.dto.ReminderDTO;
 import main.java.gui.Main;
+import main.java.gui.windows.SearchWindow;
 import main.java.gui.windows.TaskWindow;
 
 public class ReminderDialog extends JDialog {
@@ -71,19 +73,20 @@ public class ReminderDialog extends JDialog {
 		setUndecorated(true);
 		setLayout(new BorderLayout(10, 10));
 		
-		if(TaskWindow.getCreateUpdateTaskWindow() != null) {
-			this.source = TaskWindow.getCreateUpdateTaskWindow();
-			this.reminderBtn = TaskWindow.getCreateUpdateTaskWindow().getReminderBtn();
+		if(TaskWindow.getTaskWindow() != null) {
+			this.source = TaskWindow.getTaskWindow();
+			this.reminderBtn = TaskWindow.getTaskWindow().getReminderBtn();
 		}
 		this.recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
 		this.reminderController = SpringContext.getBean(ReminderController.class);
 		
 		if(reminderId != null) {
 			reminderDTO = reminderController.getReminderById(reminderId).getBody();
-			isUpdate = true;
+//			if not null, then true
+			isUpdate = !Objects.isNull(reminderDTO);
 		}
 
-		picker = new DateTimePicker();
+		picker = new CustomDateTimePicker();
 		
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -133,7 +136,7 @@ public class ReminderDialog extends JDialog {
 		addSpecialRadioButtonActionListener(specialRadioButton);
 		
 		radioPanel = new JPanel();
-		radioPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 10, 2));
+		radioPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 2));
 		radioPanel.add(onceRadioButton);
 		radioPanel.add(everyDayRadioButton);
 		radioPanel.add(specialRadioButton);
@@ -199,7 +202,7 @@ public class ReminderDialog extends JDialog {
 	
 	private void setDaysPanel() {
 		daysPanel.removeAll();
-		daysPanel.setLayout(new WrapLayout(WrapLayout.CENTER));
+		daysPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 		daysPanel.setVisible(false);
 				
 		for(int i = 1; i <= 7; i ++) {
@@ -237,13 +240,13 @@ public class ReminderDialog extends JDialog {
 			if(repeatCheckBox.isSelected()) {
 				radioPanel.setVisible(true);
 				tempIsRecurring = true;
-				picker.datePicker.setVisible(false);
+				picker.getDatePicker().setVisible(false);
 			}
 			else {
 				radioPanel.setVisible(false);
 				tempIsRecurring = false;
 				tempSelectedRecurringDays.clear();
-				picker.datePicker.setVisible(true);
+				picker.getDatePicker().setVisible(true);
 			}
 			pack();
 
@@ -379,7 +382,11 @@ public class ReminderDialog extends JDialog {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
-				Main.getMain().getRemindersButton().doClick();
+				if(SearchWindow.getSearchWindow() != null)
+					SearchWindow.getSearchWindow().clear();
+				else if(TaskWindow.getTaskWindow() == null)
+					Main.getMain().getRemindersButton().doClick();
+//				otherwise it is for TaskWindow, then window can do it's own refresh
 			}
 		});
 	}

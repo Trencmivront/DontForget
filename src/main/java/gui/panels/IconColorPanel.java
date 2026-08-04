@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
-
 import main.java.controllers.IconColorController;
 import main.java.custom.SpringContext;
 import main.java.dto.IconColorDTO;
@@ -34,15 +32,15 @@ public class IconColorPanel extends JPanel {
 	private ButtonGroup buttonGroup = new ButtonGroup();
 
 	public IconColorPanel() {
-		// WrapLayout wraps children to the next row when they don't fit horizontally
-		setLayout(new WrapLayout(FlowLayout.LEFT, 5, 5));
+		// FlowLayout wraps children to the next row when they don't fit horizontally
+		setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		setBorder(new EmptyBorder(5, 0, 5, 0));
 
 		JLabel colorLabel = new JLabel("Color: ");
 		colorLabel.setFont(new Font("Dialog", Font.BOLD, 14));
 		add(colorLabel);
 		
-		JPanel colorRadioPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 5, 0));
+		JPanel colorRadioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 		
 		listColors(colorRadioPanel);
 		add(colorRadioPanel);

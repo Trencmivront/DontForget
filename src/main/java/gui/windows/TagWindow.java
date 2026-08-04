@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -84,6 +86,7 @@ public class TagWindow extends JDialog {
 		buttonPanel.add(addButton);
 		contentPanel.add(buttonPanel);
 
+		addWindowCloseListener();
 		pack();
 		setVisible(true);
 		tagNameField.requestFocusInWindow();
@@ -114,4 +117,16 @@ public class TagWindow extends JDialog {
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
+	
+	private void addWindowCloseListener() {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				if(SearchWindow.getSearchWindow() != null) {
+					SearchWindow.getSearchWindow().clear();
+				}
+			}
+		});
+	}
+	
 }

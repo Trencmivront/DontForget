@@ -133,14 +133,14 @@ public class ProjectWindow extends JDialog {
 			descriptionTextArea.setText(updateProjectDTO.getDescription());
 			iconColorPanel.setSelectedColor(updateProjectDTO.getIconColorId());
 		}
-
-		revalidate();
-		repaint();
+		
 		int x = (int) getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
 		int y = (int) getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
 		setLocation(x, y);
 		setVisible(true);
 
+		revalidate();
+		repaint();
 		logger.info("Window is ready.");
 	}
 	
@@ -163,26 +163,19 @@ public class ProjectWindow extends JDialog {
 			
 			if(isUpdate) {
 				Long id = updateProjectDTO.getProjectId();
-				try {
-					ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId));
-					if (re.getStatusCode().value() >= 400) {
-						new ErrorDialog("Database Error", "Error while updating project");
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				ResponseEntity<String> re = projectController.updateProject(new ProjectDTO(id, title, description, iconColorId));
+				if (re.getStatusCode().value() >= 400) {
 					new ErrorDialog("Database Error", "Error while updating project");
 				}
 			}
 			else {
-				try {
-					ResponseEntity<Long> re = projectController.createProject(new ProjectDTO(null, title, description, iconColorId));
-					if (re.getStatusCode().value() >= 400) {
-						new ErrorDialog("Database Error", "Error while creating project");
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				ResponseEntity<Long> re = projectController.createProject(new ProjectDTO(null, title, description, iconColorId));
+				if (re.getStatusCode().value() >= 400) {
 					new ErrorDialog("Database Error", "Error while creating project");
 				}
+			}
+			if(SearchWindow.getSearchWindow() != null) {
+				SearchWindow.getSearchWindow().clear();
 			}
 			dispose();
 
@@ -202,5 +195,5 @@ public class ProjectWindow extends JDialog {
 	private void addTextAreaDocumentFilter(JTextArea area) {
 		((AbstractDocument) area.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(BODY_MAX_LENGTH));
 	}
-
+	
 }

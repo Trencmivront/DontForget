@@ -115,7 +115,7 @@ public class SearchedItemsPanel extends JPanel{
 		return panel;
 	}
 
-	private void listItems() {		
+	public void listItems() {		
 		model = new DefaultTableModel(new Object[] { "Search Results" }, 0) {
 			private static final long serialVersionUID = 1L;
 			@Override

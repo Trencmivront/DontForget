@@ -44,7 +44,6 @@ import main.java.custom.SpringContext;
 import main.java.controllers.ProjectController;
 import org.springframework.http.ResponseEntity;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 import main.java.dto.ProjectDTO;
 import main.java.gui.panels.InboxPanel;
 import main.java.gui.panels.ReminderPanel;
@@ -181,7 +180,7 @@ public class Main extends JFrame {
 		rightContainer.setLayout(new BorderLayout(0, 0));
 		
 		JPanel buttonMenuPanel = new JPanel();
-		buttonMenuPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 20, 5));
+		buttonMenuPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 5));
 		
 		tagsButton = new JButton("Tags");
 		buttonMenuPanel.add(tagsButton);

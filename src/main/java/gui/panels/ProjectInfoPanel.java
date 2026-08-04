@@ -111,6 +111,7 @@ public class ProjectInfoPanel extends JPanel{
 		button.setFont(new Font("Ariel", 1, 20));
 		
 		button.addActionListener(_-> new TaskWindow(null, projectDTO.getProjectId()));
+		
 		button.setMaximumSize(new Dimension(40, 40));
 		
 		panel.add(button, BorderLayout.EAST);

@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.zinternaltools.WrapLayout;
 
 import main.java.controllers.RecurringTaskController;
 import main.java.controllers.ReminderController;
@@ -185,7 +184,7 @@ public class TaskWindow extends JDialog {
 		return reminderBtn;
 	}
 	
-	public static TaskWindow getCreateUpdateTaskWindow() {
+	public static TaskWindow getTaskWindow() {
 		return taskWindow;
 	}
 	
@@ -259,7 +258,7 @@ public class TaskWindow extends JDialog {
 		centerPanel.add(descScrollPane, BorderLayout.CENTER);
 
 		// Options bar under description
-		JPanel optionsPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 8, 0));
+		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
 		dueDateBtn = new JButton("Due Date");
@@ -505,6 +504,10 @@ public class TaskWindow extends JDialog {
 //				relist tasks
 				ProjectInfoPanel.getProjectInfoPanel().listTasks();
 			}
+			if(SearchWindow.getSearchWindow() != null) {
+				SearchWindow.getSearchWindow().clear();
+			}
+			
 //			refresh window
 			main.refreshWindow();
 //				Close this ui
@@ -548,9 +551,16 @@ public class TaskWindow extends JDialog {
 		});
 
 		customItem.addActionListener(_ -> {
-			DatePicker picker = new DatePicker();
-			picker.setDateToToday();
-			
+			DatePicker picker = new DatePicker() {
+				@Override
+				public boolean isDateAllowed(LocalDate date) {
+					if(date.isBefore(LocalDate.now())) {
+						return false;
+					}
+					return true;
+				}
+			};
+			picker.isDateAllowed(selectedDueDate);
 			JDialog inputDialog = new JDialog(TaskWindow.this, "Due-Date", true);
 			
 			Container contentPane = inputDialog.getContentPane();
@@ -562,7 +572,7 @@ public class TaskWindow extends JDialog {
 			inputDialog.setResizable(false);
 			
 			JPanel buttonPanel = new JPanel();
-			buttonPanel.setLayout(new WrapLayout(FlowLayout.RIGHT, 20, 5));
+			buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 5));
 			contentPane.add(buttonPanel);
 			
 			JButton cancelButton = new JButton("Cancel");
@@ -572,13 +582,14 @@ public class TaskWindow extends JDialog {
 			JButton addButton = new JButton("Add");
 			addButton.addActionListener(_->{
 				selectedDueDate = picker.getDate();
+				
 				button.setText(selectedDueDate.toString());
 				button.setForeground(new Color(42, 157, 143));
 				inputDialog.dispose();
 			});
 			buttonPanel.add(addButton);
 			
-			inputDialog.setSize(getPreferredSize());
+			inputDialog.pack();
 			inputDialog.setVisible(true);	
 		});
 
