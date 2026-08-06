@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.nio.file.StandardCopyOption;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +37,6 @@ import main.io.github.trencmivront.dontforget.notify.NotificationManager;
 public class App {
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
 	private static ServerSocket serverSocket;
-	private static final ObjectMapper mapper = new ObjectMapper();
-	private static final File settingsFile = Path.of(
-			System.getenv().getOrDefault("XDG_CONFIG_HOME", System.getProperty("user.home") + "/.config"),
-			"DontForget", "settings.json").toFile();
-    
-	public static ObjectMapper getMapper() {
-		return mapper;
-	}
-
-	public static File getSettingsfile() {
-		return settingsFile;
-	}
 
 	public static void main(String[] args) {
 	    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -74,7 +64,10 @@ public class App {
 //			Displaying app
 			try {
 				logger.info("Starting DontForget application...");
-								
+							
+				UIManager.put("Label.font", new Font("Times New Roman", Font.PLAIN, 14));
+				UIManager.put("Button.font", new Font("Times New Roman", Font.BOLD, 14));
+				
 //				show window
 				new Main();
 //				Start background listener
@@ -163,14 +156,12 @@ public class App {
 //    	get the JsonNode from file
     	try {
     		
-    		final JsonNode node = mapper.readTree(settingsFile);
-    		
 //        	read and insert values
-        	checkIconSet(node);
-        	checkSystemAAFontSet(node);
-        	checkSwingAATextSet(node);
+        	checkIconSet();
+        	checkSystemAAFontSet();
+        	checkSwingAATextSet();
 //        	apply saved scale BEFORE AWT initializes
-        	if (!applyScaleFromSettings(node)) {
+        	if (!applyScaleFromSettings()) {
 //        		no saved scale — detect after AWT starts and save for next launch
         		SwingUtilities.invokeLater(App::detectAndSaveScale);
         	}
@@ -248,18 +239,5 @@ public class App {
     	System.setProperty("swing.aatext", defaultValue);
     	setSettingValue("swingAAText", defaultValue);
     }
-    
-    public static void setSettingValue(String key, Object value) {
-        try {
-            ObjectNode rootNode = settingsFile.exists() ?
-            		(ObjectNode) mapper.readTree(settingsFile) : 
-            			mapper.createObjectNode();
-            // put object and let json cast it
-            rootNode.putPOJO(key, value);
-            mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, rootNode);
-            logger.info("Saved {} => {}", key, value);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

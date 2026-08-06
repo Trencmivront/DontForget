@@ -23,6 +23,11 @@ public class CreateTaskService implements Post<TaskDTO> {
 	@Autowired
 	private TaskRepository taskRepository;
 
+	/** 
+	 * <p> Creates a task from given <b>TaskDTO</b> instance. 
+	 * The <b>listOrder</b> value is choosen by checking max <b>listOrder</b> that is in database.</p>
+	 * @author Trencmivront
+	 * */
 	public CreateTaskService(TaskRepository taskRepository) {
 		this.taskRepository = taskRepository;
 	}

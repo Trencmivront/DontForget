@@ -16,6 +16,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
 
 import org.springframework.http.ResponseEntity;
 
@@ -38,6 +39,7 @@ public class TagRowPanel extends JPanel {
 	private TagController tagController;
 	private TagDTO tagDTO;
 
+	private Font globalFont = (Font)UIManager.get("Label.font");
 	public TagRowPanel(TagDTO tagDTO) {
 		logger.info("Initializing TagRowPanel");
 		this(null, tagDTO);
@@ -53,7 +55,7 @@ public class TagRowPanel extends JPanel {
 		setAlignmentX(LEFT_ALIGNMENT);
 
 		JLabel label = new JLabel(tagDTO.getTagName());
-		label.setFont(new Font("Dialog", Font.PLAIN, 20));
+		label.setFont(globalFont);
 
 		IconColorDTO ic = null;
 		try {

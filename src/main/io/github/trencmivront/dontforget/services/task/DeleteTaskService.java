@@ -27,6 +27,11 @@ public class DeleteTaskService implements Command<Long> {
 	@Autowired
 	private DeleteTaskTagService deleteTaskTagService;
 
+	/**
+	 * This service class deletes a task by given id and reminders, tag conections associated with that task.
+	 * So, if you want to remove a task, just give it's id and don't look back.
+	 * @author Trencmivront
+	 * */
 	public DeleteTaskService(TaskRepository taskRepository, DeleteReminderService deleteReminderService, DeleteTaskTagService deleteTaskTagService) {
 		this.taskRepository = taskRepository;
 		this.deleteReminderService = deleteReminderService;

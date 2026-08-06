@@ -15,6 +15,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ public class ReminderRowPanel extends JPanel {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReminderRowPanel.class.getName());
 
+	private Font globalFont = (Font)UIManager.get("Label.font");
 	private ReminderController reminderController;
 	private TaskDTO taskDTO;
 	
@@ -53,12 +55,11 @@ public class ReminderRowPanel extends JPanel {
 					localDateTime.getDayOfMonth() + " " +
 					localDateTime.getMonth().name().substring(0, 3),
 					SwingConstants.CENTER);
-			dayLabel.setFont(dayLabel.getFont().deriveFont(Font.BOLD, 11f));
-
+			dayLabel.setFont(globalFont.deriveFont(Font.BOLD, globalFont.getSize() - 1));
 			JLabel timeLabel = new JLabel(
 					localDateTime.format(DateTimeFormatter.ofPattern("HH:mm")),
 					SwingConstants.CENTER);
-			timeLabel.setFont(timeLabel.getFont().deriveFont(Font.PLAIN, 10f));
+			timeLabel.setFont(globalFont.deriveFont(Font.PLAIN, globalFont.getSize() - 2));
 
 			datePanel.add(dayLabel);
 			datePanel.add(timeLabel);

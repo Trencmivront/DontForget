@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
@@ -49,7 +50,6 @@ public class MessageRowPanel extends JPanel {
 
 		// --- Message label (fills remaining space) ---
 		JLabel messageLabel = new JLabel(inboxDTO.getMessage());
-		messageLabel.setFont(new Font("Dialog", Font.PLAIN, 13));
 		messageLabel.setBorder(new EmptyBorder(0, 8, 0, 8));
 
 		// --- Date label (fixed width) ---
@@ -58,7 +58,7 @@ public class MessageRowPanel extends JPanel {
 						.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
 				: "";
 		JLabel dateLabel = new JLabel(dateText);
-		dateLabel.setFont(new Font("Dialog", Font.ITALIC, 11));
+		dateLabel.setFont(new Font(((Font)UIManager.get("Label.font")).getFamily(), Font.ITALIC, ((Font)UIManager.get("Label.font")).getSize()));
 		dateLabel.setForeground(new Color(120, 120, 120));
 		dateLabel.setBorder(new EmptyBorder(0, 4, 0, 8));
 		dateLabel.setPreferredSize(new Dimension(160, 40));
@@ -67,7 +67,6 @@ public class MessageRowPanel extends JPanel {
 
 		// --- Delete button ---
 		JButton deleteButton = new JButton("Delete");
-		deleteButton.setFont(new Font("Dialog", Font.PLAIN, 12));
 		deleteButton.setFocusPainted(false);
 		deleteButton.setPreferredSize(new Dimension(80, 26));
 		deleteButton.setMaximumSize(new Dimension(80, 26));

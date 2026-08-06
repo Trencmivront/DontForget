@@ -220,16 +220,7 @@ public class Main extends JFrame {
 		JToolBar toolBar = new JToolBar();
 		contentPane.add(toolBar, BorderLayout.NORTH);
 		
-		JMenuBar menuBar = new JMenuBar();
-		JMenu optionsMenu = new JMenu("Options");
-		
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(_->System.exit(0));
-		
-		optionsMenu.add(exitItem);
-		menuBar.add(optionsMenu);
-		
-		toolBar.add(menuBar);
+		addMenuBar(toolBar);
 
 		refreshWindow();
 		setLocationRelativeTo(null);
@@ -277,6 +268,51 @@ public class Main extends JFrame {
 		container.setViewport(viewport);
 	}
 	
+	private void addMenuBar(JToolBar jToolBar) {
+		JMenuBar menuBar = new JMenuBar();
+		JMenu preferencesMenu = new JMenu("Preferences");
+		
+		JMenu aboutMenu = new JMenu("About");
+		
+		addPreferencesMenuItems(preferencesMenu);
+		addAboutMenuItems(aboutMenu);
+
+		menuBar.add(preferencesMenu);
+		
+		jToolBar.add(menuBar);
+	}
+
+	private void addPreferencesMenuItems(JMenu preferencesMenu) {
+//		TODO: Add settings menu button and SettingsWindow as well. 
+/*		Settings window includes: 
+ * Keep app runnin on the background
+ * Change dark/light colors
+ * Change text font size
+ * Change app scale
+ * Change notification sounds
+ * re-organize navigation buttons?
+ * Backup data (as JSON or as .db options)
+ * Insert data option (maybe I need to remove the uniqueness of task and project titles)
+ * Run command on start (hmm)
+ * Run on system start option
+ * Restore to factory settings.
+ *  */
+//		TODO: Write BackupJsonData and ImportJsonData files which will be used in sharing data or, you know, importing data.
+		JMenuItem exitItem = new JMenuItem("Exit");
+		exitItem.setToolTipText("Exit From DontForget App");
+		exitItem.addActionListener(_->System.exit(0));
+		
+		preferencesMenu.add(exitItem);
+		
+	}
+
+	private void addAboutMenuItems(JMenu aboutMenu) {
+		JMenuItem aboutDontForget =  new JMenuItem("About DontForget");
+		aboutDontForget.setToolTipText("About DontForget App");
+		// TODO: Add action listener for aboutDontForget
+		aboutMenu.add(aboutDontForget);
+	}
+
 	private void addCheckBoxEventListener(JCheckBox ck) {
 		ck.addActionListener(_->{
 			ProjectRowPanel panel = (ProjectRowPanel)ck.getParent();
