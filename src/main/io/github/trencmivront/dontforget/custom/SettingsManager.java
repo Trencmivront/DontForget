@@ -3,19 +3,12 @@ package main.io.github.trencmivront.dontforget.custom;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
 
-import org.assertj.core.error.ActualIsNotEmpty;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.mockito.internal.util.Primitives;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class SettingsManager {
@@ -25,6 +18,7 @@ public class SettingsManager {
 	private final ObjectMapper mapper = new ObjectMapper();
 	private File settingsFile;
 	private JsonNode node;
+	private static SettingsManager settingsManager;
     
 	public ObjectMapper getMapper() {
 		return mapper;
@@ -34,8 +28,15 @@ public class SettingsManager {
 		return settingsFile;
 	}
 	
+	public static SettingsManager getSettingsManager() {
+		return settingsManager;
+	}
+	
 	public SettingsManager() {
+		settingsManager = this;
 		try {
+//			initialize the settings file before starting
+			createSettingsFile();
 			settingsFile = Path.of(
 					System.getenv().getOrDefault("XDG_CONFIG_HOME", System.getProperty("user.home") + "/.config"),
 					"DontForget", "settings.json").toFile();
@@ -61,14 +62,19 @@ public class SettingsManager {
         }
     }
     
-    public <T> T get(String field, T type) {
-    	Object object = node.get(field);
-
-    	if(type instanceof Primitives) {
-    		
-    	}
-    	
-    	return (T)object;
+    public Object get(String field) {
+    	return node.get(field);
+    }
+    
+    public void createSettingsFile() {
+		if(!settingsFile.exists()) {
+			settingsFile.getParentFile().mkdirs();
+			try {
+				mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, mapper.createObjectNode());
+			} catch (IOException e) {
+				logger.warn("Exception: {} thrown at {} class {} ", e.getClass(), "createSettingsFile", this.getClass());
+			}
+		}
     }
 	
 }

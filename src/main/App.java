@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -14,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -25,11 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
+import main.io.github.trencmivront.dontforget.custom.SettingsManager;
 import main.io.github.trencmivront.dontforget.gui.Main;
 import main.io.github.trencmivront.dontforget.notify.NotificationManager;
 
@@ -37,6 +35,8 @@ import main.io.github.trencmivront.dontforget.notify.NotificationManager;
 public class App {
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
 	private static ServerSocket serverSocket;
+	
+	private static final SettingsManager settingsManager = new SettingsManager();
 
 	public static void main(String[] args) {
 	    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -64,9 +64,6 @@ public class App {
 //			Displaying app
 			try {
 				logger.info("Starting DontForget application...");
-							
-				UIManager.put("Label.font", new Font("Times New Roman", Font.PLAIN, 14));
-				UIManager.put("Button.font", new Font("Times New Roman", Font.BOLD, 14));
 				
 //				show window
 				new Main();
@@ -153,60 +150,61 @@ public class App {
     }
     
     private static void applySettings() {
-//    	get the JsonNode from file
-    	try {
-    		
+		
+UIManager.put("Label.font", new Font("Times New Roman", Font.PLAIN, 14));
+UIManager.put("Button.font", new Font("Times New Roman", Font.BOLD, 14));
 //        	read and insert values
-        	checkIconSet();
-        	checkSystemAAFontSet();
-        	checkSwingAATextSet();
+    	checkIconSet();
+    	checkSystemAAFontSet();
+    	checkSwingAATextSet();
 //        	apply saved scale BEFORE AWT initializes
-        	if (!applyScaleFromSettings()) {
+    	if (!applyScaleFromSettings()) {
 //        		no saved scale — detect after AWT starts and save for next launch
-        		SwingUtilities.invokeLater(App::detectAndSaveScale);
-        	}
-    	}catch (IOException e) {
-    		logger.warn("applySettings: {}", e.getMessage());
-		}
-    	
+    		SwingUtilities.invokeLater(App::detectAndSaveScale);
+    		applyScaleFromSettings();
+    	}
+
     	FlatMacDarkLaf.setup();
     }
     
-    private static void checkIconSet(JsonNode node) {
-    	JsonNode iconNode = node.get("isIconSet");
-    	boolean isIconSet = iconNode != null && iconNode.asBoolean();
+    private static void checkIconSet() {
+    	final boolean defaultValue = false;
+    	Object isIconSet = Objects.requireNonNullElse(settingsManager.get("isIconSet"), defaultValue);
     	
-    	if (!isIconSet) {
-    		try {
-    			Path src = Path.of("src/main/resources/dontforget.png");
-    			Path dest = Paths.get(System.getProperty("user.home"), ".local/share/icons/hicolor/32x32/apps/dontforget.png");
-    			Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-    			logger.info("Icon copied to system icons directory.");
-        		setSettingValue("isIconSet", true);
-    		} catch (Exception e) {
-    			logger.warn("Could not copy icon to system icons directory, skipping: {}", e.getMessage());
-    		}
+    	if(isIconSet instanceof Boolean isIconSetBoolean) {
+    		if (!isIconSetBoolean) {
+        		try {
+        			Path src = Path.of("src/main/resources/dontforget.png");
+        			Path dest = Paths.get(System.getProperty("user.home"), ".local/share/icons/hicolor/32x32/apps/dontforget.png");
+        			Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+        			logger.info("Icon copied to system icons directory.");
+            		settingsManager.set("isIconSet", true);
+        		} catch (Exception e) {
+        			logger.warn("Could not copy icon to system icons directory, skipping: {}", e.getMessage());
+        		}
+        	}
+    		return;
     	}
+//    	it is not a boolean value, turn it into boolean and don't judge
+		settingsManager.set("isIconSet", defaultValue);
+    	
     }
 
 //  Returns true if a valid scale was found in settings and applied
-    private static boolean applyScaleFromSettings(JsonNode node) {
-    	JsonNode scaleNode = node.get("uiScale");
-    	if (scaleNode != null && !scaleNode.isNull()) {
-    		try {
-    			double scale = Double.parseDouble(scaleNode.asText());
-    			if (scale > 0) {
-    				long rounded = Math.round(scale);
-//				Must be set on the main thread BEFORE AWT initializes — invokeLater is too late
-				System.setProperty("sun.java2d.uiScale", String.valueOf(rounded));
-				logger.info("Applied uiScale: {}", rounded);
-    				return true;
-    			}
-    			logger.warn("uiScale must be above 0, detecting from screen.");
-    		} catch (NumberFormatException _) {
-    			logger.warn("Invalid uiScale value '{}', detecting from screen.", scaleNode.asText());
-    		} 
+    private static boolean applyScaleFromSettings() {
+    	Object scale = Objects.requireNonNullElse(settingsManager.get("uiScale"), 0);
+    	if (scale instanceof Long scaleLong) {
+//    			check if it became 0
+			if(scaleLong == 0l || scaleLong < 0l) {
+				logger.warn("Invalid scale value detected: {}", scaleLong);
+				return false;
+			}
+//				Must be set on the main thread BEFORE AWT initializes
+			System.setProperty("sun.java2d.uiScale", String.valueOf(scaleLong));
+			logger.info("Applied uiScale: {}", scaleLong);
+			return true;
     	}
+    
     	return false;
     }
 
@@ -214,30 +212,38 @@ public class App {
     private static void detectAndSaveScale() {
     	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     	final long scale = Math.round(screen.getWidth() / screen.getHeight());
-    	setSettingValue("uiScale", scale);
-    	logger.info("Detected screen {}x{}, saved uiScale={} for next launch.", screen.width, screen.height, scale);
+    	settingsManager.set("uiScale", scale);
     }
     
-    private static void checkSystemAAFontSet(JsonNode node) {
+    private static void checkSystemAAFontSet() {
     	final String defaultValue = "on";
-    	JsonNode aaNode = node.get("awtUseSystemAAFontSettings");
-    	if (aaNode != null && !aaNode.isNull()) {
-    		System.setProperty("awt.useSystemAAFontSettings", aaNode.asText());
-    		return;
+    	Object aaFont = Objects.requireNonNullElse(settingsManager.get("awtUseSystemAAFontSettings"), defaultValue);
+//    	Validate the value
+    	if(aaFont instanceof String aaFontString) {
+//    		IF it is not a valid value, use default value
+    		if(!(aaFontString.equals("on") || aaFontString.equals("off"))) {
+    			aaFontString = defaultValue;
+        	}
+        	System.setProperty("awt.useSystemAAFontSettings", (String)aaFontString);
+        	settingsManager.set("awtUseSystemAAFontSettings", (String)aaFontString);
+        	return;
     	}
+    	
     	System.setProperty("awt.useSystemAAFontSettings", defaultValue);
-    	setSettingValue("awtUseSystemAAFontSettings", defaultValue);
+    	settingsManager.set("awtUseSystemAAFontSettings", defaultValue);
     }
 
-    private static void checkSwingAATextSet(JsonNode node) {
-    	final String defaultValue = "true";
-    	JsonNode aaNode = node.get("swingAAText");
-    	if (aaNode != null && !aaNode.isNull()) {
-    		System.setProperty("swing.aatext", aaNode.asText());
+    private static void checkSwingAATextSet() {
+    	final boolean defaultValue = true;
+    	Object aaText = Objects.requireNonNullElse(settingsManager.get("swingAAText"), defaultValue);
+    	
+    	if (aaText instanceof Boolean aaTextBoolean) {
+        	System.setProperty("swing.aatext", (String)aaText);
+        	settingsManager.set("swingAAText", aaTextBoolean);
     		return;
     	}
-    	System.setProperty("swing.aatext", defaultValue);
-    	setSettingValue("swingAAText", defaultValue);
+    	System.setProperty("swing.aatext", Boolean.toString(defaultValue));
+    	settingsManager.set("swingAAText", defaultValue);
     }
 
 }
