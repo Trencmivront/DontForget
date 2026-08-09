@@ -52,6 +52,7 @@ import main.io.github.trencmivront.dontforget.gui.panels.TodayPanel;
 import main.io.github.trencmivront.dontforget.gui.panels.rows.ProjectRowPanel;
 import main.io.github.trencmivront.dontforget.gui.windows.ProjectWindow;
 import main.io.github.trencmivront.dontforget.gui.windows.SearchWindow;
+import main.io.github.trencmivront.dontforget.gui.windows.SettingsWindow;
 
 public class Main extends JFrame {
 	private static final int WINDOW_HEIGHT= 500;
@@ -277,27 +278,21 @@ public class Main extends JFrame {
 		addPreferencesMenuItems(preferencesMenu);
 		addAboutMenuItems(aboutMenu);
 
-		menuBar.add(preferencesMenu);
+
+		JButton settingsButton = new JButton("⚙");
+		settingsButton.setToolTipText("Settings");
+		settingsButton.putClientProperty("JButton.buttonType", "toolBarButton");
+		addSettingsButtonActionListener(settingsButton);
 		
+		menuBar.add(preferencesMenu);
+		menuBar.add(aboutMenu);
+		
+		jToolBar.add(settingsButton);
 		jToolBar.add(menuBar);
+
 	}
 
 	private void addPreferencesMenuItems(JMenu preferencesMenu) {
-//		TODO: Add settings menu button and SettingsWindow as well. 
-/*		Settings window includes: 
- * Keep app runnin on the background
- * Change dark/light colors
- * Change text font size
- * Change app scale
- * Change notification sounds
- * re-organize navigation buttons?
- * Backup data (as JSON or as .db options)
- * Insert data option (maybe I need to remove the uniqueness of task and project titles)
- * Run command on start (hmm)
- * Run on system start option
- * Restore to factory settings.
- *  */
-//		TODO: Write BackupJsonData and ImportJsonData files which will be used in sharing data or, you know, importing data.
 		JMenuItem exitItem = new JMenuItem("Exit");
 		exitItem.setToolTipText("Exit From DontForget App");
 		exitItem.addActionListener(_->System.exit(0));
@@ -309,7 +304,6 @@ public class Main extends JFrame {
 	private void addAboutMenuItems(JMenu aboutMenu) {
 		JMenuItem aboutDontForget =  new JMenuItem("About DontForget");
 		aboutDontForget.setToolTipText("About DontForget App");
-		// TODO: Add action listener for aboutDontForget
 		aboutMenu.add(aboutDontForget);
 	}
 
@@ -402,6 +396,14 @@ public class Main extends JFrame {
 	
 	private void addSearchButtonActionListener(JButton button) {
 		button.addActionListener(_->new SearchWindow());
+	}
+	
+	private void addSettingsButtonActionListener(java.awt.Component component) {
+		if (component instanceof JButton btn) {
+			btn.addActionListener(_ -> new SettingsWindow());
+		} else if (component instanceof JMenuItem item) {
+			item.addActionListener(_ -> new SettingsWindow());
+		}
 	}
 	
 	private void setSplitDivider() {

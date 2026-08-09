@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>DontForget</groupId>
 	<artifactId>DontForget</artifactId>
-	<version>0.6.9</version>
+	<version>0.7.1</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>src</testSourceDirectory>
@@ -107,7 +107,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<release>26</release>
+					<release>25</release>
 					<compilerArgs>
 						<arg>-parameters</arg>
 					</compilerArgs>
@@ -137,10 +137,6 @@
 	</build>
 
 	<dependencies>
-
-
-
-
 
 		<!-- Source:
 		https://mvnrepository.com/artifact/com.formdev/flatlaf-extras -->
@@ -199,6 +195,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>4.0.6</version>
+		</dependency>
+		
+		<!--
+		Source - https://stackoverflow.com/a/40058812
+		Posted by AchillesVan, modified by community. See post 'Timeline' for change history
+		Retrieved 2026-08-08, License - CC BY-SA 4.0
+		-->
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.3.0</version>
 		</dependency>
 
 		<!-- Source:

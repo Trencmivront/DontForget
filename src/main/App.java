@@ -1,31 +1,20 @@
 package main;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import main.io.github.trencmivront.dontforget.custom.SettingsManager;
 import main.io.github.trencmivront.dontforget.gui.Main;
@@ -66,7 +55,16 @@ public class App {
 				logger.info("Starting DontForget application...");
 				
 //				show window
-				new Main();
+				Main mainWindow = new Main();
+//				Apply close behaviour based on setting
+				if (settingsManager.isRunOnBackground()) {
+//					Keep the JVM alive when the window is closed; user can re-open via tray/single-instance
+					mainWindow.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+					logger.info("runOnBackground=true: window will hide on close.");
+				} else {
+					mainWindow.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+					logger.info("runOnBackground=false: app will exit on close.");
+				}
 //				Start background listener
 				startSingleInstanceListener();
 				
@@ -150,100 +148,7 @@ public class App {
     }
     
     private static void applySettings() {
-		
-UIManager.put("Label.font", new Font("Times New Roman", Font.PLAIN, 14));
-UIManager.put("Button.font", new Font("Times New Roman", Font.BOLD, 14));
-//        	read and insert values
-    	checkIconSet();
-    	checkSystemAAFontSet();
-    	checkSwingAATextSet();
-//        	apply saved scale BEFORE AWT initializes
-    	if (!applyScaleFromSettings()) {
-//        		no saved scale — detect after AWT starts and save for next launch
-    		SwingUtilities.invokeLater(App::detectAndSaveScale);
-    		applyScaleFromSettings();
-    	}
-
-    	FlatMacDarkLaf.setup();
-    }
-    
-    private static void checkIconSet() {
-    	final boolean defaultValue = false;
-    	Object isIconSet = Objects.requireNonNullElse(settingsManager.get("isIconSet"), defaultValue);
-    	
-    	if(isIconSet instanceof Boolean isIconSetBoolean) {
-    		if (!isIconSetBoolean) {
-        		try {
-        			Path src = Path.of("src/main/resources/dontforget.png");
-        			Path dest = Paths.get(System.getProperty("user.home"), ".local/share/icons/hicolor/32x32/apps/dontforget.png");
-        			Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-        			logger.info("Icon copied to system icons directory.");
-            		settingsManager.set("isIconSet", true);
-        		} catch (Exception e) {
-        			logger.warn("Could not copy icon to system icons directory, skipping: {}", e.getMessage());
-        		}
-        	}
-    		return;
-    	}
-//    	it is not a boolean value, turn it into boolean and don't judge
-		settingsManager.set("isIconSet", defaultValue);
-    	
-    }
-
-//  Returns true if a valid scale was found in settings and applied
-    private static boolean applyScaleFromSettings() {
-    	Object scale = Objects.requireNonNullElse(settingsManager.get("uiScale"), 0);
-    	if (scale instanceof Long scaleLong) {
-//    			check if it became 0
-			if(scaleLong == 0l || scaleLong < 0l) {
-				logger.warn("Invalid scale value detected: {}", scaleLong);
-				return false;
-			}
-//				Must be set on the main thread BEFORE AWT initializes
-			System.setProperty("sun.java2d.uiScale", String.valueOf(scaleLong));
-			logger.info("Applied uiScale: {}", scaleLong);
-			return true;
-    	}
-    
-    	return false;
-    }
-
-//  Runs in invokeLater — safe to use Toolkit here
-    private static void detectAndSaveScale() {
-    	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    	final long scale = Math.round(screen.getWidth() / screen.getHeight());
-    	settingsManager.set("uiScale", scale);
-    }
-    
-    private static void checkSystemAAFontSet() {
-    	final String defaultValue = "on";
-    	Object aaFont = Objects.requireNonNullElse(settingsManager.get("awtUseSystemAAFontSettings"), defaultValue);
-//    	Validate the value
-    	if(aaFont instanceof String aaFontString) {
-//    		IF it is not a valid value, use default value
-    		if(!(aaFontString.equals("on") || aaFontString.equals("off"))) {
-    			aaFontString = defaultValue;
-        	}
-        	System.setProperty("awt.useSystemAAFontSettings", (String)aaFontString);
-        	settingsManager.set("awtUseSystemAAFontSettings", (String)aaFontString);
-        	return;
-    	}
-    	
-    	System.setProperty("awt.useSystemAAFontSettings", defaultValue);
-    	settingsManager.set("awtUseSystemAAFontSettings", defaultValue);
-    }
-
-    private static void checkSwingAATextSet() {
-    	final boolean defaultValue = true;
-    	Object aaText = Objects.requireNonNullElse(settingsManager.get("swingAAText"), defaultValue);
-    	
-    	if (aaText instanceof Boolean aaTextBoolean) {
-        	System.setProperty("swing.aatext", (String)aaText);
-        	settingsManager.set("swingAAText", aaTextBoolean);
-    		return;
-    	}
-    	System.setProperty("swing.aatext", Boolean.toString(defaultValue));
-    	settingsManager.set("swingAAText", defaultValue);
+    	settingsManager.validateAndSet();
     }
 
 }
