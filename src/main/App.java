@@ -1,5 +1,10 @@
 package main;
 
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,7 +36,34 @@ public class App {
 	    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
 	        logger.error("Uncaught exception in thread {}: {}", thread.getName(), throwable.getMessage(), throwable);
 	    });
-		startApp(args);
+	    
+	    try {
+	        // Initialize your app normally
+	    	startApp(args);
+	    } catch (Throwable e) {
+	        showCompatibilityAlert(e.getMessage());
+	    } 
+	}
+	
+	private static void showCompatibilityAlert(String message) {
+	    Frame frame = new Frame();
+	    frame.setVisible(false);
+	    Dialog dialog = new Dialog(frame, "Compatibility Error", false);
+	    Label label = new Label(message);
+	    label.setSize(350, 150);
+	    dialog.add(label);
+	    dialog.setSize(400, 200);
+	    dialog.setLocationRelativeTo(null);
+	    
+	    dialog.addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosing(WindowEvent e) {
+	            dialog.dispose();
+	            frame.dispose();
+	        }
+	    });
+	    
+	    dialog.setVisible(true);
 	}
 
 	private static void startApp(String[] args) {

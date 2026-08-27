@@ -6,22 +6,29 @@ ARG APP_VERSION=0.7.1
 ARG APP_NAME="DontForget"
 
 WORKDIR /app
+# copy the pom.xml into "app" directory
 COPY pom.xml .
+# Then check dependencies
+RUN mvn clean compile
+# Then copy rest
 COPY src ./src
-
-RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -Dproject.build.finalName=${APP_NAME}-${APP_VERSION} -DskipTests
+# Then package it
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:25-jre
 
-ARG APP_VERSION=0.7.1
-ARG APP_NAME="DontForget"
+# installing X11 libraries
+RUN apt-get update && \
+    apt-get install -y \
+    libxext6 libxrender1 libxtst6 libxi6 \
+    libx11-6 libxft2 fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY --from=build /app/target/${APP_NAME}-${APP_VERSION}.jar app.jar
+COPY --from=build /app/target/DontForget*.jar app.jar
 
 EXPOSE 8090
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
