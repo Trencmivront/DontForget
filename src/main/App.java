@@ -41,20 +41,21 @@ public class App {
 	        // Initialize your app normally
 	    	startApp(args);
 	    } catch (Throwable e) {
-	        showCompatibilityAlert(e.getMessage());
-	    } 
+	        showCompatibilityAlert(e.getMessage() + 
+	        		(e instanceof ClassNotFoundException ? " This version of Java is incompatible. The app is built in Java 25, try that instead.":""));
+	    }
 	}
 	
 	private static void showCompatibilityAlert(String message) {
 	    Frame frame = new Frame();
 	    frame.setVisible(false);
-	    Dialog dialog = new Dialog(frame, "Compatibility Error", false);
+	    Dialog dialog = new Dialog(frame, "Error", false);
 	    Label label = new Label(message);
 	    label.setSize(350, 150);
 	    dialog.add(label);
 	    dialog.setSize(400, 200);
 	    dialog.setLocationRelativeTo(null);
-	    
+//	    The dialog doesn't close when I press "x". So I added this listener for it.
 	    dialog.addWindowListener(new WindowAdapter() {
 	        @Override
 	        public void windowClosing(WindowEvent e) {

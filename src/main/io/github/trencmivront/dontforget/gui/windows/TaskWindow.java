@@ -30,6 +30,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
 import main.io.github.trencmivront.dontforget.dto.TagDTO;
 import main.io.github.trencmivront.dontforget.dto.TaskDTO;
 import main.io.github.trencmivront.dontforget.dto.TaskTagDTO;
+import main.io.github.trencmivront.dontforget.enums.Priority;
 import main.io.github.trencmivront.dontforget.gui.Main;
 import main.io.github.trencmivront.dontforget.gui.panels.ProjectInfoPanel;
 import main.io.github.trencmivront.dontforget.gui.popups.ErrorDialog;
@@ -60,7 +62,7 @@ public class TaskWindow extends JDialog {
 	private static final Logger logger = LoggerFactory.getLogger(TaskWindow.class.getName());
 
 	private LocalDate selectedDueDate = null;
-	private Integer selectedPriority = null;
+	private Priority selectedPriority = null;
 
 	private Long projectId;
 	private JTextField titleField;
@@ -100,11 +102,11 @@ public class TaskWindow extends JDialog {
 		this.selectedDueDate = selectedDueDate;
 	}
 
-	public Integer getSelectedPriority() {
+	public Priority getSelectedPriority() {
 		return selectedPriority;
 	}
 
-	public void setSelectedPriority(Integer selectedPriority) {
+	public void setSelectedPriority(Priority selectedPriority) {
 		this.selectedPriority = selectedPriority;
 	}
 
@@ -252,6 +254,7 @@ public class TaskWindow extends JDialog {
 		descArea.setWrapStyleWord(true);
 		descArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
 		descArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
+		addTextAreaCaretListener(descArea);
 		setDescriptionFieldDocumentFilter(descArea);
 		
 		JScrollPane descScrollPane = new JScrollPane(descArea);
@@ -261,16 +264,16 @@ public class TaskWindow extends JDialog {
 		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-		dueDateBtn = new JButton("Due Date");
+		dueDateBtn = new JButton("📅");
 		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		priorityBtn = new JButton("Priority");
+		priorityBtn = new JButton("🚩");
 		priorityBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		reminderBtn = new JButton("Reminder");
+		reminderBtn = new JButton("🔔");
 		reminderBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		tagsBtn = new JButton("Tags");
+		tagsBtn = new JButton("🏷️");
 		tagsBtn.putClientProperty("JButton.buttonType", "roundRect");
 
 		optionsPanel.add(dueDateBtn);
@@ -321,7 +324,7 @@ public class TaskWindow extends JDialog {
 			}
 			
 			LocalDate dueDate = updateTaskDTO.getDueDate();
-			Integer priority = updateTaskDTO.getPriority();
+			Priority priority = Priority.getPriority(updateTaskDTO.getPriority());
 			
 			setDueDate(dueDate);
 			setPriority(priority);
@@ -335,8 +338,7 @@ public class TaskWindow extends JDialog {
 		
 		addFocusListener();
 		
-		revalidate();
-		repaint();
+		refresh();
 		setLocationToCenter(this);
 		setVisible(true);
 		logger.info("TaskWindow display complete.");
@@ -375,7 +377,7 @@ public class TaskWindow extends JDialog {
 		if (recurringDays != null && !recurringDays.isEmpty()) {
 			selectedRecurringDays.addAll(recurringDays);
 			isRecurring = true;
-			dueDateBtn.setText("Disabled");
+			dueDateBtn.setText("🚫");
 			dueDateBtn.setToolTipText("Can't set due date when\nrecurring task is enabled");
 			dueDateBtn.setForeground(null);
 			dueDateBtn.setEnabled(false);
@@ -395,23 +397,23 @@ public class TaskWindow extends JDialog {
 			selectedReminderMsg = reminder.getMessage();
 			if (selectedReminderTime != null) {
 				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
-				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				reminderBtn.setText("⏰ " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 				reminderBtn.setForeground(new Color(59, 130, 246));
 			}
 		}
 	}
 
-	private void setPriority(Integer priority) {
+	private void setPriority(Priority priority) {
 		if (priority != null) {
 			selectedPriority = priority;
-			if (priority == 1) {
-				priorityBtn.setText("High");
+			if (priority == Priority.HIGH) {
+				priorityBtn.setText(" 🔴 ");
 				priorityBtn.setForeground(new Color(239, 68, 68));
-			} else if (priority == 2) {
-				priorityBtn.setText("Medium");
+			} else if (priority == Priority.MEDIUM) {
+				priorityBtn.setText("🟡");
 				priorityBtn.setForeground(new Color(245, 158, 11));
-			} else if (priority == 3) {
-				priorityBtn.setText("Low");
+			} else if (priority == Priority.LOW) {
+				priorityBtn.setText("🟢");
 				priorityBtn.setForeground(new Color(16, 185, 129));
 			}
 		}
@@ -438,7 +440,7 @@ public class TaskWindow extends JDialog {
 					title,
 					description,
 					statusId,
-					selectedPriority,
+					selectedPriority.getValue(),
 					selectedDueDate,
 					projectId
 				);
@@ -456,7 +458,7 @@ public class TaskWindow extends JDialog {
 				}
 			} else {
 				try {
-					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority, selectedDueDate, projectId));
+					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority.getValue(), selectedDueDate, projectId));
 					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 						return;
@@ -536,18 +538,21 @@ public class TaskWindow extends JDialog {
 			selectedDueDate = LocalDate.now();
 			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
+			refresh();
 		});
 
 		tomorrowItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusDays(1);
 			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
+			refresh();
 		});
 
 		nextWeekItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusWeeks(1);
 			button.setText(selectedDueDate.toString());
 			button.setForeground(new Color(42, 157, 143));
+			refresh();
 		});
 
 		customItem.addActionListener(_ -> {
@@ -561,7 +566,7 @@ public class TaskWindow extends JDialog {
 				}
 			};
 			picker.isDateAllowed(selectedDueDate);
-			JDialog inputDialog = new JDialog(TaskWindow.this, "Due-Date", true);
+			JDialog inputDialog = new JDialog(TaskWindow.this, "📅", true);
 			
 			Container contentPane = inputDialog.getContentPane();
 			
@@ -591,12 +596,14 @@ public class TaskWindow extends JDialog {
 			
 			inputDialog.pack();
 			inputDialog.setVisible(true);	
+			refresh();
 		});
 
 		clearDateItem.addActionListener(_ -> {
 			selectedDueDate = null;
-			button.setText("Due Date");
+			button.setText("📅");
 			button.setForeground(null);
+			refresh();
 		});
 	}
 
@@ -616,26 +623,26 @@ public class TaskWindow extends JDialog {
 		button.addActionListener(_ -> priorityMenu.show(button, 0, -button.getHeight()));
 
 		highItem.addActionListener(_ -> {
-			selectedPriority = 1;
-			button.setText("High");
+			selectedPriority = Priority.HIGH;
+			button.setText("🔴");
 			button.setForeground(new Color(239, 68, 68));
 		});
 
 		mediumItem.addActionListener(_ -> {
-			selectedPriority = 2;
-			button.setText("Medium");
+			selectedPriority = Priority.MEDIUM;
+			button.setText("🟡");
 			button.setForeground(new Color(245, 158, 11));
 		});
 
 		lowItem.addActionListener(_ -> {
-			selectedPriority = 3;
-			button.setText("Low");
+			selectedPriority = Priority.LOW;
+			button.setText("🟢");
 			button.setForeground(new Color(16, 185, 129));
 		});
 
 		clearPriorityItem.addActionListener(_ -> {
 			selectedPriority = null;
-			button.setText("Priority");
+			button.setText("🚩");
 			button.setForeground(null);
 		});
 	}
@@ -657,7 +664,7 @@ public class TaskWindow extends JDialog {
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;
 			selectedReminderMsg = null;
-			button.setText("Reminder");
+			button.setText("🔔");
 			button.setForeground(null);
 
 			isRecurring = false;
@@ -665,12 +672,11 @@ public class TaskWindow extends JDialog {
 			selectedRecurringDays.clear();
 
 			selectedDueDate = null;
-			dueDateBtn.setText("Due Date");
+			dueDateBtn.setText("📅");
 			dueDateBtn.setForeground(null);
 			dueDateBtn.setEnabled(true);
 
-			revalidate();
-			repaint();
+			refresh();
 		});
 	}
 
@@ -689,6 +695,7 @@ public class TaskWindow extends JDialog {
 				selectedTags = tagsDialog.getSelectedTags();
 				updateTagsButton(button);
 				tagsDialog.dispose();
+				refresh();
 			});
 
 			buttonPane.add(okButton);
@@ -702,13 +709,13 @@ public class TaskWindow extends JDialog {
 
 	private void updateTagsButton(JButton button) {
 		if (selectedTags.isEmpty()) {
-			button.setText("Tags");
+			button.setText("🏷️");
 			button.setForeground(null);
 		} else if (selectedTags.size() == 1) {
 			button.setText(selectedTags.get(0).getTagName());
 			button.setForeground(new Color(59, 130, 246));
 		} else {
-			button.setText(selectedTags.size() + " Tags Selected");
+			button.setText(selectedTags.size() + " 🏷️");
 			button.setForeground(new Color(59, 130, 246));
 		}
 	}
@@ -727,6 +734,25 @@ public class TaskWindow extends JDialog {
 		window.setLocation(x, y);
 	}
 	
+	private void addTextAreaCaretListener(JTextArea area) {
+		area.addCaretListener(e -> {
+			try {
+		        int caretPos = e.getDot();
+		        int line = area.getLineOfOffset(caretPos);
+		        int lineStart = area.getLineStartOffset(line);
+		        int lineEnd = area.getLineEndOffset(line);
+		        
+		        if ((caretPos == lineStart || caretPos == lineEnd) && (caretPos == area.getText().length())) {
+		        	refresh();
+		        }
+		        
+		    } catch (BadLocationException _) {
+		        logger.warn("Bad Caret Location");
+		    }
+			
+		});
+	}
+	
 	private void addFocusListener() {
 		addWindowFocusListener(new WindowAdapter() {
 			@Override
@@ -737,4 +763,10 @@ public class TaskWindow extends JDialog {
 		});
 	}
 
+	private void refresh() {
+		pack();
+		revalidate();
+		repaint();
+	}
+	
 }

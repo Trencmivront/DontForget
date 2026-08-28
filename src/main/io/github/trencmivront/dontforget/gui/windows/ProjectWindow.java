@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,12 +97,14 @@ public class ProjectWindow extends JDialog {
 		JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
 
 		descriptionTextArea = new JTextArea();
+
 		descriptionTextArea.setFont(new Font("Dialog", Font.PLAIN, 14));
 		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setWrapStyleWord(true);
 		descriptionTextArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
 		descriptionTextArea.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		
+		addTextAreaCaretListener(descriptionTextArea);
 		addTextAreaDocumentFilter(descriptionTextArea);
 
 		JScrollPane descScrollPane = new JScrollPane(descriptionTextArea);
@@ -139,6 +142,7 @@ public class ProjectWindow extends JDialog {
 		setLocation(x, y);
 		setVisible(true);
 
+		pack();
 		revalidate();
 		repaint();
 		logger.info("Window is ready.");
@@ -190,6 +194,27 @@ public class ProjectWindow extends JDialog {
 	
 	private void addTextFieldDocumentFilter(JTextField field) {
 		((AbstractDocument) field.getDocument()).setDocumentFilter(DocumentFilterFactory.getDocumentFilter(TITLE_MAX_LENGTH));
+	}
+	
+	private void addTextAreaCaretListener(JTextArea area) {
+		area.addCaretListener(e -> {
+			try {
+		        int caretPos = e.getDot();
+		        int line = area.getLineOfOffset(caretPos);
+		        int lineStart = area.getLineStartOffset(line);
+		        int lineEnd = area.getLineEndOffset(line);
+		        
+		        if (caretPos == lineStart || caretPos == lineEnd) {
+		        	ProjectWindow.this.pack();
+		        	ProjectWindow.this.revalidate();
+		        	ProjectWindow.this.repaint();
+		        }
+		        
+		    } catch (BadLocationException _) {
+		        logger.warn("Bad Caret Location");
+		    }
+			
+		});
 	}
 	
 	private void addTextAreaDocumentFilter(JTextArea area) {
