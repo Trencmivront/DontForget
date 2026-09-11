@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.enums.Script;
 import main.io.github.trencmivront.dontforget.inter.Command;
 
 @Service
@@ -40,6 +41,11 @@ public class DeleteCompletedTasksService implements Command<Long> {
 		for (TaskDTO task : tasks) {
 			if (task.getStatusId() != null && task.getStatusId() == 2L) { // 2 = COMPLETED
 				ResponseEntity<String> res = deleteTaskService.execute(task.getTaskId());
+				// Also deleting script files of the given task if it has runsScript true
+				// So that we don't execute the function for every task
+				if(task.isRunsScript()) 
+					Script.deleteTaskScriptFile(task.getTaskId());
+				
 				if (res.getStatusCode().isError()) {
 					success = false;
 				}
@@ -51,4 +57,6 @@ public class DeleteCompletedTasksService implements Command<Long> {
 			return ResponseEntity.internalServerError().body("FAILED TO DELETE COMPLETED TASKS");
 		}
 	}
+	
+
 }

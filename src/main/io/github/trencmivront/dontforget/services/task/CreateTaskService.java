@@ -48,6 +48,7 @@ public class CreateTaskService implements Post<TaskDTO> {
 			t.setDueDate(task.getDueDate() != null ? Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
 			t.setListOrder(listOrder);
 			t.setProjectId(projectId);
+			t.setRunsScript(task.isRunsScript());
 
 			Task saved = taskRepository.save(t);
 			logger.info("Task saved successfully.");

@@ -48,6 +48,7 @@ public class UpdateTaskService implements Command<TaskDTO> {
 			existing.setPriority(task.getPriority());
 			existing.setDueDate(task.getDueDate() != null ? Timestamp.valueOf(task.getDueDate().atStartOfDay()) : null);
 			existing.setProjectId(task.getProjectId() != null && task.getProjectId() != 0L ? task.getProjectId() : null);
+			existing.setRunsScript(task.isRunsScript());
 
 			// Handle completedAt timestamp:
 			// If status is COMPLETED (2), set completedAt if not already set.

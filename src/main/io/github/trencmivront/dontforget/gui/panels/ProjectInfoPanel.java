@@ -22,6 +22,7 @@ import main.io.github.trencmivront.dontforget.controllers.TaskController;
 import main.io.github.trencmivront.dontforget.custom.SpringContext;
 import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
 import main.io.github.trencmivront.dontforget.dto.TaskDTO;
+import main.io.github.trencmivront.dontforget.enums.Icon;
 import main.io.github.trencmivront.dontforget.gui.Main;
 import main.io.github.trencmivront.dontforget.gui.panels.rows.TaskRowPanel;
 import main.io.github.trencmivront.dontforget.gui.windows.TaskWindow;
@@ -39,6 +40,10 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public static ProjectInfoPanel getProjectInfoPanel() {
 		return projectInfoPanel;
+	}
+	
+	public ProjectDTO getProjectDTO() {
+		return projectDTO;
 	}
 	
 	public ProjectInfoPanel(ProjectDTO projectDTO) {
@@ -68,16 +73,14 @@ public class ProjectInfoPanel extends JPanel{
 	
 	public void listTasks() {
 		Long id = projectDTO.getProjectId();
-		
 		ResponseEntity<List<TaskDTO>> tasksResponseEntity = taskController.getTasksOfProject(id);
 		
 		List<TaskDTO> tasks = tasksResponseEntity.getBody();
 		
 		if(tasks == null || tasks.isEmpty()) {
-			infoScrollPane.removeAll();
-			add(new EmptyPanel("No task found for this project."), BorderLayout.CENTER);
-			revalidate();
-			repaint();
+			infoScrollPane.setViewportView(new EmptyPanel("No task found for this project."));
+			infoScrollPane.revalidate();
+			infoScrollPane.repaint();
 			main.refreshWindow();
 			logger.info("No task found for project.");
 			return;
@@ -93,7 +96,6 @@ public class ProjectInfoPanel extends JPanel{
 		infoScrollPane.setViewportView(tasksContainer);
 		infoScrollPane.revalidate();
 		infoScrollPane.repaint();
-		main.refreshWindow();
 	}
 	
 	private JPanel createHeaderPanel() {
@@ -103,7 +105,7 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	private void createTaskActionButton(JPanel panel) {
-		JButton button = new JButton("+");
+		JButton button = new JButton(Icon.PLUS.getSmallIcon());
 		
 		button.setToolTipText("Create New Task");
 		button.putClientProperty("JButton.buttonType", "roundRect");
@@ -118,7 +120,7 @@ public class ProjectInfoPanel extends JPanel{
 	}
 	
 	private void createDeleteCompletedTasksButton(JPanel panel) {
-		JButton button = new JButton("Del Completed");
+		JButton button = new JButton(Icon.RED_TRASH_CAN.getSmallIcon());
 		
 		button.setToolTipText("Delete Completed Task(s)");
 		button.setHorizontalAlignment(SwingConstants.CENTER);

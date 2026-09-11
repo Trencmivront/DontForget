@@ -41,6 +41,7 @@ import main.io.github.trencmivront.dontforget.controllers.ReminderController;
 import main.io.github.trencmivront.dontforget.custom.CustomDateTimePicker;
 import main.io.github.trencmivront.dontforget.custom.SpringContext;
 import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
+import main.io.github.trencmivront.dontforget.enums.Icon;
 import main.io.github.trencmivront.dontforget.gui.Main;
 import main.io.github.trencmivront.dontforget.gui.windows.SearchWindow;
 import main.io.github.trencmivront.dontforget.gui.windows.TaskWindow;
@@ -327,19 +328,23 @@ public class ReminderDialog extends JDialog {
 				source.setRecurring(tempIsRecurring);
 				source.getSelectedRecurringDays().clear();
 				source.getSelectedRecurringDays().addAll(tempSelectedRecurringDays);
-				source.setSelectedDueDate(null);
 				if (source.isRecurring()) {
-					source.getDueDateBtn().setText("Disabled");
+					source.getDueDateBtn().setText(null);
+					source.setSelectedDueDate(null);
+					source.getDueDateBtn().setIcon(Icon.PROHIBITION.getSmallIcon());
 					source.getDueDateBtn().setToolTipText("Can't set due date when\nrecurring task is enabled");	
 					source.getDueDateBtn().setForeground(null);
 					source.getDueDateBtn().setEnabled(false);
 				} else {
-					source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():"Due Date");
+					source.getDueDateBtn().setIcon(Icon.CALENDAR.getSmallIcon());
+					source.getDueDateBtn().setText(source.getSelectedDueDate() != null ? source.getSelectedDueDate().toString():null);
 					source.getDueDateBtn().setForeground(new Color(42, 157, 143));
 					source.getDueDateBtn().setEnabled(true);
 				}
-				reminderBtn.setText("Remind: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				reminderBtn.setIcon(Icon.RINGING.getSmallIcon());
+				reminderBtn.setText(ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 				reminderBtn.setForeground(new Color(59, 130, 246));
+				source.updateScriptButton();
 				source.revalidate();
 				source.repaint();
 			}

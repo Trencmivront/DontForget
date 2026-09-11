@@ -62,7 +62,6 @@ public class WindowsNotificationService implements NotificationService{
                 } else {
                     logger.info("Windows toast notification sent successfully for task ID: {}", taskId);
                 }
-//              TODO: Add action on click over notification for Windows
 
             } catch (Exception e) {
                 logger.error("Error sending Windows notification: {}", e.getMessage());

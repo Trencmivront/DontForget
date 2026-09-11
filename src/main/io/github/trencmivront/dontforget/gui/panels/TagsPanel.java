@@ -39,7 +39,8 @@ public class TagsPanel extends JPanel {
 	}
 	
 	public void setSelectedTags(List<TagDTO> selectedTags) {
-		this.selectedTags = selectedTags;
+		this.selectedTags = new ArrayList<>(selectedTags);
+		listTags();
 	}
 	
 	public static TagsPanel getTagsPanel() {
@@ -47,11 +48,6 @@ public class TagsPanel extends JPanel {
 	}
 	
 	public TagsPanel() {
-//		I want a new instance every time I use it
-		if(tagsPanel != null) {
-			tagsPanel = null;
-		}
-
 		tagsPanel = this;
 		
 		logger.info("Drawing TagsPanel.");

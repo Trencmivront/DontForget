@@ -126,7 +126,8 @@ public class TaskRowPanel extends JPanel{
 				newStatusId,
 				priority,
 				dueDate != null ? dueDate : null,
-				projectId
+				projectId,
+				taskDTO.isRunsScript()
 			);
 			
 			try {

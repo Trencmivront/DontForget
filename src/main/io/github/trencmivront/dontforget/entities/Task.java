@@ -41,6 +41,9 @@ public class Task {
     @Column
     private Timestamp completedAt;
 
+    @Column(nullable = false)
+    private Boolean runsScript = false;
+
     // No-arg constructor
     public Task() {}
 
@@ -54,6 +57,7 @@ public class Task {
         Timestamp dueDate,
         Integer listOrder,
         Long projectId,
+        Boolean runsScript,
         Timestamp createdAt,
         Timestamp updatedAt,
         Timestamp completedAt
@@ -66,6 +70,7 @@ public class Task {
         this.dueDate = dueDate;
         this.listOrder = listOrder;
         this.projectId = projectId;
+        this.runsScript = runsScript;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.completedAt = completedAt;
@@ -157,5 +162,13 @@ public class Task {
 
 	public void setCompletedAt(Timestamp completedAt) {
 		this.completedAt = completedAt;
+	}
+
+	public boolean isRunsScript() {
+		return runsScript;
+	}
+
+	public void setRunsScript(boolean runsScript) {
+		this.runsScript = runsScript;
 	}
 }

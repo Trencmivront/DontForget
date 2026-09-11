@@ -76,8 +76,7 @@ public class ProjectWindow extends JDialog {
 
 		Dimension size = main.getSize();
 		int w = Math.min(480, (int) (size.getWidth() * 0.75));
-		int h = Math.min(400, (int) (size.getHeight() * 0.75));
-		setSize(new Dimension(w, h));
+		setMinimumSize(new Dimension(w, 0));
 
 		// Content Panel with standard margin
 		contentPanel.setLayout(new BorderLayout(15, 15));

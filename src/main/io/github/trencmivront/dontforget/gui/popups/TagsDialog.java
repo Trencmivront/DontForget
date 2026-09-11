@@ -29,8 +29,18 @@ public class TagsDialog extends JDialog{
 		return tagsPanel.getSelectedTags();
 	}
 	
+	public TagsDialog(List<TagDTO> selectedTags) {
+		TagsPanel panel = new TagsPanel();
+		panel.setSelectedTags(selectedTags);
+		this(panel);
+	}
 	public TagsDialog() {
+		this(new TagsPanel());
+	}
+	
+	private TagsDialog(TagsPanel tagsPanel) {
 //		only one instance of task window at a time
+		this.tagsPanel = tagsPanel;
 		if(tagsDialog != null) {
 			tagsDialog.dispose();
 			tagsDialog = null;
@@ -41,8 +51,6 @@ public class TagsDialog extends JDialog{
 		setResizable(false);
 		setUndecorated(true);
 		setLayout(new BorderLayout(10, 10));
-		
-		tagsPanel = new TagsPanel();
 		
 		add(tagsPanel);
 		logger.info("Tags dialog initialized");

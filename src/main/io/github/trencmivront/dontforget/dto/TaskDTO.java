@@ -15,10 +15,11 @@ public class TaskDTO {
     private Integer priority;
     private LocalDate dueDate;
     private Long projectId;
+    private boolean runsScript;
 
     public TaskDTO() {}
 
-    public TaskDTO(Long taskId, String taskTitle, String description, Long statusId, Integer priority, LocalDate dueDate, Long projectId) {
+    public TaskDTO(Long taskId, String taskTitle, String description, Long statusId, Integer priority, LocalDate dueDate, Long projectId, boolean runsScript) {
         this.taskId = taskId;
         this.taskTitle = taskTitle;
         this.description = description;
@@ -26,6 +27,7 @@ public class TaskDTO {
         this.priority = priority;
         this.dueDate = dueDate;
         this.projectId = projectId;
+        this.runsScript = runsScript;
     }
 
     public TaskDTO(Task task) {
@@ -37,6 +39,7 @@ public class TaskDTO {
         Timestamp ts = task.getDueDate();
         this.dueDate = ts != null ? ts.toLocalDateTime().toLocalDate() : null;
         this.projectId = task.getProjectId();
+        this.runsScript = task.isRunsScript();
     }
 
     public Long getTaskId() {
@@ -93,5 +96,13 @@ public class TaskDTO {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public boolean isRunsScript() {
+        return runsScript;
+    }
+
+    public void setRunsScript(boolean runsScript) {
+        this.runsScript = runsScript;
     }
 }

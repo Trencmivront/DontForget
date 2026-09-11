@@ -43,7 +43,7 @@ public class DBusNotificationService implements NotificationService{
                 
                 logger.info("Executing notification process command: {}", String.join(" ", command));
                 Process process = new ProcessBuilder(command).start();
-
+                
                 // Listen to the command output
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line;

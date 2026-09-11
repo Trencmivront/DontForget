@@ -52,7 +52,6 @@ public class MacosNotificationService implements NotificationService{
                 } else {
                     logger.info("macOS notification sent successfully for task ID: {}", taskId);
                 }
-//              TODO: Find a way to display app
 
             } catch (Exception e) {
                 logger.error("Error sending macOS notification: {}", e.getMessage());

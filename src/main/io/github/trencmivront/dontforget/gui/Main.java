@@ -45,7 +45,9 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import main.io.github.trencmivront.dontforget.controllers.ProjectController;
 import main.io.github.trencmivront.dontforget.custom.SpringContext;
 import main.io.github.trencmivront.dontforget.dto.ProjectDTO;
+import main.io.github.trencmivront.dontforget.enums.Icon;
 import main.io.github.trencmivront.dontforget.gui.panels.InboxPanel;
+import main.io.github.trencmivront.dontforget.gui.panels.ProjectInfoPanel;
 import main.io.github.trencmivront.dontforget.gui.panels.ReminderPanel;
 import main.io.github.trencmivront.dontforget.gui.panels.TagsPanel;
 import main.io.github.trencmivront.dontforget.gui.panels.TodayPanel;
@@ -161,14 +163,15 @@ public class Main extends JFrame {
 		leftBottomContainer.add(newProjectField, BorderLayout.NORTH);
 		newProjectField.setLayout(new BorderLayout(0, 0));
 		
-		deleteProjectsButton = new JButton("-");
+		deleteProjectsButton = new JButton(Icon.ORANGE_TRASH_CAN.getSmallIcon());
 		deleteProjectsButton.setEnabled(false);
 		deleteProjectsButton.setVisible(false);
 		deleteProjectsButton.setToolTipText("delete-projects");
 		newProjectField.add(deleteProjectsButton, BorderLayout.WEST);
 		addDeleteProjectActionListener(deleteProjectsButton);
+		addDeleteProjectsMouseListener(deleteProjectsButton);
 		
-		JButton newProjectButton = new JButton("+");
+		JButton newProjectButton = new JButton(Icon.PLUS.getSmallIcon());
 		newProjectButton.putClientProperty("JButton.buttonType", "roundRect");
 		newProjectField.add(newProjectButton, BorderLayout.EAST);
 		addCreateProjectActionListener(newProjectButton);
@@ -181,18 +184,26 @@ public class Main extends JFrame {
 		rightContainer.setLayout(new BorderLayout(0, 0));
 		
 		JPanel buttonMenuPanel = new JPanel();
-		buttonMenuPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 5));
+		buttonMenuPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 20, 5));
 		
-		tagsButton = new JButton("Tags");
+		tagsButton = new JButton(Icon.TAGS.getMediumIcon());
+		tagsButton.setToolTipText("Tags");
+		tagsButton.setBackground(null);
 		buttonMenuPanel.add(tagsButton);
 		
-		inboxButton = new JButton("Inbox");
+		inboxButton = new JButton(Icon.INBOX.getMediumIcon());
+		inboxButton.setToolTipText("Inbox");
+		inboxButton.setBackground(null);
 		buttonMenuPanel.add(inboxButton);
 		
-		todayButton = new JButton("Today");
+		todayButton = new JButton(Icon.TODAY.getMediumIcon());
+		todayButton.setToolTipText("Today");
+		todayButton.setBackground(null);
 		buttonMenuPanel.add(todayButton);
 		
-		remindersButton = new JButton("Reminders");
+		remindersButton = new JButton(Icon.REMINDERS.getMediumIcon());
+		remindersButton.setToolTipText("Reminders");
+		remindersButton.setBackground(null);
 		buttonMenuPanel.add(remindersButton);
 		
 		JPanel navigationPanel = new JPanel();
@@ -229,6 +240,19 @@ public class Main extends JFrame {
 		logger.info("Main window is ready.");
 	}
 	
+	private void addDeleteProjectsMouseListener(JButton deleteProjectsButton2) {
+		deleteProjectsButton2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				deleteProjectsButton2.setIcon(Icon.RED_TRASH_CAN.getSmallIcon());
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				deleteProjectsButton2.setIcon(Icon.ORANGE_TRASH_CAN.getSmallIcon());
+			}
+		});
+	}
+
 	public void listProjects(JScrollPane container) {
 		container.removeAll();
 		List<ProjectDTO> projects = Collections.emptyList();
@@ -353,6 +377,9 @@ public class Main extends JFrame {
 					Long projectId = panel.getProjectDTO().getProjectId();
 					if (projectId != null) {
 						try {
+							if(ProjectInfoPanel.getProjectInfoPanel() != null && ProjectInfoPanel.getProjectInfoPanel().getProjectDTO().getProjectId() == projectId) {
+								showInfoPanel.removeAll();
+							}
 							projectController.deleteProject(projectId);
 						} catch (Exception e) {
 							logger.error("Failed to delete project " + projectId, e);
@@ -431,15 +458,15 @@ public class Main extends JFrame {
 			
 			@Override
 			public void windowGainedFocus(WindowEvent e) {
-				for(Window w : getOwnedWindows()) {
-					w.dispose();
-				}
+				destroyChildWindows();
 			}
 		});
 	}
 	
 	public void destroyChildWindows() {
-		requestFocus();
+		for(Window w : getOwnedWindows()) {
+			w.dispose();
+		}
 	}
 	
 	public void destroyChildWindowsExcluding(Window exclude) {

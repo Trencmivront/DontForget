@@ -45,4 +45,16 @@ public class TagDTO {
     public void setIconColorId(Long iconColorId) {
         this.iconColorId = iconColorId;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TagDTO other)) return false;
+        return tagId != null && tagId.equals(other.tagId);
+    }
+    
+    @Override
+    public int hashCode() {
+        return tagId != null ? tagId.hashCode() : 0;
+    }
 }

@@ -10,6 +10,8 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -20,14 +22,17 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
@@ -44,16 +49,20 @@ import main.io.github.trencmivront.dontforget.controllers.TagController;
 import main.io.github.trencmivront.dontforget.controllers.TaskController;
 import main.io.github.trencmivront.dontforget.controllers.TaskTagController;
 import main.io.github.trencmivront.dontforget.custom.DocumentFilterFactory;
+import main.io.github.trencmivront.dontforget.custom.ScriptWriter;
 import main.io.github.trencmivront.dontforget.custom.SpringContext;
 import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
 import main.io.github.trencmivront.dontforget.dto.TagDTO;
 import main.io.github.trencmivront.dontforget.dto.TaskDTO;
 import main.io.github.trencmivront.dontforget.dto.TaskTagDTO;
+import main.io.github.trencmivront.dontforget.enums.Icon;
 import main.io.github.trencmivront.dontforget.enums.Priority;
+import main.io.github.trencmivront.dontforget.enums.Script;
 import main.io.github.trencmivront.dontforget.gui.Main;
 import main.io.github.trencmivront.dontforget.gui.panels.ProjectInfoPanel;
 import main.io.github.trencmivront.dontforget.gui.popups.ErrorDialog;
 import main.io.github.trencmivront.dontforget.gui.popups.ReminderDialog;
+import main.io.github.trencmivront.dontforget.gui.popups.ScriptDialog;
 import main.io.github.trencmivront.dontforget.gui.popups.TagsDialog;
 
 public class TaskWindow extends JDialog {
@@ -62,7 +71,7 @@ public class TaskWindow extends JDialog {
 	private static final Logger logger = LoggerFactory.getLogger(TaskWindow.class.getName());
 
 	private LocalDate selectedDueDate = null;
-	private Priority selectedPriority = null;
+	private Priority selectedPriority = Priority.NONE;
 
 	private Long projectId;
 	private JTextField titleField;
@@ -78,8 +87,11 @@ public class TaskWindow extends JDialog {
 	private JButton tagsBtn;
 	private JButton priorityBtn;
 	private JButton reminderBtn;
+	private JButton scriptBtn;
 	private static final Main main = Main.getMain();
-	
+
+	private boolean runsScript = false;
+	private String osTypeExtension = Script.getCurrentOsScript().getExtension();
 	private boolean isUpdate;
 	private TaskDTO updateTaskDTO;
 
@@ -88,6 +100,13 @@ public class TaskWindow extends JDialog {
 	private final RecurringTaskController recurringTaskController = SpringContext.getBean(RecurringTaskController.class);
 	private final ReminderController reminderController = SpringContext.getBean(ReminderController.class);
 	private final TaskTagController taskTagController = SpringContext.getBean(TaskTagController.class);
+	
+	// Icons
+	private final ImageIcon redFlagIcon = Icon.RED_FALG.getSmallIcon(),
+			greenFlagIcon = Icon.GREEN_FLAG.getSmallIcon(),
+			yellowFlagIcon = Icon.YELLOW_FLAG.getSmallIcon(),
+			noneFlagIcon = Icon.NONE_FLAG.getSmallIcon(),
+			tagIcon = Icon.TAG.getSmallIcon();
 	
 	private static final int TITLE_MAX_LENGTH = 100;
 	private static final int BODY_MAX_LENGTH = 1000;
@@ -225,11 +244,9 @@ public class TaskWindow extends JDialog {
 		if (activeWindow != null) {
 			Dimension size = activeWindow.getSize();
 			int w = Math.min(480, (int) (size.getWidth() * 0.75));
-			int h = Math.min(400, (int) (size.getHeight() * 0.75));
-			setSize(new Dimension(w, h));
-			setLocationRelativeTo(activeWindow);
+			setMinimumSize(new Dimension(w, 0));
 		} else {
-			setSize(new Dimension(480, 400));
+			setMinimumSize(new Dimension(480, 0));
 		}
 
 		// Content Panel with standard margin
@@ -239,7 +256,7 @@ public class TaskWindow extends JDialog {
 
 		// 1. Task Title (Header Panel)
 		titleField = new JTextField();
-		titleField.setFont(new Font("Dialog", Font.BOLD, 15));
+		titleField.setFont(UIManager.getFont("Button.font"));
 		titleField.putClientProperty("JTextField.placeholderText", "Title of the task");
 		titleField.putClientProperty("JTextField.margin", new Insets(6, 8, 6, 8));
 		setTitleFieldDocumentFilter(titleField);
@@ -249,7 +266,6 @@ public class TaskWindow extends JDialog {
 		JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
 
 		descArea = new JTextArea();
-		descArea.setFont(new Font("Dialog", Font.PLAIN, 14));
 		descArea.setLineWrap(true);
 		descArea.setWrapStyleWord(true);
 		descArea.putClientProperty("JTextArea.placeholderText", "Add details or description...");
@@ -264,22 +280,26 @@ public class TaskWindow extends JDialog {
 		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		optionsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-		dueDateBtn = new JButton("📅");
+		dueDateBtn = new JButton(Icon.CALENDAR.getSmallIcon());
 		dueDateBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		priorityBtn = new JButton("🚩");
+		priorityBtn = new JButton(noneFlagIcon);
 		priorityBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		reminderBtn = new JButton("🔔");
+		reminderBtn = new JButton(Icon.ADD_REMINDER.getSmallIcon());
 		reminderBtn.putClientProperty("JButton.buttonType", "roundRect");
 
-		tagsBtn = new JButton("🏷️");
+		tagsBtn = new JButton(tagIcon);
 		tagsBtn.putClientProperty("JButton.buttonType", "roundRect");
+
+		scriptBtn = new JButton(Icon.ADD_FILE.getSmallIcon());
+		scriptBtn.putClientProperty("JButton.buttonType", "roundRect");
 
 		optionsPanel.add(dueDateBtn);
 		optionsPanel.add(priorityBtn);
 		optionsPanel.add(reminderBtn);
 		optionsPanel.add(tagsBtn);
+		optionsPanel.add(scriptBtn);
 
 		JPanel southContainer = new JPanel();
 		southContainer.setLayout(new BoxLayout(southContainer, BoxLayout.Y_AXIS));
@@ -307,12 +327,6 @@ public class TaskWindow extends JDialog {
 		
 		addCreateButtonActionListener(createButton, isUpdate);
 
-		// Set up dropdown popups for the option buttons
-		setupDueDateMenu(dueDateBtn);
-		setupPriorityMenu(priorityBtn);
-		setupReminderMenu(reminderBtn);
-		setupTagsDialog(tagsBtn);
-
 		if (isUpdate && updateTaskDTO != null) {
 			String taskTitle = updateTaskDTO.getTaskTitle();
 			if (taskTitle != null) {
@@ -332,14 +346,21 @@ public class TaskWindow extends JDialog {
 				setReminder(taskId);
 				setRecurringDays(taskId);
 				setTag(taskId);
+				setScript(Script.getTaskScript(taskId) != null ? true:false);
 			}
-			
 		}
 		
-		addFocusListener();
+		// Set up dropdown popups for the option buttons
+		setupDueDateMenu();
+		setupPriorityMenu();
+		setupReminderMenu();
+		setupTagsDialog();
+		setupScriptButton();
 		
+		addFocusListener();
+		addWindowCloseListener();
 		refresh();
-		setLocationToCenter(this);
+		setLocationRelativeTo(main);
 		setVisible(true);
 		logger.info("TaskWindow display complete.");
 	}
@@ -377,7 +398,8 @@ public class TaskWindow extends JDialog {
 		if (recurringDays != null && !recurringDays.isEmpty()) {
 			selectedRecurringDays.addAll(recurringDays);
 			isRecurring = true;
-			dueDateBtn.setText("🚫");
+			dueDateBtn.setIcon(Icon.PROHIBITION.getSmallIcon());
+			dueDateBtn.setText(null);
 			dueDateBtn.setToolTipText("Can't set due date when\nrecurring task is enabled");
 			dueDateBtn.setForeground(null);
 			dueDateBtn.setEnabled(false);
@@ -397,7 +419,8 @@ public class TaskWindow extends JDialog {
 			selectedReminderMsg = reminder.getMessage();
 			if (selectedReminderTime != null) {
 				LocalDateTime ldt = selectedReminderTime.toLocalDateTime();
-				reminderBtn.setText("⏰ " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+				reminderBtn.setIcon(Icon.RINGING.getSmallIcon());
+				reminderBtn.setText(ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 				reminderBtn.setForeground(new Color(59, 130, 246));
 			}
 		}
@@ -407,14 +430,11 @@ public class TaskWindow extends JDialog {
 		if (priority != null) {
 			selectedPriority = priority;
 			if (priority == Priority.HIGH) {
-				priorityBtn.setText(" 🔴 ");
-				priorityBtn.setForeground(new Color(239, 68, 68));
+				priorityBtn.setIcon(redFlagIcon);
 			} else if (priority == Priority.MEDIUM) {
-				priorityBtn.setText("🟡");
-				priorityBtn.setForeground(new Color(245, 158, 11));
+				priorityBtn.setIcon(yellowFlagIcon);
 			} else if (priority == Priority.LOW) {
-				priorityBtn.setText("🟢");
-				priorityBtn.setForeground(new Color(16, 185, 129));
+				priorityBtn.setIcon(greenFlagIcon);
 			}
 		}
 	}
@@ -442,7 +462,8 @@ public class TaskWindow extends JDialog {
 					statusId,
 					selectedPriority.getValue(),
 					selectedDueDate,
-					projectId
+					projectId,
+					runsScript
 				);
 
 				try {
@@ -458,7 +479,7 @@ public class TaskWindow extends JDialog {
 				}
 			} else {
 				try {
-					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority.getValue(), selectedDueDate, projectId));
+					ResponseEntity<Long> response = taskController.createTask(new TaskDTO(null, title, description, 1L, selectedPriority.getValue(), selectedDueDate, projectId, runsScript));
 					if (response.getStatusCode().value() >= 400) {
 						new ErrorDialog("Error", "Failed to create task. Make sure the title is unique.");
 						return;
@@ -470,34 +491,64 @@ public class TaskWindow extends JDialog {
 					return;
 				}
 			}
-
-			if (selectedReminderTime != null && taskId != null) {
-				try {
-					ReminderDTO reminder = new ReminderDTO(taskId, selectedReminderTime.toLocalDateTime(), selectedReminderMsg);
-					reminderController.createReminder(reminder);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
-			if (taskId != null && (selectedTags != null || !selectedTags.isEmpty())) {
-				taskTagController.deleteTagsOfTask(taskId);
-				for (TagDTO tag : selectedTags) {
+			
+			if(taskId != null) {
+				if (selectedReminderTime != null) {
 					try {
-						taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.getTagId()));
+						ReminderDTO reminder = new ReminderDTO(taskId, selectedReminderTime.toLocalDateTime(), selectedReminderMsg);
+						reminderController.createReminder(reminder);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-			}
+				else {
+					try {
+						reminderController.deleteReminder(taskId);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 
-			if (taskId != null && isRecurring && selectedRecurringDays != null && !selectedRecurringDays.isEmpty()) {
-				try {
-					recurringTaskController.createRecurringTask(taskId, selectedRecurringDays);
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (selectedTags != null || !selectedTags.isEmpty()) {
+					taskTagController.deleteTagsOfTask(taskId);
+					for (TagDTO tag : selectedTags) {
+						try {
+							taskTagController.createTaskTag(new TaskTagDTO(taskId, tag.getTagId()));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				else {
+					try {
+						taskTagController.deleteTagsOfTask(taskId);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+				if (isRecurring && selectedRecurringDays != null && !selectedRecurringDays.isEmpty()) {
+					try {
+						recurringTaskController.createRecurringTask(taskId, selectedRecurringDays);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				if(runsScript) {
+					Path script =  Script.getNullScript();
+					if(script != null) {
+						File file = script.toFile();
+						File rename = ScriptWriter.getScriptsDir().resolve(taskId + "_script" + osTypeExtension).toFile();
+						file.renameTo(rename);
+						logger.info("null_script file renamed to {}_script.", taskId);
+					}
+				}
+				else {
+					Script.deleteTaskScriptFile(taskId);
 				}
 			}
+
+			
 //			Destroy dialogs
 			main.destroyChildWindows();
 
@@ -517,7 +568,7 @@ public class TaskWindow extends JDialog {
 		});
 	}
 
-	private void setupDueDateMenu(JButton button) {
+	private void setupDueDateMenu() {
 		JPopupMenu dateMenu = new JPopupMenu();
 		JMenuItem todayItem = new JMenuItem("Today");
 		JMenuItem tomorrowItem = new JMenuItem("Tomorrow");
@@ -532,26 +583,26 @@ public class TaskWindow extends JDialog {
 		dateMenu.add(customItem);
 		dateMenu.add(clearDateItem);
 
-		button.addActionListener(_ -> dateMenu.show(button, 0, -button.getHeight()));
+		dueDateBtn.addActionListener(_ -> dateMenu.show(dueDateBtn, 0, -dueDateBtn.getHeight()));
 
 		todayItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now();
-			button.setText(selectedDueDate.toString());
-			button.setForeground(new Color(42, 157, 143));
+			dueDateBtn.setText(selectedDueDate.toString());
+			dueDateBtn.setForeground(new Color(42, 157, 143));
 			refresh();
 		});
 
 		tomorrowItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusDays(1);
-			button.setText(selectedDueDate.toString());
-			button.setForeground(new Color(42, 157, 143));
+			dueDateBtn.setText(selectedDueDate.toString());
+			dueDateBtn.setForeground(new Color(42, 157, 143));
 			refresh();
 		});
 
 		nextWeekItem.addActionListener(_ -> {
 			selectedDueDate = LocalDate.now().plusWeeks(1);
-			button.setText(selectedDueDate.toString());
-			button.setForeground(new Color(42, 157, 143));
+			dueDateBtn.setText(selectedDueDate.toString());
+			dueDateBtn.setForeground(new Color(42, 157, 143));
 			refresh();
 		});
 
@@ -565,8 +616,7 @@ public class TaskWindow extends JDialog {
 					return true;
 				}
 			};
-			picker.isDateAllowed(selectedDueDate);
-			JDialog inputDialog = new JDialog(TaskWindow.this, "📅", true);
+			JDialog inputDialog = new JDialog(TaskWindow.this, "Due Date", true);
 			
 			Container contentPane = inputDialog.getContentPane();
 			
@@ -586,10 +636,17 @@ public class TaskWindow extends JDialog {
 			
 			JButton addButton = new JButton("Add");
 			addButton.addActionListener(_->{
+				if(picker.getDate().isBefore(LocalDate.now())) {
+					JOptionPane.showMessageDialog(inputDialog, "Past Date", "The date picked is in past.", JOptionPane.ERROR_MESSAGE);
+					dueDateBtn.setText(null);
+					dueDateBtn.setForeground(null);
+					selectedDueDate = null;
+					return;
+				}
 				selectedDueDate = picker.getDate();
 				
-				button.setText(selectedDueDate.toString());
-				button.setForeground(new Color(42, 157, 143));
+				dueDateBtn.setText(selectedDueDate.toString());
+				dueDateBtn.setForeground(new Color(42, 157, 143));
 				inputDialog.dispose();
 			});
 			buttonPanel.add(addButton);
@@ -601,13 +658,14 @@ public class TaskWindow extends JDialog {
 
 		clearDateItem.addActionListener(_ -> {
 			selectedDueDate = null;
-			button.setText("📅");
-			button.setForeground(null);
+			dueDateBtn.setIcon(Icon.CALENDAR.getSmallIcon());
+			dueDateBtn.setText(null);
+			dueDateBtn.setForeground(null);
 			refresh();
 		});
 	}
 
-	private void setupPriorityMenu(JButton button) {
+	private void setupPriorityMenu() {
 		JPopupMenu priorityMenu = new JPopupMenu();
 		JMenuItem highItem = new JMenuItem("High");
 		JMenuItem mediumItem = new JMenuItem("Medium");
@@ -620,34 +678,30 @@ public class TaskWindow extends JDialog {
 		priorityMenu.addSeparator();
 		priorityMenu.add(clearPriorityItem);
 
-		button.addActionListener(_ -> priorityMenu.show(button, 0, -button.getHeight()));
+		priorityBtn.addActionListener(_ -> priorityMenu.show(priorityBtn, 0, -priorityBtn.getHeight()));
 
 		highItem.addActionListener(_ -> {
 			selectedPriority = Priority.HIGH;
-			button.setText("🔴");
-			button.setForeground(new Color(239, 68, 68));
+			priorityBtn.setIcon(redFlagIcon);
 		});
 
 		mediumItem.addActionListener(_ -> {
 			selectedPriority = Priority.MEDIUM;
-			button.setText("🟡");
-			button.setForeground(new Color(245, 158, 11));
+			priorityBtn.setIcon(yellowFlagIcon);
 		});
 
 		lowItem.addActionListener(_ -> {
 			selectedPriority = Priority.LOW;
-			button.setText("🟢");
-			button.setForeground(new Color(16, 185, 129));
+			priorityBtn.setIcon(greenFlagIcon);
 		});
 
 		clearPriorityItem.addActionListener(_ -> {
 			selectedPriority = null;
-			button.setText("🚩");
-			button.setForeground(null);
+			priorityBtn.setIcon(noneFlagIcon);
 		});
 	}
 
-	private void setupReminderMenu(JButton button) {
+	private void setupReminderMenu() {
 		JPopupMenu reminderMenu = new JPopupMenu();
 		JMenuItem addReminderItem = new JMenuItem("Add/Edit Reminder");
 		JMenuItem clearReminderItem = new JMenuItem("Clear Reminder");
@@ -655,8 +709,8 @@ public class TaskWindow extends JDialog {
 		reminderMenu.add(addReminderItem);
 		reminderMenu.add(clearReminderItem);
 
-		button.addActionListener(_ -> {
-			reminderMenu.show(button, 0, -button.getHeight());
+		reminderBtn.addActionListener(_ -> {
+			reminderMenu.show(reminderBtn, 0, -reminderBtn.getHeight());
 		});
 
 		addReminderItem.addActionListener(_ ->new ReminderDialog(isUpdate ? updateTaskDTO.getTaskId() : null));
@@ -664,27 +718,31 @@ public class TaskWindow extends JDialog {
 		clearReminderItem.addActionListener(_ -> {
 			selectedReminderTime = null;
 			selectedReminderMsg = null;
-			button.setText("🔔");
-			button.setForeground(null);
+			reminderBtn.setIcon(Icon.ADD_REMINDER.getSmallIcon());
+			reminderBtn.setText(null);
+			reminderBtn.setForeground(null);
 
 			isRecurring = false;
+			
+			dueDateBtn.setIcon(Icon.CALENDAR.getSmallIcon());
+			if(!selectedRecurringDays.isEmpty()) {
+				selectedDueDate = null;
+				dueDateBtn.setText(null);
+			} else {
+				dueDateBtn.setText(selectedDueDate != null ? selectedDueDate.toString():null);
+			}
 
 			selectedRecurringDays.clear();
-
-			selectedDueDate = null;
-			dueDateBtn.setText("📅");
-			dueDateBtn.setForeground(null);
+			
 			dueDateBtn.setEnabled(true);
-
+			setScript(false);
 			refresh();
 		});
 	}
-
-	private void setupTagsDialog(JButton button) {
-		button.addActionListener(_ -> {
-			TagsDialog tagsDialog = new TagsDialog();
-			
-			tagsDialog.setSelectedTags(selectedTags);
+	
+	private void setupTagsDialog() {
+		tagsBtn.addActionListener(_ -> {
+			TagsDialog tagsDialog = new TagsDialog(new ArrayList<>(selectedTags));
 
 			JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 			buttonPane.setBorder(new EmptyBorder(0, 15, 15, 15));
@@ -692,8 +750,8 @@ public class TaskWindow extends JDialog {
 			JButton okButton = new JButton("OK");
 			okButton.putClientProperty("JButton.buttonType", "roundRect");
 			okButton.addActionListener(_ -> {
-				selectedTags = tagsDialog.getSelectedTags();
-				updateTagsButton(button);
+				selectedTags = new ArrayList<>(tagsDialog.getSelectedTags());
+				updateTagsButton(tagsBtn);
 				tagsDialog.dispose();
 				refresh();
 			});
@@ -707,15 +765,47 @@ public class TaskWindow extends JDialog {
 		});
 	}
 
+	private void setupScriptButton() {
+		updateScriptButton();
+		scriptBtn.addActionListener(_ -> {
+			Long currentTaskId = isUpdate ? updateTaskDTO.getTaskId() : null;
+			new ScriptDialog(currentTaskId, scriptSet -> {
+				runsScript = scriptSet;
+				updateScriptButton();
+			});
+		});
+	}
+
+	private void setScript(boolean hasScript) {
+		runsScript = hasScript;
+		updateScriptButton();
+	}
+
+	public void updateScriptButton() {
+		if (runsScript && selectedReminderTime != null) {
+			scriptBtn.setIcon(Icon.FILE.getSmallIcon());
+			scriptBtn.setEnabled(true);
+		} else if(selectedReminderTime == null) {
+			scriptBtn.setIcon(Icon.PROHIBITION.getSmallIcon());
+			scriptBtn.setEnabled(false);
+		} else {
+			scriptBtn.setIcon(Icon.ADD_FILE.getSmallIcon());
+			scriptBtn.setEnabled(true);
+		}
+	}
+
 	private void updateTagsButton(JButton button) {
 		if (selectedTags.isEmpty()) {
-			button.setText("🏷️");
+			button.setIcon(tagIcon);
+			button.setText(null);
 			button.setForeground(null);
 		} else if (selectedTags.size() == 1) {
 			button.setText(selectedTags.get(0).getTagName());
+			button.setIcon(tagIcon);
 			button.setForeground(new Color(59, 130, 246));
 		} else {
-			button.setText(selectedTags.size() + " 🏷️");
+			button.setText(Integer.toString(selectedTags.size()));
+			button.setIcon(tagIcon);
 			button.setForeground(new Color(59, 130, 246));
 		}
 	}
@@ -729,8 +819,8 @@ public class TaskWindow extends JDialog {
 	}
 	
 	private void setLocationToCenter(Window window) {
-		int x = (int) window.getOwner().getLocationOnScreen().getX() + (getOwner().getWidth() / 2 + getWidth());
-		int y = (int) window.getOwner().getLocationOnScreen().getY() + (getOwner().getHeight() / 2 + getHeight());
+		int x = (int) main.getLocationOnScreen().getX() + (main.getWidth() / 2 - WIDTH / 2);
+		int y = (int) main.getLocationOnScreen().getY() + (main.getHeight() / 2 - HEIGHT / 2);
 		window.setLocation(x, y);
 	}
 	
@@ -753,6 +843,17 @@ public class TaskWindow extends JDialog {
 		});
 	}
 	
+
+	
+	private void addWindowCloseListener() {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				Script.deleteNullScriptFile();
+			}
+		});
+	}
+	
 	private void addFocusListener() {
 		addWindowFocusListener(new WindowAdapter() {
 			@Override
@@ -762,11 +863,9 @@ public class TaskWindow extends JDialog {
 			}
 		});
 	}
-
 	private void refresh() {
 		pack();
 		revalidate();
 		repaint();
 	}
-	
 }
