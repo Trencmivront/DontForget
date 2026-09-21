@@ -56,7 +56,6 @@ public class ScriptExecutor {
             builder = new ProcessBuilder("cmd.exe", "/c", scriptPath.toAbsolutePath().toString());
         } else {
 //        	For Linux systems. MacOS can wait for now.
-        	// TODO: Tell MacOS to stop being different.
             builder = new ProcessBuilder("bash", scriptPath.toAbsolutePath().toString());
         }
         builder.redirectErrorStream(false);

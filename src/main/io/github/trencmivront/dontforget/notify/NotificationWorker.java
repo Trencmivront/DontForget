@@ -5,9 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import main.io.github.trencmivront.dontforget.controllers.InboxController;
+import main.io.github.trencmivront.dontforget.controllers.TaskController;
+import main.io.github.trencmivront.dontforget.custom.ScriptExecutor;
 import main.io.github.trencmivront.dontforget.custom.SpringContext;
 import main.io.github.trencmivront.dontforget.dto.InboxDTO;
 import main.io.github.trencmivront.dontforget.dto.ReminderDTO;
+import main.io.github.trencmivront.dontforget.dto.TaskDTO;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -16,6 +19,7 @@ import javax.sound.sampled.Clip;
 public class NotificationWorker implements Runnable{
 	private static final Logger logger = LoggerFactory.getLogger(NotificationWorker.class.getName());
     private final InboxController inboxController = SpringContext.getBean(InboxController.class);
+    private final TaskController taskController = SpringContext.getBean(TaskController.class);
 //	id of the task to open
 	private Long id;
 //	title of the reminder
@@ -70,7 +74,12 @@ public class NotificationWorker implements Runnable{
 						logger.warn("Sound play thread is interrupted.");
 					}
 				});
-
+				
+				TaskDTO taskDTO = taskController.getTaskById(id).getBody();
+				if(taskDTO.isRunsScript()) {
+					ScriptExecutor scriptExecutor = new ScriptExecutor(id);
+					scriptExecutor.execute();
+				}
 				thread.start();
 				
 			} else {

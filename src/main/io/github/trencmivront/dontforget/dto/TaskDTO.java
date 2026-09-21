@@ -15,7 +15,7 @@ public class TaskDTO {
     private Integer priority;
     private LocalDate dueDate;
     private Long projectId;
-    private boolean runsScript;
+    private boolean runsScript = false;
 
     public TaskDTO() {}
 
