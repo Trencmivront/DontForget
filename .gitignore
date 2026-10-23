@@ -3,6 +3,8 @@
 target/
 # Log file
 *.log
+# useless vaadin folder
+.vaadin
 
 # BlueJ files
 *.ctxt

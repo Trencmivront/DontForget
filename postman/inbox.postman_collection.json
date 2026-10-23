@@ -1,0 +1,69 @@
+{
+  "info": {
+    "_postman_id": "c4558aa8-b0fe-4bac-8948-ce4b733f54bd",
+    "name": "inbox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45029381"
+  },
+  "item": [
+    {
+      "name": "Create Inbox Message",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"message\" : \"Test Message\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/inbox/create",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "inbox",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Inbox",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/inbox/get-all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "inbox",
+            "get-all"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

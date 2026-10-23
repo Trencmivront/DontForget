@@ -1,0 +1,12 @@
+name: api-tests
+on: [push, pull_request]
+jobs:
+    test:
+    runs-on: ubuntu-latest
+    steps:
+        -uses: actions/checkout@v7
+        -run: npm install -g postman-cli
+        -run: > 
+            postman collection run
+            postman/inbox.postman_collection.json
+            -r cli, junit
